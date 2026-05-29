@@ -238,18 +238,7 @@ export default function Home() {
 
       <Footer />
 
-      <style jsx global>{`
-        .promo-grid {
-          grid-template-columns: 1fr;
-        }
-        @media (min-width: 768px) {
-          .promo-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-        }
-        .spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
+
     </>
   );
 }

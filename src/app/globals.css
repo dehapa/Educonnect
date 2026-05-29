@@ -305,3 +305,93 @@ button, input, select, textarea {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ==========================================================================
+   Responsive Display & Grid Utilities (Ensures Mobile Layout Integrity)
+   ========================================================================== */
+.desktop-only {
+  display: flex !important;
+}
+.mobile-only, .mobile-only-flex {
+  display: none !important;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.promo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.claim-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Stats card wrap on mobile */
+.hero-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+  .mobile-only-flex {
+    display: flex !important;
+  }
+  
+  /* Collapses stats vertically on mobile */
+  .hero-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  /* Adds border separators for stats vertically */
+  .hero-stats-grid > div {
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-primary);
+    padding-bottom: 16px;
+  }
+  .hero-stats-grid > div:last-child {
+    border-bottom: none !important;
+    padding-bottom: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .promo-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .search-grid {
+    grid-template-columns: 2fr 1fr 1fr auto;
+  }
+  .admin-grid {
+    grid-template-columns: 1.2fr 1fr;
+  }
+  .claim-card-inner {
+    flex-direction: row;
+    align-items: center;
+  }
+}

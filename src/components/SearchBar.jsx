@@ -105,16 +105,7 @@ export default function SearchBar({ onSearch }) {
         </form>
       </div>
 
-      <style jsx global>{`
-        .search-grid {
-          grid-template-columns: 1fr;
-        }
-        @media (min-width: 1024px) {
-          .search-grid {
-            grid-template-columns: 2fr 1fr 1fr auto;
-          }
-        }
-      `}</style>
+
     </div>
   );
 }

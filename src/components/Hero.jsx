@@ -66,25 +66,25 @@ export default function Hero() {
           </div>
 
           {/* Stats Bar */}
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(3, 1fr)", 
-            gap: "24px", 
-            background: "var(--card-bg)", 
-            border: "1px solid var(--card-border)", 
-            borderRadius: "var(--radius-xl)", 
-            padding: "24px", 
-            maxWidth: "650px", 
-            marginRight: "auto", 
-            marginLeft: "auto",
-            boxShadow: "var(--shadow-lg)"
-          }}>
+          <div 
+            className="hero-stats-grid"
+            style={{ 
+              background: "var(--card-bg)", 
+              border: "1px solid var(--card-border)", 
+              borderRadius: "var(--radius-xl)", 
+              padding: "24px", 
+              maxWidth: "650px", 
+              marginRight: "auto", 
+              marginLeft: "auto",
+              boxShadow: "var(--shadow-lg)"
+            }}
+          >
             <div style={{ textAlign: "center" }}>
               <div style={{ color: "var(--primary)", display: "flex", justifyContent: "center", marginBottom: "8px" }}><GraduationCap size={28} /></div>
               <h3 style={{ fontSize: "1.8rem", color: "var(--text-primary)", fontWeight: "800" }}>2,500+</h3>
               <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontWeight: "600" }}>Verified Schools</p>
             </div>
-            <div style={{ textAlign: "center", borderRight: "1px solid var(--border-primary)", borderLeft: "1px solid var(--border-primary)" }}>
+            <div style={{ textAlign: "center" }}>
               <div style={{ color: "var(--accent)", display: "flex", justifyContent: "center", marginBottom: "8px" }}><Users size={28} /></div>
               <h3 style={{ fontSize: "1.8rem", color: "var(--text-primary)", fontWeight: "800" }}>45,000+</h3>
               <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontWeight: "600" }}>Students & Teachers</p>

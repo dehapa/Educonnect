@@ -338,25 +338,7 @@ export default function AdminDashboard() {
 
       <Footer />
 
-      <style jsx global>{`
-        .admin-grid {
-          grid-template-columns: 1fr;
-        }
-        .claim-card-inner {
-          flex-direction: column;
-        }
-        @media (min-width: 1024px) {
-          .admin-grid {
-            grid-template-columns: 1.2fr 1fr;
-          }
-          .claim-card-inner {
-            flex-direction: row;
-            align-items: center;
-          }
-        }
-        .spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
+
     </div>
   );
 }
