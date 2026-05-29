@@ -1,94 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import SearchBar from "../components/SearchBar";
 import InstitutionCard from "../components/InstitutionCard";
 import Footer from "../components/Footer";
-import { GraduationCap, Briefcase, Users, MapPin, Sparkles, Building, Landmark, CheckCircle } from "lucide-react";
-
-// Mock database for educational institutions in Odisha
-const initialInstitutions = [
-  {
-    id: "kiit-university",
-    name: "Kalinga Institute of Industrial Technology (KIIT)",
-    type: "university",
-    location: "bhubaneswar",
-    rating: 4.8,
-    isVerified: true,
-    isClaimed: true,
-    coursesCount: 48,
-    studentsCount: 25000,
-    description: "A world-class university offering engineering, medical, management, and law courses with high placement rates.",
-    logo: "🎓"
-  },
-  {
-    id: "dav-cspur",
-    name: "DAV Public School, Chandrasekharpur",
-    type: "high-school",
-    location: "bhubaneswar",
-    rating: 4.6,
-    isVerified: true,
-    isClaimed: false,
-    coursesCount: 6,
-    studentsCount: 3500,
-    description: "One of the premier schools in India known for academic excellence and outstanding records in board examinations.",
-    logo: "🏫"
-  },
-  {
-    id: "vssut-burla",
-    name: "Veer Surendra Sai University of Technology",
-    type: "university",
-    location: "sambalpur",
-    rating: 4.7,
-    isVerified: true,
-    isClaimed: true,
-    coursesCount: 24,
-    studentsCount: 5000,
-    description: "A prestigious government engineering college offering undergraduate, postgraduate, and doctoral degrees.",
-    logo: "🏛️"
-  },
-  {
-    id: "dps-rourkela",
-    name: "Delhi Public School Rourkela",
-    type: "high-school",
-    location: "rourkela",
-    rating: 4.5,
-    isVerified: true,
-    isClaimed: false,
-    coursesCount: 4,
-    studentsCount: 2200,
-    description: "Providing quality secondary education with focus on holistic development, sports, and technical science clubs.",
-    logo: "🎒"
-  },
-  {
-    id: "aakash-bbsr",
-    name: "Aakash Institute, Bhubaneswar",
-    type: "coaching",
-    location: "bhubaneswar",
-    rating: 4.3,
-    isVerified: false,
-    isClaimed: false,
-    coursesCount: 8,
-    studentsCount: 1500,
-    description: "Leading national coaching institute preparing students for competitive exams like JEE Main, JEE Advanced, and NEET.",
-    logo: "✏️"
-  },
-  {
-    id: "government-iti-cuttack",
-    name: "Government Industrial Training Institute",
-    type: "technical",
-    location: "cuttack",
-    rating: 4.4,
-    isVerified: true,
-    isClaimed: false,
-    coursesCount: 12,
-    studentsCount: 1200,
-    description: "Odisha's premier vocational and technical school offering skill development, electrical, and mechanical trades.",
-    logo: "🔧"
-  }
-];
+import { Landmark, Sparkles, Briefcase, RefreshCw } from "lucide-react";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 // Mock database for placement opportunities
 const mockJobs = [
@@ -125,15 +45,39 @@ const mockJobs = [
 ];
 
 export default function Home() {
-  const [institutions, setInstitutions] = useState(initialInstitutions);
-  const [filteredInstitutions, setFilteredInstitutions] = useState(initialInstitutions);
+  const [institutions, setInstitutions] = useState([]);
+  const [filteredInstitutions, setFilteredInstitutions] = useState([]);
+  const [loading, setLoading] = useState(true);
   
+  // Load institutions from Firestore educonnect database
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "institutions"));
+        const data = [];
+        querySnapshot.forEach((doc) => {
+          data.push({ id: doc.id, ...doc.data() });
+        });
+        // Sort by rating (highest first)
+        data.sort((a, b) => b.rating - a.rating);
+        setInstitutions(data);
+        setFilteredInstitutions(data);
+      } catch (e) {
+        console.error("Error loading institutions from Firestore:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstitutions();
+  }, []);
+
   // Search and filter logic
   const handleSearch = ({ query, location, category }) => {
     const results = institutions.filter((inst) => {
       const matchesQuery = query 
         ? inst.name.toLowerCase().includes(query.toLowerCase()) || 
-          inst.description.toLowerCase().includes(query.toLowerCase())
+          (inst.description && inst.description.toLowerCase().includes(query.toLowerCase()))
         : true;
       
       const matchesLocation = location ? inst.location === location : true;
@@ -144,28 +88,28 @@ export default function Home() {
     setFilteredInstitutions(results);
   };
 
-  // Claim listing handler
-  const handleClaim = (id) => {
-    // Show alert prompting for action
+  // Live Claim listing handler (saves state to Firestore!)
+  const handleClaim = async (id) => {
     alert(`Claim Request Sent!\nTo claim this institution profile, you will be redirected to verify your official institutional email (e.g. admin@school.edu.in) or submit verification documents.`);
     
-    // Update local state to show claimed status
-    const updated = institutions.map((inst) => {
-      if (inst.id === id) {
-        return { ...inst, isClaimed: true, isVerified: true };
-      }
-      return inst;
-    });
-    setInstitutions(updated);
-    
-    // Re-apply current search filter
-    const activeFilters = document.querySelector('form');
-    if (activeFilters) {
-      const data = new FormData(activeFilters);
-      // Fallback update
-      setFilteredInstitutions(updated);
-    } else {
-      setFilteredInstitutions(updated);
+    try {
+      const docRef = doc(db, "institutions", id);
+      await updateDoc(docRef, {
+        isClaimed: true,
+        isVerified: true
+      });
+      
+      // Update local state to show verified
+      const updated = institutions.map((inst) => {
+        if (inst.id === id) {
+          return { ...inst, isClaimed: true, isVerified: true };
+        }
+        return inst;
+      });
+      setInstitutions(updated);
+      setFilteredInstitutions(filteredInstitutions.map(inst => inst.id === id ? { ...inst, isClaimed: true, isVerified: true } : inst));
+    } catch (e) {
+      console.error("Error saving claim to database:", e);
     }
   };
 
@@ -189,11 +133,15 @@ export default function Home() {
                 <p style={{ color: "var(--text-secondary)" }}>Find and compare verified schools, coaching classes, and universities.</p>
               </div>
               <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--text-muted)", background: "var(--bg-tertiary)", padding: "6px 12px", borderRadius: "8px" }}>
-                Found {filteredInstitutions.length} listings
+                {loading ? "Loading..." : `Found ${filteredInstitutions.length} listings`}
               </span>
             </div>
 
-            {filteredInstitutions.length > 0 ? (
+            {loading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
+                <RefreshCw className="spinner" size={36} style={{ color: "var(--primary)" }} />
+              </div>
+            ) : filteredInstitutions.length > 0 ? (
               <div className="grid-3">
                 {filteredInstitutions.map((inst) => (
                   <InstitutionCard 
@@ -299,6 +247,8 @@ export default function Home() {
             grid-template-columns: 1fr 1fr;
           }
         }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </>
   );
