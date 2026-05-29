@@ -5,7 +5,9 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
@@ -46,14 +48,13 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // Sign up user with role
+  // Sign up user with email & role
   const signup = async (email, password, name, role) => {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser = userCredential.user;
       
-      // Store additional user profile data (role, name) in Firestore
       const userProfile = {
         uid: newUser.uid,
         name,
@@ -72,14 +73,64 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Log in
+  // Sign in with Google (Gmail)
+  const loginWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const loggedUser = userCredential.user;
+      
+      // Check if user profile already exists in Firestore
+      const docRef = doc(db, "users", loggedUser.uid);
+      const docSnap = await getDoc(docRef);
+      
+      let exists = docSnap.exists();
+      let userProfile = null;
+      
+      if (exists) {
+        userProfile = docSnap.data();
+        setProfile(userProfile);
+      } else {
+        setProfile(null);
+      }
+      
+      setLoading(false);
+      return { user: loggedUser, exists, profile: userProfile };
+    } catch (e) {
+      setLoading(false);
+      throw e;
+    }
+  };
+
+  // Create profile for new Google Sign-Ins
+  const saveUserProfile = async (uid, name, email, role) => {
+    setLoading(true);
+    try {
+      const userProfile = {
+        uid,
+        name,
+        email,
+        role, // "student" | "teacher" | "employer" | "admin"
+        createdAt: new Date().toISOString(),
+      };
+      await setDoc(doc(db, "users", uid), userProfile);
+      setProfile(userProfile);
+      setLoading(false);
+      return userProfile;
+    } catch (e) {
+      setLoading(false);
+      throw e;
+    }
+  };
+
+  // Email/Password login
   const login = async (email, password) => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const loggedUser = userCredential.user;
       
-      // Fetch profile
       const docRef = doc(db, "users", loggedUser.uid);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -104,7 +155,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, signup, loginWithGoogle, saveUserProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );
