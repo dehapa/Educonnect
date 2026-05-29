@@ -1,3 +1,4 @@
+import { AuthProvider } from "../context/AuthContext";
 import "./globals.css";
 
 export const metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
