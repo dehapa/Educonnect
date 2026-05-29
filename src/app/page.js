@@ -7,8 +7,9 @@ import SearchBar from "../components/SearchBar";
 import InstitutionCard from "../components/InstitutionCard";
 import Footer from "../components/Footer";
 import { Landmark, Sparkles, Briefcase, RefreshCw } from "lucide-react";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import ShareButtons from "../components/ShareButtons";
 
 // Mock database for placement opportunities
 const mockJobs = [
@@ -72,6 +73,29 @@ export default function Home() {
     fetchInstitutions();
   }, []);
 
+  // Handle Referral Click Ingestion
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref");
+    if (ref) {
+      const logReferral = async () => {
+        try {
+          const refDocRef = doc(collection(db, "referrals"));
+          await setDoc(refDocRef, {
+            referrerId: ref,
+            timestamp: new Date().toISOString(),
+            type: "click",
+            userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "Unknown"
+          });
+          console.log("Logged referral click for:", ref);
+        } catch (e) {
+          console.error("Error logging referral click:", e);
+        }
+      };
+      logReferral();
+    }
+  }, []);
+
   // Search and filter logic
   const handleSearch = ({ query, location, category }) => {
     const results = institutions.filter((inst) => {
@@ -123,6 +147,11 @@ export default function Home() {
         
         {/* Search Bar */}
         <SearchBar onSearch={handleSearch} />
+
+        {/* Share Buttons */}
+        <div className="container" style={{ marginTop: "-10px", marginBottom: "20px" }}>
+          <ShareButtons />
+        </div>
 
         {/* Directory Listing Section */}
         <section style={{ padding: "40px 0" }} id="institutions">

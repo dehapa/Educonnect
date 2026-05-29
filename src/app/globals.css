@@ -395,3 +395,32 @@ button, input, select, textarea {
     align-items: center;
   }
 }
+
+/* Heartbeat Pulse Keyframe Animation */
+@keyframes pulse-heartbeat {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px 0 rgba(var(--primary-glow), 0.3);
+  }
+  14% {
+    transform: scale(1.04);
+    box-shadow: 0 6px 20px 0 rgba(var(--primary-glow), 0.45);
+  }
+  28% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px 0 rgba(var(--primary-glow), 0.3);
+  }
+  42% {
+    transform: scale(1.04);
+    box-shadow: 0 6px 20px 0 rgba(var(--primary-glow), 0.45);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px 0 rgba(var(--primary-glow), 0.3);
+  }
+}
+
+.heartbeat {
+  animation: pulse-heartbeat 2.5s infinite ease-in-out;
+}
+
