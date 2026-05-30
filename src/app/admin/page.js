@@ -1664,147 +1664,77 @@ Sent ${selectedContacts.length} promotional messages.`);
                   </h3>
                   
                   <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "20px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                      <div>
-                        <label className="form-label">Country</label>
-                        <select value={scrapingCountry} onChange={(e) => { setScrapingCountry(e.target.value); if (e.target.value === "International") { setScrapingState(""); setScrapingDistrict(""); } else { setScrapingState("Odisha"); setScrapingDistrict("Khordha"); } }} className="dashboard-select">
-                          <option value="India">India</option>
-                          <option value="International">International</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">State</label>
-                        {scrapingCountry === "India" ? (
-                          <select value={scrapingState} onChange={(e) => { setScrapingState(e.target.value); if (e.target.value !== "Odisha") setScrapingDistrict(""); }} className="dashboard-select">
-                            {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                        <div>
+                          <label className="form-label">Location (State)</label>
+                          <select 
+                            value={jobState} 
+                            onChange={(e) => setJobState(e.target.value)} 
+                            className="dashboard-select"
+                          >
+                            <option value="">Any State / Automatic</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Delhi">Delhi</option>
                           </select>
-                        ) : (
-                          <input type="text" value={scrapingState} onChange={(e) => setScrapingState(e.target.value)} placeholder="Enter State/Region" className="dashboard-input" />
-                        )}
+                        </div>
+                        <div>
+                          <label className="form-label">City/Town (Optional)</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Bangalore, Bhubaneswar" 
+                            value={jobLocation} 
+                            onChange={(e) => setJobLocation(e.target.value)} 
+                            className="dashboard-input" 
+                          />
+                        </div>
                       </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: "12px" }} className="claim-card-inner">
-                      <div>
-                        <label className="form-label">District *</label>
-                        {scrapingState === "Odisha" ? (
-                          <select value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} className="dashboard-select">
-                            {ODISHA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                          </select>
-                        ) : (
-                          <input type="text" value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} placeholder="Enter District/County" className="dashboard-input" />
-                        )}
-                      </div>
-                      <div>
-                        <label className="form-label">Town/City/Block</label>
-                        <input type="text" placeholder="e.g. Patia" value={scrapingTown} onChange={(e) => setScrapingTown(e.target.value)} className="dashboard-input" />
-                      </div>
-                      <div>
-                        <label className="form-label">Pin Code</label>
-                        <input type="text" placeholder="e.g. 751024" value={scrapingPinCode} onChange={(e) => setScrapingPinCode(e.target.value)} className="dashboard-input" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="form-label">Category Type *</label>
-                      <select value={scrapingCategory} onChange={(e) => setScrapingCategory(e.target.value)} className="dashboard-select">
-                        <option value="school">Schools</option>
-                        <option value="university">Universities / Degree Colleges</option>
-                        <option value="engineering">Engineering Colleges</option>
-                        <option value="coaching">Coaching Centers / Tutorials</option>
-                        <option value="kindergarten">Play Schools / Kindergartens</option>
-                        <option value="vocational">ITI & Vocational Training</option>
-                        <option value="computer">Computer Training Institutes</option>
-                        <option value="sports">Sports Academies & Gyms</option>
-                        <option value="library">Libraries / Study Rooms</option>
-                        <option value="consultant">Educational Consultants</option>
-                        <option value="hostel">Student Hostels / PGs</option>
-                        <option value="custom">Custom / Add New...</option>
-                      </select>
                       
-                      {scrapingCategory === "custom" && (
-                        <input type="text" placeholder="Enter Custom Category Type" value={scrapingCustomCategory} onChange={(e) => setScrapingCustomCategory(e.target.value)} className="dashboard-input" style={{ marginTop: "10px" }} />
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
-                    <button onClick={() => runPlacesScraper(false)} disabled={isScraping} className="action-btn-primary" style={{ flex: 2 }}>
-                      {isScraping ? <RefreshCw className="spinner" size={16} /> : <Play size={16} />}
-                      <span>Trigger Places Sync</span>
-                    </button>
-                    {hasMoreListings && institutions.length > 0 && (
-                      <button onClick={() => runPlacesScraper(true)} disabled={isScraping} className="action-btn-secondary" style={{ flex: 1 }}>
-                        Load Next Page
-                      </button>
-                    )}
-                  </div>
-
-                  <h4 className="card-sub-title">System Ingestion Log</h4>
-                  <div className="log-console" style={{ minHeight: "150px" }}>
-                    {scraperLog.length > 0 ? (
-                      scraperLog.map((log, i) => <div key={i} className="log-line">{log}</div>)
-                    ) : (
-                      <div style={{ color: "#64748b", fontStyle: "italic" }}>[IDLE] Places pipeline is ready...</div>
-                    )}
-                  </div>
-                </div>
-
-                              </div>
-            </div>
-          )}
-
-          {/* JOB CRAWLER VIEW */}
-          {activeTab === "jobs_crawler" && (
-            <div className="tab-pane">
-              <div className="tab-header">
-                <h2>Jobs Crawler</h2>
-                <p>Automated ingestion pipeline for Jobs.</p>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px", maxWidth: "800px" }}>
-                {/* SerpApi Job Crawler */}
-                <div className="dashboard-card">
-                  <h3 className="card-title" style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Briefcase size={20} color="var(--primary)" /> SerpApi Job Sync
-                  </h3>
-                  
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "20px" }}>
-                    <div>
-                      <label className="form-label">Job Keyword/Title *</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Teaching Jobs, Medical Nurse, React Developer" 
-                        value={jobQuery} 
-                        onChange={(e) => setJobQuery(e.target.value)} 
-                        className="dashboard-input" 
-                      />
-                    </div>
-                    
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                      <div>
-                        <label className="form-label">Location (Optional)</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. Odisha, Bangalore, India" 
-                          value={jobLocation} 
-                          onChange={(e) => setJobLocation(e.target.value)} 
-                          className="dashboard-input" 
-                        />
-                      </div>
-                      <div>
-                        <label className="form-label">Scope</label>
-                        <select 
-                          value={isInternationalJob ? "International" : "India"} 
-                          onChange={(e) => setIsInternationalJob(e.target.value === "International")} 
-                          className="dashboard-select"
-                        >
-                          <option value="India">India</option>
-                          <option value="International">International</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div style={{ background: "#fef3c7", border: "1px solid #fde68a", padding: "12px", borderRadius: "8px", fontSize: "0.8rem", color: "#92400e", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginTop: "12px" }}>
+                        <div>
+                          <label className="form-label">Industry</label>
+                          <select 
+                            value={jobIndustry} 
+                            onChange={(e) => setJobIndustry(e.target.value)} 
+                            className="dashboard-select"
+                          >
+                            <option value="">Any Industry</option>
+                            <option value="Education">Education & Teaching</option>
+                            <option value="Healthcare">Healthcare & Medical</option>
+                            <option value="Technology">IT & Software</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Finance">Finance & Banking</option>
+                            <option value="Management">Business & Management</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="form-label">Job Type</label>
+                          <select 
+                            value={jobType} 
+                            onChange={(e) => setJobType(e.target.value)} 
+                            className="dashboard-select"
+                          >
+                            <option value="">Any Type</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Internship">Internship</option>
+                            <option value="Freelance">Freelance</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="form-label">Scope</label>
+                          <select 
+                            value={isInternationalJob ? "International" : "India"} 
+                            onChange={(e) => setIsInternationalJob(e.target.value === "International")} 
+                            className="dashboard-select"
+                          >
+                            <option value="India">India</option>
+                            <option value="International">International</option>
+                          </select>
+                        </div>
+                      </div>\n\n                    <div style={{ background: "#fef3c7", border: "1px solid #fde68a", padding: "12px", borderRadius: "8px", fontSize: "0.8rem", color: "#92400e", display: "flex", gap: "8px", alignItems: "flex-start" }}>
                       <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
                       <p style={{ margin: 0 }}>This crawler aggregates data from Google Jobs (LinkedIn, Naukri, Monster). It requires a SerpApi key to be configured in your .env.local file.</p>
                     </div>
