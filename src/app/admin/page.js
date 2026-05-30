@@ -6,10 +6,11 @@ import { AlertCircle, MapPin,
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
   Award, FileText, CheckCircle2, UserCheck, MessageSquare, 
   Plus, Users, Link2, Send, Activity, Settings, LayoutDashboard,
-  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2
+  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2, Star
 } from "lucide-react";
 import { collection, getDocs, doc, setDoc, query, where, orderBy, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import AdsManager from "./AdsManager";
 
 const ODISHA_DISTRICTS = [
   "Khordha", "Cuttack", "Puri", "Baleswar", "Ganjam", "Sambalpur", 
@@ -782,6 +783,17 @@ Sent ${selectedContacts.length} promotional messages.`);
   };
   
   // Job Approval Handler
+  const handleToggleFeatured = async (collectionName, id, currentStatus) => {
+    try {
+      const docRef = doc(db, collectionName, id);
+      await updateDoc(docRef, { isFeatured: !currentStatus });
+      fetchData();
+      if (collectionName === "jobs") fetchJobs();
+    } catch (err) {
+      alert("Error updating featured status: " + err.message);
+    }
+  };
+
   const handleApproveJob = async (jobId) => {
     try {
       const jobRef = doc(db, "jobs", jobId);
@@ -1693,6 +1705,9 @@ Sent ${selectedContacts.length} promotional messages.`);
                             </td>
                             <td style={{ textAlign: "right" }}>
                               <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                                <button onClick={() => handleToggleFeatured("institutions", inst.id, inst.isFeatured)} title="Toggle Featured" style={{ background: "transparent", border: `1px solid ${inst.isFeatured ? '#eab308' : '#cbd5e1'}`, color: inst.isFeatured ? '#eab308' : '#cbd5e1', padding: "4px", borderRadius: "4px", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                                  <Star size={14} fill={inst.isFeatured ? '#eab308' : 'none'} />
+                                </button>
                                 <a href={`/institutions/${inst.id}`} target="_blank" rel="noopener noreferrer" className="table-action-btn-secondary" style={{ padding: "6px 8px", fontSize: "0.75rem" }}>View</a>
                                 <button onClick={() => openEditModal(inst)} className="table-action-btn" style={{ padding: "6px 8px", fontSize: "0.75rem", background: "#f59e0b" }}>Edit</button>
                                 <button onClick={() => handleDeleteListing(inst.id, inst.name)} className="table-action-btn" style={{ padding: "6px 8px", fontSize: "0.75rem", background: "#ef4444" }}>Del</button>
@@ -2051,7 +2066,12 @@ Sent ${selectedContacts.length} promotional messages.`);
                           <td><span className="email-cell">{stud.email}</span></td>
                           <td>{stud.createdAt ? new Date(stud.createdAt).toLocaleDateString() : "May 29, 2026"}</td>
                           <td style={{ textAlign: "right" }}>
-                            <a href={`/student/${stud.uid}`} target="_blank" rel="noreferrer" className="table-action-btn-secondary">View Profile</a>
+                            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                              <button onClick={() => handleToggleFeatured("users", stud.uid, stud.isFeatured)} title="Toggle Featured" style={{ background: "transparent", border: `1px solid ${stud.isFeatured ? '#eab308' : '#cbd5e1'}`, color: stud.isFeatured ? '#eab308' : '#cbd5e1', padding: "6px", borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                                <Star size={16} fill={stud.isFeatured ? '#eab308' : 'none'} />
+                              </button>
+                              <a href={`/student/${stud.uid}`} target="_blank" rel="noreferrer" className="table-action-btn-secondary" style={{ padding: "8px 12px", display: "flex", alignItems: "center" }}>View Profile</a>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -2466,6 +2486,8 @@ Sent ${selectedContacts.length} promotional messages.`);
           )}
 
           {/* TAB 10: SETTINGS (STAFF ROLES) */}
+          {activeTab === "ads" && <AdsManager />}
+
           {activeTab === "settings" && (
             <div className="tab-pane">
               <div className="tab-header">

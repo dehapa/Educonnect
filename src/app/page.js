@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import AdSpace from "../components/AdSpace";
 import { useAuth } from "../context/AuthContext";
 import { Star, MapPin, ChevronRight, Briefcase, GraduationCap, Users, BookOpen, Calendar, ArrowRight, Landmark } from "lucide-react";
 
@@ -493,6 +494,7 @@ export default function Home() {
         {/* JOB LISTINGS & KNOWLEDGE BASE (SPLIT) */}
         <div className="split-section" style={{marginTop: "50px", marginBottom: "50px"}}>
           
+        <AdSpace category="all" style={{ marginBottom: "50px" }} />
           {/* JOB LISTINGS */}
           <div>
             <div className="section-header">
