@@ -1734,7 +1734,8 @@ Sent ${selectedContacts.length} promotional messages.`);
                             <option value="International">International</option>
                           </select>
                         </div>
-                      </div>\n\n                    <div style={{ background: "#fef3c7", border: "1px solid #fde68a", padding: "12px", borderRadius: "8px", fontSize: "0.8rem", color: "#92400e", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                      </div>
+                    <div style={{ background: "#fef3c7", border: "1px solid #fde68a", padding: "12px", borderRadius: "8px", fontSize: "0.8rem", color: "#92400e", display: "flex", gap: "8px", alignItems: "flex-start" }}>
                       <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
                       <p style={{ margin: 0 }}>This crawler aggregates data from Google Jobs (LinkedIn, Naukri, Monster). It requires a SerpApi key to be configured in your .env.local file.</p>
                     </div>
