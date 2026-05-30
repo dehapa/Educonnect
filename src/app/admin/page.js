@@ -110,6 +110,43 @@ export default function AdminDashboard() {
   const [jobScraperLog, setJobScraperLog] = useState([]);
   const [recentlyCrawledJobs, setRecentlyCrawledJobs] = useState([]);
 
+  const handleImportSelectedJobs = async () => {
+    if (selectedCrawledJobs.length === 0) return;
+    
+    setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] Importing ${selectedCrawledJobs.length} selected jobs...`, ...prev]);
+    setIsScrapingJobs(true);
+    
+    try {
+      let importedCount = 0;
+      for (const jobId of selectedCrawledJobs) {
+        const jobData = recentlyCrawledJobs.find(j => j.id === jobId);
+        if (jobData) {
+          const { id, ...jobToSave } = jobData;
+          jobToSave.postedAt = new Date(); // Update timestamp on actual import
+          
+          const jobsRef = collection(db, "jobs");
+          const docRef = await addDoc(jobsRef, jobToSave);
+          
+          setJobsList(prev => [{ id: docRef.id, ...jobToSave }, ...prev]);
+          importedCount++;
+        }
+      }
+      
+      // Remove imported jobs from preview list
+      setRecentlyCrawledJobs(prev => prev.filter(j => !selectedCrawledJobs.includes(j.id)));
+      setSelectedCrawledJobs([]);
+      
+      setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ✅ Successfully imported ${importedCount} jobs!`, ...prev]);
+      alert(`Successfully imported ${importedCount} jobs!`);
+    } catch (error) {
+      console.error("Error importing jobs:", error);
+      setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ❌ Failed to import jobs: ${error.message}`, ...prev]);
+      alert("Failed to import jobs. See log for details.");
+    } finally {
+      setIsScrapingJobs(false);
+    }
+  };
+
   const runJobScraper = async () => {
     if (!jobQuery) {
       alert("Please enter a job search query.");

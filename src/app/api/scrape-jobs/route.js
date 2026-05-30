@@ -45,8 +45,8 @@ export async function POST(request) {
     }
 
     const jobsResult = data.jobs_results || [];
-    let ingestedJobs = [];
-    let ingestedCount = 0;
+    let fetchedJobs = [];
+    let fetchedCount = 0;
     let skippedCount = 0;
 
     for (const job of jobsResult) {
@@ -61,23 +61,23 @@ export async function POST(request) {
       const existingJobs = await getDocs(q);
       
       if (existingJobs.empty) {
-        // Create new job
+        // Prepare job preview (do not save to DB yet)
         const jobData = {
+          id: `preview_${crypto.randomUUID()}`,
           title: job.title,
           companyName: job.company_name,
           location: job.location || location || "Remote",
           description: job.description || "No description provided.",
           salaryRange: job.detected_extensions?.salary || "Not Disclosed",
           type: job.detected_extensions?.schedule_type || "Full-time",
-          postedAt: Timestamp.now(),
+          postedAt: Timestamp.now(), // Will be overwritten on actual import, but needed for UI
           employerId: "SYSTEM_CRAWLER",
           applyLink: job.apply_options?.[0]?.link || job.related_links?.[0]?.link || null,
           source: "SerpApi",
           companyLogo: job.thumbnail || null
         };
-        const docRef = await addDoc(jobsRef, jobData);
-        ingestedJobs.push({ id: docRef.id, ...jobData });
-        ingestedCount++;
+        fetchedJobs.push(jobData);
+        fetchedCount++;
       } else {
         skippedCount++;
       }
@@ -85,9 +85,9 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: `Successfully ingested ${ingestedCount} jobs. Skipped ${skippedCount} duplicates.`,
-      ingested: ingestedCount,
-      jobs: ingestedJobs
+      message: `Successfully fetched ${fetchedCount} new jobs. Skipped ${skippedCount} duplicates.`,
+      fetched: fetchedCount,
+      jobs: fetchedJobs
     });
 
   } catch (error) {
