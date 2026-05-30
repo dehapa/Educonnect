@@ -6,9 +6,9 @@ import { AlertCircle, MapPin,
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
   Award, FileText, CheckCircle2, UserCheck, MessageSquare, 
   Plus, Users, Link2, Send, Activity, Settings, LayoutDashboard,
-  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid
+  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2
 } from "lucide-react";
-import { collection, getDocs, doc, setDoc, query, where, orderBy, updateDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc, query, where, orderBy, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 
 const ODISHA_DISTRICTS = [
@@ -204,7 +204,9 @@ export default function AdminDashboard() {
   const [claims, setClaims] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
 
+
   const [jobsList, setJobsList] = useState([]);
+  const [selectedJobs, setSelectedJobs] = useState([]);
   const [showEditJobModal, setShowEditJobModal] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
 
@@ -716,6 +718,32 @@ Sent ${selectedContacts.length} promotional messages.`);
     }
   };
 
+
+  // Job Deletion Handlers
+  const handleDeleteJob = async (jobId) => {
+    if (!window.confirm("Are you sure you want to permanently delete this job?")) return;
+    try {
+      await deleteDoc(doc(db, "jobs", jobId));
+      setJobsList(prev => prev.filter(j => j.id !== jobId));
+      setSelectedJobs(prev => prev.filter(id => id !== jobId));
+    } catch (e) {
+      console.error("Error deleting job:", e);
+      alert("Failed to delete job");
+    }
+  };
+
+  const handleBulkDeleteJobs = async () => {
+    if (!window.confirm(`Are you sure you want to permanently delete ${selectedJobs.length} jobs?`)) return;
+    try {
+      await Promise.all(selectedJobs.map(jobId => deleteDoc(doc(db, "jobs", jobId))));
+      setJobsList(prev => prev.filter(j => !selectedJobs.includes(j.id)));
+      setSelectedJobs([]);
+    } catch (e) {
+      console.error("Error bulk deleting jobs:", e);
+      alert("Failed to delete some jobs");
+    }
+  };
+  
   // Job Approval Handler
   const handleApproveJob = async (jobId) => {
     try {
@@ -2098,15 +2126,36 @@ Sent ${selectedContacts.length} promotional messages.`);
           {/* TAB 6: JOB LISTINGS VIEW */}
           {activeTab === "jobs" && (
             <div className="tab-pane">
-              <div className="tab-header">
-                <h2>Job Placement Directory ({jobsList.length})</h2>
-                <p>Manage job posts, audit vacancy requirements, and approve submissions from employers.</p>
+              <div className="tab-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h2>Job Placement Directory ({jobsList.length})</h2>
+                  <p>Manage job posts, audit vacancy requirements, and approve submissions from employers.</p>
+                </div>
+                {selectedJobs.length > 0 && (
+                  <button onClick={handleBulkDeleteJobs} className="btn-danger" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", borderRadius: "8px", background: "#ef4444", color: "white", border: "none", cursor: "pointer", fontWeight: "600" }}>
+                    <Trash2 size={18} /> Delete Selected ({selectedJobs.length})
+                  </button>
+                )}
               </div>
 
               <div className="dashboard-card">
                 <table className="dashboard-table">
                   <thead>
                     <tr>
+                      <th style={{ width: "40px", textAlign: "center" }}>
+                        <input 
+                          type="checkbox" 
+                          checked={jobsList.length > 0 && selectedJobs.length === jobsList.length}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedJobs(jobsList.map(j => j.id));
+                            } else {
+                              setSelectedJobs([]);
+                            }
+                          }}
+                          style={{ cursor: "pointer", width: "16px", height: "16px" }}
+                        />
+                      </th>
                       <th>Job Position</th>
                       <th>Company</th>
                       <th>Package & Type</th>
@@ -2118,6 +2167,20 @@ Sent ${selectedContacts.length} promotional messages.`);
                     {jobsList.length > 0 ? (
                       jobsList.map((job) => (
                         <tr key={job.id}>
+                          <td style={{ textAlign: "center" }}>
+                            <input 
+                              type="checkbox" 
+                              checked={selectedJobs.includes(job.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedJobs(prev => [...prev, job.id]);
+                                } else {
+                                  setSelectedJobs(prev => prev.filter(id => id !== job.id));
+                                }
+                              }}
+                              style={{ cursor: "pointer", width: "16px", height: "16px" }}
+                            />
+                          </td>
                           <td>
                             <div className="bold-cell">{job.title}</div>
                             <div className="sub-cell">Skills: {job.skills ? job.skills.join(", ") : "React, JS"}</div>
@@ -2146,13 +2209,16 @@ Sent ${selectedContacts.length} promotional messages.`);
                               ) : (
                                 <button onClick={() => handleRejectJob(job.id)} className="table-btn-reject">Deactivate</button>
                               )}
+                              <button onClick={() => handleDeleteJob(job.id)} title="Delete Job" style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "6px", borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                                <Trash2 size={16} />
+                              </button>
                             </div>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>
+                        <td colSpan="6" style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>
                           No job postings found in the database.
                         </td>
                       </tr>
