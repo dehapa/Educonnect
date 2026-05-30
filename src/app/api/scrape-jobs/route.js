@@ -71,7 +71,7 @@ export async function POST(request) {
           type: job.detected_extensions?.schedule_type || "Full-time",
           postedAt: Timestamp.now(),
           employerId: "SYSTEM_CRAWLER",
-          applyLink: job.related_links?.[0]?.link || null,
+          applyLink: job.apply_options?.[0]?.link || job.related_links?.[0]?.link || null,
           source: "SerpApi",
           companyLogo: job.thumbnail || null
         };
