@@ -1637,11 +1637,11 @@ export default function AdminDashboard() {
           )}
 
                     {/* CRAWLER VIEW */}
-          {activeTab === "crawler" && (
+          {activeTab === "places_crawler" && (
             <div className="tab-pane">
               <div className="tab-header">
-                <h2>Data Crawlers</h2>
-                <p>Automated ingestion pipelines for Institutions and Jobs.</p>
+                <h2>Google Places Crawler</h2>
+                <p>Automated ingestion pipeline for Institutions.</p>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
@@ -1738,6 +1738,14 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+                              </div>\n            </div>\n          )}\n\n          {/* JOB CRAWLER VIEW */}
+          {activeTab === "jobs_crawler" && (
+            <div className="tab-pane">
+              <div className="tab-header">
+                <h2>Jobs Crawler</h2>
+                <p>Automated ingestion pipeline for Jobs.</p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px", maxWidth: "800px" }}>
                 {/* SerpApi Job Crawler */}
                 <div className="dashboard-card">
                   <h3 className="card-title" style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
