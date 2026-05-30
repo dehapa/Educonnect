@@ -16,6 +16,8 @@ export default function JobsBoard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [filterType, setFilterType] = useState("All");
+  const [filterIndustry, setFilterIndustry] = useState("All");
+  const [filterState, setFilterState] = useState("");
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -44,10 +46,19 @@ export default function JobsBoard() {
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           job.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLocation = job.location?.toLowerCase().includes(locationQuery.toLowerCase());
+                          
+    const searchLoc = filterState ? filterState : locationQuery;
+    const matchesLocation = searchLoc === "" || job.location?.toLowerCase().includes(searchLoc.toLowerCase());
+    
     const matchesType = filterType === "All" || job.type?.toLowerCase().includes(filterType.toLowerCase());
     
-    return matchesSearch && matchesLocation && matchesType;
+    // Industry match logic based on title/description keyword inference
+    const matchesIndustry = filterIndustry === "All" || 
+                           job.title?.toLowerCase().includes(filterIndustry.toLowerCase()) ||
+                           job.companyName?.toLowerCase().includes(filterIndustry.toLowerCase()) ||
+                           job.description?.toLowerCase().includes(filterIndustry.toLowerCase());
+    
+    return matchesSearch && matchesLocation && matchesType && matchesIndustry;
   });
 
   const timeAgo = (timestamp) => {
@@ -137,10 +148,46 @@ export default function JobsBoard() {
               <Filter size={18} /> Filters
             </h3>
             
+            {/* Location State Filter */}
+            <div style={{ marginBottom: "24px" }}>
+              <h4 style={{ fontSize: "0.9rem", fontWeight: "600", color: "#475569", marginBottom: "12px" }}>Location (State)</h4>
+              <select 
+                value={filterState}
+                onChange={(e) => setFilterState(e.target.value)}
+                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none" }}
+              >
+                <option value="">All Locations</option>
+                <option value="Odisha">Odisha</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Delhi">Delhi</option>
+                <option value="International">International (Outside India)</option>
+              </select>
+            </div>
+
+            {/* Industry Filter */}
+            <div style={{ marginBottom: "24px" }}>
+              <h4 style={{ fontSize: "0.9rem", fontWeight: "600", color: "#475569", marginBottom: "12px" }}>Industry</h4>
+              <select 
+                value={filterIndustry}
+                onChange={(e) => setFilterIndustry(e.target.value)}
+                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", outline: "none" }}
+              >
+                <option value="All">All Industries</option>
+                <option value="Education">Education & Teaching</option>
+                <option value="Healthcare">Healthcare & Medical</option>
+                <option value="Technology">IT & Software</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Finance">Finance & Banking</option>
+                <option value="Management">Business & Management</option>
+              </select>
+            </div>
+            
+            {/* Job Type Filter */}
             <div style={{ marginBottom: "24px" }}>
               <h4 style={{ fontSize: "0.9rem", fontWeight: "600", color: "#475569", marginBottom: "12px" }}>Job Type</h4>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {["All", "Full-time", "Part-time", "Contract", "Internship"].map(type => (
+                {["All", "Full-time", "Part-time", "Contract", "Internship", "Freelance"].map(type => (
                   <label key={type} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.95rem", color: "#334155" }}>
                     <input 
                       type="radio" 
