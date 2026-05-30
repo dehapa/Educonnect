@@ -6,7 +6,7 @@ import { AlertCircle, MapPin,
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
   Award, FileText, CheckCircle2, UserCheck, MessageSquare, 
   Plus, Users, Link2, Send, Activity, Settings, LayoutDashboard,
-  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2, Star, Play
+  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2, Star
 } from "lucide-react";
 import { collection, getDocs, doc, setDoc, query, where, orderBy, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
