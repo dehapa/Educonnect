@@ -6,11 +6,13 @@ import { AlertCircle, MapPin,
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
   Award, FileText, CheckCircle2, UserCheck, MessageSquare, 
   Plus, Users, Link2, Send, Activity, Settings, LayoutDashboard,
-  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2, Star
+  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2, Star, Globe, LayoutTemplate
 } from "lucide-react";
 import { collection, getDocs, doc, setDoc, query, where, orderBy, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import AdsManager from "./AdsManager";
+import PageManager from "./PageManager";
+import WidgetManager from "./WidgetManager";
 
 const ODISHA_DISTRICTS = [
   "Khordha", "Cuttack", "Puri", "Baleswar", "Ganjam", "Sambalpur", 
@@ -1335,6 +1337,22 @@ Sent ${selectedContacts.length} promotional messages.`);
             </button>
 
             <button 
+              className={`sidebar-link ${activeTab === "pages" ? "active" : ""}`}
+              onClick={() => setActiveTab("pages")}
+            >
+              <Globe size={20} />
+              <span>Pages (CMS)</span>
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "widgets" ? "active" : ""}`}
+              onClick={() => setActiveTab("widgets")}
+            >
+              <LayoutTemplate size={20} />
+              <span>Widget Manager</span>
+            </button>
+
+            <button 
               className={`sidebar-link ${activeTab === "settings" ? "active" : ""}`}
               onClick={() => setActiveTab("settings")}
             >
@@ -2495,6 +2513,8 @@ Sent ${selectedContacts.length} promotional messages.`);
 
           {/* TAB 10: SETTINGS (STAFF ROLES) */}
           {activeTab === "ads" && <AdsManager />}
+          {activeTab === "pages" && <PageManager />}
+          {activeTab === "widgets" && <WidgetManager />}
 
           {activeTab === "settings" && (
             <div className="tab-pane">
