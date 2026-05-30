@@ -1,4 +1,6 @@
 import { AuthProvider } from "../context/AuthContext";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import "./globals.css";
 
 export const metadata = {
@@ -19,7 +21,13 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <AuthProvider>
-          {children}
+          <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+            <Header />
+            <main style={{ flex: 1 }}>
+              {children}
+            </main>
+            <Footer />
+          </div>
         </AuthProvider>
       </body>
     </html>
