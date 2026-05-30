@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { Star, MapPin, ChevronRight, Briefcase, GraduationCap, Users, BookOpen, Calendar, ArrowRight, Landmark } from "lucide-react";
+import { Star, MapPin, ChevronRight, Briefcase, GraduationCap, Users, BookOpen, Calendar, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const [institutions, setInstitutions] = useState([]);
@@ -67,7 +67,7 @@ export default function Home() {
   return (
     <div className="dark-premium-theme">
       {/* GLOBAL DARK THEME STYLES SPECIFIC TO HOME PAGE */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{__html: \`
         .dark-premium-theme {
           background-color: #0B1120;
           color: #f8fafc;
@@ -273,7 +273,7 @@ export default function Home() {
           justify-content: center;
           margin-right: 16px;
         }
-      `}} />
+      \`}} />
 
       <header className="premium-header">
         <div className="logo">EduConnect Pro</div>
@@ -312,7 +312,7 @@ export default function Home() {
                     <Star size={12} fill="#eab308" />
                     <span style={{color: "#94a3b8", marginLeft: "4px"}}>Verified</span>
                   </div>
-                  <Link href={`/institutions/${inst.id}`} className="card-action">Visit Profile</Link>
+                  <Link href={\`/institutions/\${inst.id}\`} className="card-action">Visit Profile</Link>
                 </div>
               </div>
             ))
@@ -418,7 +418,7 @@ export default function Home() {
                       <h4 style={{ margin: "0 0 4px 0", color: "#f8fafc" }}>{job.title}</h4>
                       <div style={{ fontSize: "0.85rem", color: "#94a3b8" }}>{job.companyName} • {job.location}</div>
                     </div>
-                    <Link href={`/jobs/${job.id}`} className="card-action" style={{ padding: "6px 12px" }}>Apply</Link>
+                    <Link href={\`/jobs/\${job.id}\`} className="card-action" style={{ padding: "6px 12px" }}>Apply</Link>
                   </div>
                 ))
               ) : (
