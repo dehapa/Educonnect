@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-export default function AdSpace({ location = "", category = "all", style = {} }) {
+export default function AdSpace({ location = "", category = "all", placement = "banner_standard", style = {} }) {
   const [ad, setAd] = useState(null);
 
   useEffect(() => {
@@ -12,9 +12,9 @@ export default function AdSpace({ location = "", category = "all", style = {} })
         const adsRef = collection(db, "advertisements");
         let q;
         
-        // 1. First try to find a highly targeted ad (Location + Category)
+        // 1. First try to find a highly targeted ad (Location + Category + Placement)
         if (location) {
-          q = query(adsRef, where("targetLocation", "==", location), where("targetCategory", "==", category));
+          q = query(adsRef, where("targetLocation", "==", location), where("targetCategory", "==", category), where("placement", "==", placement));
           let snapshot = await getDocs(q);
           if (!snapshot.empty) {
             const ads = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
@@ -22,8 +22,8 @@ export default function AdSpace({ location = "", category = "all", style = {} })
             return;
           }
           
-          // 2. Fallback to Location + "all" category
-          q = query(adsRef, where("targetLocation", "==", location), where("targetCategory", "==", "all"));
+          // 2. Fallback to Location + "all" category + Placement
+          q = query(adsRef, where("targetLocation", "==", location), where("targetCategory", "==", "all"), where("placement", "==", placement));
           snapshot = await getDocs(q);
           if (!snapshot.empty) {
             const ads = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
@@ -32,8 +32,8 @@ export default function AdSpace({ location = "", category = "all", style = {} })
           }
         }
 
-        // 3. Fallback to Global + Category
-        q = query(adsRef, where("targetLocation", "==", ""), where("targetCategory", "==", category));
+        // 3. Fallback to Global + Category + Placement
+        q = query(adsRef, where("targetLocation", "==", ""), where("targetCategory", "==", category), where("placement", "==", placement));
         let snapshot = await getDocs(q);
         if (!snapshot.empty) {
           const ads = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
@@ -41,8 +41,8 @@ export default function AdSpace({ location = "", category = "all", style = {} })
           return;
         }
 
-        // 4. Final Fallback to Global + "all"
-        q = query(adsRef, where("targetLocation", "==", ""), where("targetCategory", "==", "all"));
+        // 4. Final Fallback to Global + "all" + Placement
+        q = query(adsRef, where("targetLocation", "==", ""), where("targetCategory", "==", "all"), where("placement", "==", placement));
         snapshot = await getDocs(q);
         if (!snapshot.empty) {
           const ads = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
