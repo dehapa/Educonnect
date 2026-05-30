@@ -2137,6 +2137,10 @@ Sent ${selectedContacts.length} promotional messages.`);
                           </td>
                           <td style={{ textAlign: "right" }}>
                             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                              <button onClick={() => {
+                                setEditingJob(job);
+                                setShowEditJobModal(true);
+                              }} className="table-btn-primary" style={{ background: "#3b82f6", borderColor: "#2563eb", padding: "6px 12px", borderRadius: "6px", color: "white", cursor: "pointer", fontSize: "0.85rem" }}>Edit/View</button>
                               {!(job.status === "active" || job.isApproved) ? (
                                 <button onClick={() => handleApproveJob(job.id)} className="table-btn-approve">Approve</button>
                               ) : (
