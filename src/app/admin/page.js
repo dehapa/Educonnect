@@ -496,7 +496,8 @@ export default function AdminDashboard() {
       setAllUsers(prev => [...prev, staffProfile]);
       setStaffEmail("");
       setStaffName("");
-      alert(`Staff Created Successfully!\nRegistered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
+      alert(`Staff Created Successfully!
+Registered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
     } catch (error) {
       console.error(error);
       alert("Failed to register staff account.");
@@ -526,7 +527,8 @@ export default function AdminDashboard() {
         
         if (index === selectedContacts.length - 1) {
           setIsSendingCampaign(false);
-          alert(`WhatsApp Campaign Finished!\nSent ${selectedContacts.length} promotional messages.`);
+          alert(`WhatsApp Campaign Finished!
+Sent ${selectedContacts.length} promotional messages.`);
         }
       }, (index + 1) * 1000);
     });
@@ -578,7 +580,8 @@ export default function AdminDashboard() {
         });
       }
 
-      alert(`Claim Request Approved!\n"${instName}" is marked as Claimed and Verified.`);
+      alert(`Claim Request Approved!
+"${instName}" is marked as Claimed and Verified.`);
       setClaims(claims.filter(claim => claim.id !== claimId));
 
       const instSnap = await getDocs(collection(db, "institutions"));
@@ -640,7 +643,8 @@ export default function AdminDashboard() {
       const sugRef = doc(db, "suggestions", sugId);
       await updateDoc(sugRef, { status: "approved" });
 
-      alert(`Suggestion Approved!\n"${sug.name}" is now listed in the educational directory.`);
+      alert(`Suggestion Approved!
+"${sug.name}" is now listed in the educational directory.`);
       
       setSuggestions(suggestions.filter(s => s.id !== sugId));
       setInstitutions(prev => [...prev, newInst]);
@@ -1738,7 +1742,11 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                              </div>\n            </div>\n          )}\n\n          {/* JOB CRAWLER VIEW */}
+                              </div>
+            </div>
+          )}
+
+          {/* JOB CRAWLER VIEW */}
           {activeTab === "jobs_crawler" && (
             <div className="tab-pane">
               <div className="tab-header">
