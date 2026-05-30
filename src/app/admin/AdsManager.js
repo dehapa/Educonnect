@@ -111,8 +111,8 @@ export default function AdsManager() {
           <h2 className="tab-title">Ad Manager</h2>
           <p className="tab-subtitle">Create geo-targeted, size-specific advertisement banners.</p>
         </div>
-        <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
-          <Plus size={18} />
+        <button className="action-btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", background: showForm ? "#ef4444" : "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "500" }}>
+          <Plus size={18} style={{ transform: showForm ? "rotate(45deg)" : "none", transition: "transform 0.2s" }} />
           {showForm ? "Cancel" : "Create New Ad"}
         </button>
       </div>
@@ -132,7 +132,7 @@ export default function AdsManager() {
                   onClick={() => fileInputRef.current.click()}
                   className="btn-secondary"
                   disabled={uploading}
-                  style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, justifyContent: "center", background: "white" }}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, justifyContent: "center", background: "white", color: "#475569", border: "1px solid #cbd5e1", padding: "10px", borderRadius: "6px", cursor: "pointer" }}
                 >
                   <UploadCloud size={18} />
                   {uploading ? `Uploading ${Math.round(uploadProgress)}%` : "Upload from Device"}
@@ -233,7 +233,7 @@ export default function AdsManager() {
             </div>
             
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button type="submit" className="btn-primary" disabled={uploading}>
+              <button type="submit" className="action-btn-primary" disabled={uploading} style={{ padding: "10px 20px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600" }}>
                 Save Advertisement
               </button>
             </div>
