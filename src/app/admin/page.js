@@ -6,7 +6,7 @@ import { AlertCircle, MapPin,
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
   Award, FileText, CheckCircle2, UserCheck, MessageSquare, 
   Plus, Users, Link2, Send, Activity, Settings, LayoutDashboard,
-  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2, Star
+  GraduationCap, Briefcase, Bell, ChevronDown, LogOut, User, Menu, Database, List, LayoutGrid, Trash2, Star, Play
 } from "lucide-react";
 import { collection, getDocs, doc, setDoc, query, where, orderBy, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
@@ -1324,6 +1324,14 @@ Sent ${selectedContacts.length} promotional messages.`);
             >
               <Activity size={20} />
               <span>Reports & Campaigns</span>
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "ads" ? "active" : ""}`}
+              onClick={() => setActiveTab("ads")}
+            >
+              <Play size={20} />
+              <span>Ad Manager</span>
             </button>
 
             <button 
