@@ -39,8 +39,10 @@ export default function Header() {
 
   return (
     <header style={{
-      position: "sticky",
+      position: "fixed",
       top: 0,
+      left: 0,
+      width: "100%",
       zIndex: 1000,
       background: "rgba(11, 17, 32, 0.95)",
       backdropFilter: "blur(10px)",
@@ -91,7 +93,15 @@ export default function Header() {
         {/* RIGHT: Auth & Profile */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {user ? (
-            <Link href="/dashboard" style={{ textDecoration: "none" }}>
+            <Link href="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ flexDirection: "column", alignItems: "flex-end" }} className="user-name-display">
+                <span style={{ fontSize: "0.9rem", fontWeight: "600", color: "#f8fafc", textAlign: "right" }}>
+                  {user.displayName || "User"}
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "#3b82f6", fontWeight: "500", textAlign: "right" }}>
+                  Dashboard
+                </span>
+              </div>
               <div style={{ 
                 width: "42px", 
                 height: "42px", 
@@ -157,9 +167,11 @@ export default function Header() {
       <style dangerouslySetInnerHTML={{__html: `
         @media (min-width: 768px) {
           .desktop-nav { display: block !important; }
+          .user-name-display { display: flex !important; }
         }
         @media (max-width: 767px) {
           .mobile-menu-btn { display: block !important; }
+          .user-name-display { display: none !important; }
         }
       `}} />
 

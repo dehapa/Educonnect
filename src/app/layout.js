@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
             <Header />
-            <main style={{ flex: 1 }}>
+            <main style={{ flex: 1, paddingTop: "80px" }}>
               {children}
             </main>
             <Footer />
