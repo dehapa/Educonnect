@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { AlertCircle, MapPin, 
+import { 
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
   Award, FileText, CheckCircle2, UserCheck, MessageSquare, 
   Plus, Users, Link2, Send, Activity, Settings, LayoutDashboard,
@@ -99,63 +99,6 @@ export default function AdminDashboard() {
   const [scrapingCategory, setScrapingCategory] = useState("school");
   const [scrapingCustomCategory, setScrapingCustomCategory] = useState("");
   const [scraperLog, setScraperLog] = useState([]);
-  // Job Crawler State
-  const [jobQuery, setJobQuery] = useState("");
-  const [jobLocation, setJobLocation] = useState("");
-  const [jobState, setJobState] = useState("");
-  const [jobIndustry, setJobIndustry] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [isInternationalJob, setIsInternationalJob] = useState(false);
-  const [isScrapingJobs, setIsScrapingJobs] = useState(false);
-  const [jobScraperLog, setJobScraperLog] = useState([]);
-  const [recentlyCrawledJobs, setRecentlyCrawledJobs] = useState([]);
-
-  const runJobScraper = async () => {
-    if (!jobQuery) {
-      alert("Please enter a job search query.");
-      return;
-    }
-    
-    let finalQuery = jobQuery;
-    if (jobIndustry) finalQuery += ` ${jobIndustry}`;
-    if (jobType) finalQuery += ` ${jobType}`;
-    
-    let finalLocation = jobLocation;
-    if (jobState) finalLocation = finalLocation ? `${finalLocation}, ${jobState}` : jobState;
-    
-    setIsScrapingJobs(true);
-    setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] Starting job crawler for: "${finalQuery}" in "${finalLocation || 'Any'}"...`, ...prev]);
-    
-    try {
-      const res = await fetch("/api/scrape-jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          searchQuery: finalQuery, 
-          location: finalLocation,
-          isInternational: isInternationalJob
-        })
-      });
-      
-      const data = await res.json();
-      
-      if (res.ok) {
-        setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ✅ ${data.message}`, ...prev]);
-        if (data.jobs && data.jobs.length > 0) {
-          setRecentlyCrawledJobs(data.jobs);
-        }
-        alert(data.message);
-      } else {
-        setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ❌ ERROR: ${data.error}`, ...prev]);
-        alert("Crawler Error: " + data.error);
-      }
-    } catch (error) {
-      setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ❌ Network Error: ${error.message}`, ...prev]);
-    } finally {
-      setIsScrapingJobs(false);
-    }
-  };
-
   const [isScraping, setIsScraping] = useState(false);
   const [hasMoreListings, setHasMoreListings] = useState(true);
 
@@ -203,11 +146,7 @@ export default function AdminDashboard() {
   const [institutions, setInstitutions] = useState([]);
   const [claims, setClaims] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
-
   const [jobsList, setJobsList] = useState([]);
-  const [showEditJobModal, setShowEditJobModal] = useState(false);
-  const [editingJob, setEditingJob] = useState(null);
-
   const [referrals, setReferrals] = useState([]);
   const [nextPageToken, setNextPageToken] = useState(null);
 
@@ -514,8 +453,7 @@ export default function AdminDashboard() {
       setAllUsers(prev => [...prev, staffProfile]);
       setStaffEmail("");
       setStaffName("");
-      alert(`Staff Created Successfully!
-Registered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
+      alert(`Staff Created Successfully!\nRegistered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
     } catch (error) {
       console.error(error);
       alert("Failed to register staff account.");
@@ -545,8 +483,7 @@ Registered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
         
         if (index === selectedContacts.length - 1) {
           setIsSendingCampaign(false);
-          alert(`WhatsApp Campaign Finished!
-Sent ${selectedContacts.length} promotional messages.`);
+          alert(`WhatsApp Campaign Finished!\nSent ${selectedContacts.length} promotional messages.`);
         }
       }, (index + 1) * 1000);
     });
@@ -598,8 +535,7 @@ Sent ${selectedContacts.length} promotional messages.`);
         });
       }
 
-      alert(`Claim Request Approved!
-"${instName}" is marked as Claimed and Verified.`);
+      alert(`Claim Request Approved!\n"${instName}" is marked as Claimed and Verified.`);
       setClaims(claims.filter(claim => claim.id !== claimId));
 
       const instSnap = await getDocs(collection(db, "institutions"));
@@ -661,8 +597,7 @@ Sent ${selectedContacts.length} promotional messages.`);
       const sugRef = doc(db, "suggestions", sugId);
       await updateDoc(sugRef, { status: "approved" });
 
-      alert(`Suggestion Approved!
-"${sug.name}" is now listed in the educational directory.`);
+      alert(`Suggestion Approved!\n"${sug.name}" is now listed in the educational directory.`);
       
       setSuggestions(suggestions.filter(s => s.id !== sugId));
       setInstitutions(prev => [...prev, newInst]);
@@ -683,36 +618,6 @@ Sent ${selectedContacts.length} promotional messages.`);
     } catch (e) {
       console.error(e);
       alert("Error rejecting suggestion.");
-    }
-  };
-
-
-  // Update Job Details
-  const handleUpdateJob = async (e) => {
-    e.preventDefault();
-    if (!editingJob || !editingJob.id) return;
-    
-    try {
-      const jobRef = doc(db, "jobs", editingJob.id);
-      await updateDoc(jobRef, {
-        title: editingJob.title,
-        description: editingJob.description,
-        employerName: editingJob.employerName || "",
-        companyName: editingJob.employerName || "",
-        location: editingJob.location,
-        salary: editingJob.salary || "",
-        salaryRange: editingJob.salary || "",
-        type: editingJob.type,
-        applyLink: editingJob.applyLink || ""
-      });
-      
-      setJobsList(prev => prev.map(j => j.id === editingJob.id ? { ...j, ...editingJob } : j));
-      setShowEditJobModal(false);
-      setEditingJob(null);
-      alert("Job details updated successfully!");
-    } catch (e) {
-      console.error(e);
-      alert("Error updating job.");
     }
   };
 
@@ -1176,19 +1081,11 @@ Sent ${selectedContacts.length} promotional messages.`);
             </button>
 
             <button 
-              className={`sidebar-link ${activeTab === "places_crawler" ? "active" : ""}`}
-              onClick={() => setActiveTab("places_crawler")}
+              className={`sidebar-link ${activeTab === "crawler" ? "active" : ""}`}
+              onClick={() => setActiveTab("crawler")}
             >
               <Database size={20} />
-              <span>Places Crawler</span>
-            </button>
-
-            <button 
-              className={`sidebar-link ${activeTab === "jobs_crawler" ? "active" : ""}`}
-              onClick={() => setActiveTab("jobs_crawler")}
-            >
-              <Briefcase size={20} />
-              <span>Jobs Crawler</span>
+              <span>Data Crawler</span>
             </button>
 
             <button 
@@ -1696,268 +1593,126 @@ Sent ${selectedContacts.length} promotional messages.`);
             </div>
           )}
 
-                    {/* CRAWLER VIEW */}
-          {activeTab === "places_crawler" && (
+          {/* CRAWLER VIEW */}
+          {activeTab === "crawler" && (
             <div className="tab-pane">
               <div className="tab-header">
-                <h2>Google Places Crawler</h2>
-                <p>Automated ingestion pipeline for Institutions.</p>
+                <h2>Data Crawler</h2>
+                <p>Ingest data from Google Places directly into your directory.</p>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                {/* Google Places Crawler (Institutions) */}
-                <div className="dashboard-card">
-                  <h3 className="card-title" style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <MapPin size={20} color="var(--primary)" /> Google Places Sync
-                  </h3>
-                  
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "20px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                      <div>
-                        <label className="form-label">Country</label>
-                        <select value={scrapingCountry} onChange={(e) => { setScrapingCountry(e.target.value); if (e.target.value === "International") { setScrapingState(""); setScrapingDistrict(""); } else { setScrapingState("Odisha"); setScrapingDistrict("Khordha"); } }} className="dashboard-select">
-                          <option value="India">India</option>
-                          <option value="International">International</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">State</label>
-                        {scrapingCountry === "India" ? (
-                          <select value={scrapingState} onChange={(e) => { setScrapingState(e.target.value); if (e.target.value !== "Odisha") setScrapingDistrict(""); }} className="dashboard-select">
-                            {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
-                        ) : (
-                          <input type="text" value={scrapingState} onChange={(e) => setScrapingState(e.target.value)} placeholder="Enter State/Region" className="dashboard-input" />
-                        )}
-                      </div>
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: "12px" }} className="claim-card-inner">
-                      <div>
-                        <label className="form-label">District *</label>
-                        {scrapingState === "Odisha" ? (
-                          <select value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} className="dashboard-select">
-                            {ODISHA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                          </select>
-                        ) : (
-                          <input type="text" value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} placeholder="Enter District/County" className="dashboard-input" />
-                        )}
-                      </div>
-                      <div>
-                        <label className="form-label">Town/City/Block</label>
-                        <input type="text" placeholder="e.g. Patia" value={scrapingTown} onChange={(e) => setScrapingTown(e.target.value)} className="dashboard-input" />
-                      </div>
-                      <div>
-                        <label className="form-label">Pin Code</label>
-                        <input type="text" placeholder="e.g. 751024" value={scrapingPinCode} onChange={(e) => setScrapingPinCode(e.target.value)} className="dashboard-input" />
-                      </div>
-                    </div>
-
+              <div className="dashboard-card" style={{ maxWidth: "800px" }}>
+                <h3 className="card-title" style={{ marginBottom: "16px" }}>Google Places Settings</h3>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "20px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     <div>
-                      <label className="form-label">Category Type *</label>
-                      <select value={scrapingCategory} onChange={(e) => setScrapingCategory(e.target.value)} className="dashboard-select">
-                        <option value="school">Schools</option>
-                        <option value="university">Universities / Degree Colleges</option>
-                        <option value="engineering">Engineering Colleges</option>
-                        <option value="coaching">Coaching Centers / Tutorials</option>
-                        <option value="kindergarten">Play Schools / Kindergartens</option>
-                        <option value="vocational">ITI & Vocational Training</option>
-                        <option value="computer">Computer Training Institutes</option>
-                        <option value="sports">Sports Academies & Gyms</option>
-                        <option value="library">Libraries / Study Rooms</option>
-                        <option value="consultant">Educational Consultants</option>
-                        <option value="hostel">Student Hostels / PGs</option>
-                        <option value="custom">Custom / Add New...</option>
+                      <label className="form-label">Country</label>
+                      <select value={scrapingCountry} onChange={(e) => { setScrapingCountry(e.target.value); if (e.target.value === "International") { setScrapingState(""); setScrapingDistrict(""); } else { setScrapingState("Odisha"); setScrapingDistrict("Khordha"); } }} className="dashboard-select">
+                        <option value="India">India</option>
+                        <option value="International">International</option>
                       </select>
-                      
-                      {scrapingCategory === "custom" && (
-                        <input type="text" placeholder="Enter Custom Category Type" value={scrapingCustomCategory} onChange={(e) => setScrapingCustomCategory(e.target.value)} className="dashboard-input" style={{ marginTop: "10px" }} />
+                    </div>
+                    <div>
+                      <label className="form-label">State</label>
+                      {scrapingCountry === "India" ? (
+                        <select value={scrapingState} onChange={(e) => { setScrapingState(e.target.value); if (e.target.value !== "Odisha") setScrapingDistrict(""); }} className="dashboard-select">
+                          {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      ) : (
+                        <input type="text" value={scrapingState} onChange={(e) => setScrapingState(e.target.value)} placeholder="Enter State/Region" className="dashboard-input" />
                       )}
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
-                    <button onClick={() => runPlacesScraper(false)} disabled={isScraping} className="action-btn-primary" style={{ flex: 2 }}>
-                      {isScraping ? <RefreshCw className="spinner" size={16} /> : <Play size={16} />}
-                      <span>Trigger Places Sync</span>
-                    </button>
-                    {hasMoreListings && institutions.length > 0 && (
-                      <button onClick={() => runPlacesScraper(true)} disabled={isScraping} className="action-btn-secondary" style={{ flex: 1 }}>
-                        Load Next Page
-                      </button>
-                    )}
+                  <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: "12px" }} className="claim-card-inner">
+                    <div>
+                      <label className="form-label">District *</label>
+                      {scrapingState === "Odisha" ? (
+                        <select value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} className="dashboard-select">
+                          {ODISHA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                      ) : (
+                        <input type="text" value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} placeholder="Enter District/County" className="dashboard-input" />
+                      )}
+                    </div>
+                    <div>
+                      <label className="form-label">Town/City/Block</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Patia" 
+                        value={scrapingTown} 
+                        onChange={(e) => setScrapingTown(e.target.value)} 
+                        className="dashboard-input" 
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Pin Code</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. 751024" 
+                        value={scrapingPinCode} 
+                        onChange={(e) => setScrapingPinCode(e.target.value)} 
+                        className="dashboard-input" 
+                      />
+                    </div>
                   </div>
 
-                  <h4 className="card-sub-title">System Ingestion Log</h4>
-                  <div className="log-console" style={{ minHeight: "150px" }}>
-                    {scraperLog.length > 0 ? (
-                      scraperLog.map((log, i) => <div key={i} className="log-line">{log}</div>)
-                    ) : (
-                      <div style={{ color: "#64748b", fontStyle: "italic" }}>[IDLE] Places pipeline is ready...</div>
+                  <div>
+                    <label className="form-label">Category Type *</label>
+                    <select value={scrapingCategory} onChange={(e) => setScrapingCategory(e.target.value)} className="dashboard-select">
+                      <option value="school">Schools</option>
+                      <option value="university">Universities / Degree Colleges</option>
+                      <option value="engineering">Engineering Colleges</option>
+                      <option value="coaching">Coaching Centers / Tutorials</option>
+                      <option value="kindergarten">Play Schools / Kindergartens</option>
+                      <option value="vocational">ITI & Vocational Training</option>
+                      <option value="computer">Computer Training Institutes</option>
+                      <option value="sports">Sports Academies & Gyms</option>
+                      <option value="library">Libraries / Study Rooms</option>
+                      <option value="consultant">Educational Consultants</option>
+                      <option value="hostel">Student Hostels / PGs</option>
+                      <option value="custom">Custom / Add New...</option>
+                    </select>
+                    
+                    {scrapingCategory === "custom" && (
+                      <input 
+                        type="text" 
+                        placeholder="Enter Custom Category Type" 
+                        value={scrapingCustomCategory} 
+                        onChange={(e) => setScrapingCustomCategory(e.target.value)} 
+                        className="dashboard-input" 
+                        style={{ marginTop: "10px" }}
+                      />
                     )}
                   </div>
                 </div>
 
-                              </div>
-            </div>
-          )}
-
-          {/* JOB CRAWLER VIEW */}
-          {activeTab === "jobs_crawler" && (
-            <div className="tab-pane">
-              <div className="tab-header">
-                <h2>Jobs Crawler</h2>
-                <p>Automated ingestion pipeline for Jobs.</p>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px", maxWidth: "800px" }}>
-                {/* SerpApi Job Crawler */}
-                <div className="dashboard-card">
-                  <h3 className="card-title" style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Briefcase size={20} color="var(--primary)" /> SerpApi Job Sync
-                  </h3>
-                  
-                  <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "20px" }}>
-                    <div>
-                      <label className="form-label">Job Keyword/Title *</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Teaching Jobs, Medical Nurse, React Developer" 
-                        value={jobQuery} 
-                        onChange={(e) => setJobQuery(e.target.value)} 
-                        className="dashboard-input" 
-                      />
-                    </div>
-                    
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                      <div>
-                        <label className="form-label">Location (State)</label>
-                        <select 
-                          value={jobState} 
-                          onChange={(e) => setJobState(e.target.value)} 
-                          className="dashboard-select"
-                        >
-                          <option value="">Any State / Automatic</option>
-                          <option value="Odisha">Odisha</option>
-                          <option value="Karnataka">Karnataka</option>
-                          <option value="Maharashtra">Maharashtra</option>
-                          <option value="Delhi">Delhi</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">City/Town (Optional)</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. Bangalore, Bhubaneswar" 
-                          value={jobLocation} 
-                          onChange={(e) => setJobLocation(e.target.value)} 
-                          className="dashboard-input" 
-                        />
-                      </div>
-                    </div>
-                    
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginTop: "12px" }}>
-                      <div>
-                        <label className="form-label">Industry</label>
-                        <select 
-                          value={jobIndustry} 
-                          onChange={(e) => setJobIndustry(e.target.value)} 
-                          className="dashboard-select"
-                        >
-                          <option value="">Any Industry</option>
-                          <option value="Education">Education & Teaching</option>
-                          <option value="Healthcare">Healthcare & Medical</option>
-                          <option value="Technology">IT & Software</option>
-                          <option value="Engineering">Engineering</option>
-                          <option value="Finance">Finance & Banking</option>
-                          <option value="Management">Business & Management</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">Job Type</label>
-                        <select 
-                          value={jobType} 
-                          onChange={(e) => setJobType(e.target.value)} 
-                          className="dashboard-select"
-                        >
-                          <option value="">Any Type</option>
-                          <option value="Full-time">Full-time</option>
-                          <option value="Part-time">Part-time</option>
-                          <option value="Contract">Contract</option>
-                          <option value="Internship">Internship</option>
-                          <option value="Freelance">Freelance</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">Scope</label>
-                        <select 
-                          value={isInternationalJob ? "International" : "India"} 
-                          onChange={(e) => setIsInternationalJob(e.target.value === "International")} 
-                          className="dashboard-select"
-                        >
-                          <option value="India">India</option>
-                          <option value="International">International</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div style={{ background: "#fef3c7", border: "1px solid #fde68a", padding: "12px", borderRadius: "8px", fontSize: "0.8rem", color: "#92400e", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                      <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
-                      <p style={{ margin: 0 }}>This crawler aggregates data from Google Jobs (LinkedIn, Naukri, Monster). It requires a SerpApi key to be configured in your .env.local file.</p>
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
-                    <button onClick={runJobScraper} disabled={isScrapingJobs || !jobQuery} className="action-btn-primary" style={{ flex: 2, background: "#10b981", borderColor: "#059669" }}>
-                      {isScrapingJobs ? <RefreshCw className="spinner" size={16} /> : <Play size={16} />}
-                      <span>Trigger Job Sync</span>
+                <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
+                  <button onClick={() => runPlacesScraper(false)} disabled={isScraping} className="action-btn-primary" style={{ flex: 2 }}>
+                    {isScraping ? <RefreshCw className="spinner" size={16} /> : <Play size={16} />}
+                    <span>Trigger Google Places Sync</span>
+                  </button>
+                  {hasMoreListings && institutions.length > 0 && (
+                    <button onClick={() => runPlacesScraper(true)} disabled={isScraping} className="action-btn-secondary" style={{ flex: 1 }}>
+                      Load Next Page
                     </button>
-                  </div>
+                  )}
+                </div>
 
-                  <h4 className="card-sub-title">System Ingestion Log</h4>
-                  <div className="log-console" style={{ minHeight: "150px" }}>
-                    {jobScraperLog.length > 0 ? (
-                      jobScraperLog.map((log, i) => <div key={i} className="log-line">{log}</div>)
-                    ) : (
-                      <div style={{ color: "#64748b", fontStyle: "italic" }}>[IDLE] Job pipeline is ready...</div>
-                    )}
-                  </div>
-
-                  {recentlyCrawledJobs.length > 0 && (
-                    <div style={{ marginTop: "24px" }}>
-                      <h4 className="card-sub-title" style={{ marginBottom: "12px", borderBottom: "1px solid #e2e8f0", paddingBottom: "8px" }}>Recently Ingested Jobs</h4>
-                      <table className="dashboard-table" style={{ fontSize: "0.9rem" }}>
-                        <thead>
-                          <tr>
-                            <th>Job Title</th>
-                            <th>Company & Location</th>
-                            <th>Salary/Type</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {recentlyCrawledJobs.map(job => (
-                            <tr key={job.id}>
-                              <td className="bold-cell">{job.title}</td>
-                              <td>
-                                <div>{job.companyName}</div>
-                                <div className="sub-cell">{job.location}</div>
-                              </td>
-                              <td>
-                                <div>{job.salaryRange}</div>
-                                <div className="sub-cell">{job.type}</div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                <h4 className="card-sub-title">System Ingestion Log</h4>
+                <div className="log-console" style={{ minHeight: "150px" }}>
+                  {scraperLog.length > 0 ? (
+                    scraperLog.map((log, i) => <div key={i} className="log-line">{log}</div>)
+                  ) : (
+                    <div style={{ color: "#64748b", fontStyle: "italic" }}>[IDLE] Crawler pipeline is ready...</div>
                   )}
                 </div>
               </div>
             </div>
           )}
 
-
-          {/* TAB 3: STUDENTS VIEW */}
+{/* TAB 3: STUDENTS VIEW */}
           {activeTab === "students" && (
             <div className="tab-pane">
               <div className="tab-header">

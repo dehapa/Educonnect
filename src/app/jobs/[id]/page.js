@@ -117,7 +117,12 @@ export default function JobDetails() {
                 
                 <div style={{ flex: 1 }}>
                   <h1 style={{ fontSize: "1.75rem", fontWeight: "800", color: "#0f172a", marginBottom: "8px", lineHeight: 1.2 }}>{job.title}</h1>
-                  <h2 style={{ fontSize: "1.1rem", color: "var(--primary)", fontWeight: "600", marginBottom: "16px" }}>{job.companyName}</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+                    <h2 style={{ fontSize: "1.2rem", color: "var(--primary)", fontWeight: "700", margin: 0 }}>{job.employerName || job.companyName || "Confidential Employer"}</h2>
+                    <span style={{ padding: "4px 10px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", fontSize: "0.75rem", color: "#166534", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
+                      <CheckCircle2 size={12} /> Verified
+                    </span>
+                  </div>
                   
                   <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", color: "#475569", fontSize: "0.95rem" }}>
                     <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><MapPin size={16} /> {job.location}</span>
@@ -129,9 +134,9 @@ export default function JobDetails() {
               
               <div style={{ display: "flex", gap: "12px", borderTop: "1px solid #f1f5f9", paddingTop: "24px", flexWrap: "wrap" }}>
                 {job.applyLink ? (
-                  <a href={job.applyLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
-                    <button className="btn-primary" style={{ padding: "12px 32px", fontSize: "1rem", display: "flex", alignItems: "center", gap: "8px", borderRadius: "8px" }}>
-                      Apply Now <ExternalLink size={18} />
+                  <a href={job.applyLink.includes("?") ? `${job.applyLink}&utm_source=EduConnect` : `${job.applyLink}?utm_source=EduConnect`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
+                    <button className="btn-primary" style={{ padding: "12px 32px", fontSize: "1rem", display: "flex", alignItems: "center", gap: "8px", borderRadius: "8px", background: "#2563eb", borderColor: "#1d4ed8" }}>
+                      Apply Direct to Employer <ExternalLink size={18} />
                     </button>
                   </a>
                 ) : (

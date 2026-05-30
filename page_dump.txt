@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { AlertCircle, MapPin, 
+import { 
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
   Award, FileText, CheckCircle2, UserCheck, MessageSquare, 
   Plus, Users, Link2, Send, Activity, Settings, LayoutDashboard,
@@ -29,16 +29,16 @@ const INDIAN_STATES = [
 ];
 
 const selectEmoji = (category) => {
-  if (!category) return "🏫";
+  if (!category) return "ðŸ«";
   const cat = category.toLowerCase();
-  if (cat.includes("university") || cat.includes("college")) return "🎓";
-  if (cat.includes("high-school") || cat.includes("school")) return "🏫";
-  if (cat.includes("coaching") || cat.includes("tutorial")) return "📚";
-  if (cat.includes("kindergarten") || cat.includes("play")) return "🎒";
-  if (cat.includes("vocational") || cat.includes("iti")) return "🛠️";
-  if (cat.includes("computer")) return "💻";
-  if (cat.includes("sports") || cat.includes("gym")) return "🏆";
-  return "🏫";
+  if (cat.includes("university") || cat.includes("college")) return "ðŸŽ“";
+  if (cat.includes("high-school") || cat.includes("school")) return "ðŸ«";
+  if (cat.includes("coaching") || cat.includes("tutorial")) return "ðŸ“š";
+  if (cat.includes("kindergarten") || cat.includes("play")) return "ðŸŽ’";
+  if (cat.includes("vocational") || cat.includes("iti")) return "ðŸ› ï¸";
+  if (cat.includes("computer")) return "ðŸ’»";
+  if (cat.includes("sports") || cat.includes("gym")) return "ðŸ†";
+  return "ðŸ«";
 };
 
 export default function AdminDashboard() {
@@ -99,40 +99,30 @@ export default function AdminDashboard() {
   const [scrapingCategory, setScrapingCategory] = useState("school");
   const [scrapingCustomCategory, setScrapingCustomCategory] = useState("");
   const [scraperLog, setScraperLog] = useState([]);
+  const [isScraping, setIsScraping] = useState(false);
   // Job Crawler State
   const [jobQuery, setJobQuery] = useState("");
   const [jobLocation, setJobLocation] = useState("");
-  const [jobState, setJobState] = useState("");
-  const [jobIndustry, setJobIndustry] = useState("");
-  const [jobType, setJobType] = useState("");
   const [isInternationalJob, setIsInternationalJob] = useState(false);
   const [isScrapingJobs, setIsScrapingJobs] = useState(false);
   const [jobScraperLog, setJobScraperLog] = useState([]);
-  const [recentlyCrawledJobs, setRecentlyCrawledJobs] = useState([]);
-
+  
   const runJobScraper = async () => {
     if (!jobQuery) {
       alert("Please enter a job search query.");
       return;
     }
     
-    let finalQuery = jobQuery;
-    if (jobIndustry) finalQuery += ` ${jobIndustry}`;
-    if (jobType) finalQuery += ` ${jobType}`;
-    
-    let finalLocation = jobLocation;
-    if (jobState) finalLocation = finalLocation ? `${finalLocation}, ${jobState}` : jobState;
-    
     setIsScrapingJobs(true);
-    setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] Starting job crawler for: "${finalQuery}" in "${finalLocation || 'Any'}"...`, ...prev]);
+    setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] Starting job crawler for: "${jobQuery}" in "${jobLocation || 'Any'}"...`, ...prev]);
     
     try {
       const res = await fetch("/api/scrape-jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          searchQuery: finalQuery, 
-          location: finalLocation,
+          searchQuery: jobQuery, 
+          location: jobLocation,
           isInternational: isInternationalJob
         })
       });
@@ -140,23 +130,19 @@ export default function AdminDashboard() {
       const data = await res.json();
       
       if (res.ok) {
-        setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ✅ ${data.message}`, ...prev]);
-        if (data.jobs && data.jobs.length > 0) {
-          setRecentlyCrawledJobs(data.jobs);
-        }
+        setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] âœ… ${data.message}`, ...prev]);
         alert(data.message);
       } else {
-        setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ❌ ERROR: ${data.error}`, ...prev]);
+        setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] âŒ ERROR: ${data.error}`, ...prev]);
         alert("Crawler Error: " + data.error);
       }
     } catch (error) {
-      setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] ❌ Network Error: ${error.message}`, ...prev]);
+      setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] âŒ Network Error: ${error.message}`, ...prev]);
     } finally {
       setIsScrapingJobs(false);
     }
   };
 
-  const [isScraping, setIsScraping] = useState(false);
   const [hasMoreListings, setHasMoreListings] = useState(true);
 
   // Manual Listing Modals & Form state
@@ -203,11 +189,7 @@ export default function AdminDashboard() {
   const [institutions, setInstitutions] = useState([]);
   const [claims, setClaims] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
-
   const [jobsList, setJobsList] = useState([]);
-  const [showEditJobModal, setShowEditJobModal] = useState(false);
-  const [editingJob, setEditingJob] = useState(null);
-
   const [referrals, setReferrals] = useState([]);
   const [nextPageToken, setNextPageToken] = useState(null);
 
@@ -514,8 +496,7 @@ export default function AdminDashboard() {
       setAllUsers(prev => [...prev, staffProfile]);
       setStaffEmail("");
       setStaffName("");
-      alert(`Staff Created Successfully!
-Registered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
+      alert(`Staff Created Successfully!\nRegistered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
     } catch (error) {
       console.error(error);
       alert("Failed to register staff account.");
@@ -540,13 +521,12 @@ Registered ${staffName} as a platform ${staffRole.toUpperCase()}.`);
       setTimeout(() => {
         setCampaignLogs(prev => [
           ...prev, 
-          `[${new Date().toLocaleTimeString()}] Blasting to: ${name} (+91 94371 9${Math.floor(10000 + Math.random() * 90000)})... Sent ✔`
+          `[${new Date().toLocaleTimeString()}] Blasting to: ${name} (+91 94371 9${Math.floor(10000 + Math.random() * 90000)})... Sent âœ”`
         ]);
         
         if (index === selectedContacts.length - 1) {
           setIsSendingCampaign(false);
-          alert(`WhatsApp Campaign Finished!
-Sent ${selectedContacts.length} promotional messages.`);
+          alert(`WhatsApp Campaign Finished!\nSent ${selectedContacts.length} promotional messages.`);
         }
       }, (index + 1) * 1000);
     });
@@ -598,8 +578,7 @@ Sent ${selectedContacts.length} promotional messages.`);
         });
       }
 
-      alert(`Claim Request Approved!
-"${instName}" is marked as Claimed and Verified.`);
+      alert(`Claim Request Approved!\n"${instName}" is marked as Claimed and Verified.`);
       setClaims(claims.filter(claim => claim.id !== claimId));
 
       const instSnap = await getDocs(collection(db, "institutions"));
@@ -652,7 +631,7 @@ Sent ${selectedContacts.length} promotional messages.`);
         state: sug.state || "Odisha",
         district: sug.district || "",
         townOrBlock: sug.townOrBlock || "",
-        logo: sug.logo || "🏫",
+        logo: sug.logo || "ðŸ«",
         createdAt: new Date().toISOString()
       };
 
@@ -661,8 +640,7 @@ Sent ${selectedContacts.length} promotional messages.`);
       const sugRef = doc(db, "suggestions", sugId);
       await updateDoc(sugRef, { status: "approved" });
 
-      alert(`Suggestion Approved!
-"${sug.name}" is now listed in the educational directory.`);
+      alert(`Suggestion Approved!\n"${sug.name}" is now listed in the educational directory.`);
       
       setSuggestions(suggestions.filter(s => s.id !== sugId));
       setInstitutions(prev => [...prev, newInst]);
@@ -683,36 +661,6 @@ Sent ${selectedContacts.length} promotional messages.`);
     } catch (e) {
       console.error(e);
       alert("Error rejecting suggestion.");
-    }
-  };
-
-
-  // Update Job Details
-  const handleUpdateJob = async (e) => {
-    e.preventDefault();
-    if (!editingJob || !editingJob.id) return;
-    
-    try {
-      const jobRef = doc(db, "jobs", editingJob.id);
-      await updateDoc(jobRef, {
-        title: editingJob.title,
-        description: editingJob.description,
-        employerName: editingJob.employerName || "",
-        companyName: editingJob.employerName || "",
-        location: editingJob.location,
-        salary: editingJob.salary || "",
-        salaryRange: editingJob.salary || "",
-        type: editingJob.type,
-        applyLink: editingJob.applyLink || ""
-      });
-      
-      setJobsList(prev => prev.map(j => j.id === editingJob.id ? { ...j, ...editingJob } : j));
-      setShowEditJobModal(false);
-      setEditingJob(null);
-      alert("Job details updated successfully!");
-    } catch (e) {
-      console.error(e);
-      alert("Error updating job.");
     }
   };
 
@@ -812,7 +760,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                 className="login-input" 
                 value={adminPassword} 
                 onChange={(e) => setAdminPassword(e.target.value)} 
-                placeholder="••••••••"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                 required 
               />
             </div>
@@ -1176,19 +1124,11 @@ Sent ${selectedContacts.length} promotional messages.`);
             </button>
 
             <button 
-              className={`sidebar-link ${activeTab === "places_crawler" ? "active" : ""}`}
-              onClick={() => setActiveTab("places_crawler")}
+              className={`sidebar-link ${activeTab === "crawler" ? "active" : ""}`}
+              onClick={() => setActiveTab("crawler")}
             >
               <Database size={20} />
-              <span>Places Crawler</span>
-            </button>
-
-            <button 
-              className={`sidebar-link ${activeTab === "jobs_crawler" ? "active" : ""}`}
-              onClick={() => setActiveTab("jobs_crawler")}
-            >
-              <Briefcase size={20} />
-              <span>Jobs Crawler</span>
+              <span>Data Crawler</span>
             </button>
 
             <button 
@@ -1414,12 +1354,12 @@ Sent ${selectedContacts.length} promotional messages.`);
                       <div className="analytics-stats-footer">
                         <div className="stat-col">
                           <span className="stat-label">New Users</span>
-                          <span className="stat-value"><span style={{ color: "#10b981" }}>▲ +5.2%</span> 620</span>
+                          <span className="stat-value"><span style={{ color: "#10b981" }}>â–² +5.2%</span> 620</span>
                         </div>
                         <div className="stat-divider"></div>
                         <div className="stat-col">
                           <span className="stat-label">New Jobs</span>
-                          <span className="stat-value"><span style={{ color: "#ef4444" }}>▼ -1.5%</span> 58</span>
+                          <span className="stat-value"><span style={{ color: "#ef4444" }}>â–¼ -1.5%</span> 58</span>
                         </div>
                       </div>
                     </div>
@@ -1434,7 +1374,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                   <div className="dashboard-card">
                     <div className="card-header-row">
                       <h3 className="card-title">User Suggestions</h3>
-                      <button onClick={() => setActiveTab("suggestions")} className="card-header-link">Manage Suggestions ↗</button>
+                      <button onClick={() => setActiveTab("suggestions")} className="card-header-link">Manage Suggestions â†—</button>
                     </div>
                     <div className="card-body">
                       {suggestions.length > 0 ? (
@@ -1443,7 +1383,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                             <div key={sug.id} className="suggestion-item-mini">
                               <div className="suggestion-info">
                                 <span className="sug-title">{sug.name}</span>
-                                <span className="sug-meta">{sug.type} • {sug.townOrBlock}</span>
+                                <span className="sug-meta">{sug.type} â€¢ {sug.townOrBlock}</span>
                               </div>
                               <div className="suggestion-badges">
                                 <span className="badge-status-pill new">New</span>
@@ -1465,7 +1405,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                   <div className="dashboard-card">
                     <div className="card-header-row">
                       <h3 className="card-title">Recent Job Listings</h3>
-                      <button onClick={() => setActiveTab("jobs")} className="card-header-link">View All Jobs ↗</button>
+                      <button onClick={() => setActiveTab("jobs")} className="card-header-link">View All Jobs â†—</button>
                     </div>
                     <div className="card-body">
                       {jobsList.length > 0 ? (
@@ -1478,7 +1418,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                                 </div>
                                 <div className="job-details-block">
                                   <span className="job-title">{job.title}</span>
-                                  <span className="job-company">{job.employerName || "Employer"} — {job.location}</span>
+                                  <span className="job-company">{job.employerName || "Employer"} â€” {job.location}</span>
                                 </div>
                               </div>
                               <div className="job-actions-right">
@@ -1650,7 +1590,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                               />
                             ) : (
                               <div style={{ width: "60px", height: "60px", background: "rgba(79, 70, 229, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "10px", fontSize: "2rem" }}>
-                                {inst.logo || "🏫"}
+                                {inst.logo || "ðŸ«"}
                               </div>
                             )}
                             <div>
@@ -1671,11 +1611,11 @@ Sent ${selectedContacts.length} promotional messages.`);
                               </span>
                             )}
                             {inst.phone && (
-                              <span className="pill-badge phone">📞 {inst.phone}</span>
+                              <span className="pill-badge phone">ðŸ“ž {inst.phone}</span>
                             )}
                             {inst.website && (
                               <a href={inst.website} target="_blank" rel="noreferrer" className="pill-badge" style={{ textDecoration: "none", background: "#e0f2fe", color: "#0369a1", border: "1px solid #bae6fd" }}>
-                                🌐 Website
+                                ðŸŒ Website
                               </a>
                             )}
                           </div>
@@ -1696,12 +1636,14 @@ Sent ${selectedContacts.length} promotional messages.`);
             </div>
           )}
 
-                    {/* CRAWLER VIEW */}
-          {activeTab === "places_crawler" && (
+          {/* CRAWLER VIEW */}
+          
+          {/* CRAWLER VIEW */}
+          {activeTab === "crawler" && (
             <div className="tab-pane">
               <div className="tab-header">
-                <h2>Google Places Crawler</h2>
-                <p>Automated ingestion pipeline for Institutions.</p>
+                <h2>Data Crawlers</h2>
+                <p>Automated ingestion pipelines for Institutions and Jobs.</p>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
@@ -1798,18 +1740,6 @@ Sent ${selectedContacts.length} promotional messages.`);
                   </div>
                 </div>
 
-                              </div>
-            </div>
-          )}
-
-          {/* JOB CRAWLER VIEW */}
-          {activeTab === "jobs_crawler" && (
-            <div className="tab-pane">
-              <div className="tab-header">
-                <h2>Jobs Crawler</h2>
-                <p>Automated ingestion pipeline for Jobs.</p>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px", maxWidth: "800px" }}>
                 {/* SerpApi Job Crawler */}
                 <div className="dashboard-card">
                   <h3 className="card-title" style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1830,62 +1760,14 @@ Sent ${selectedContacts.length} promotional messages.`);
                     
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                       <div>
-                        <label className="form-label">Location (State)</label>
-                        <select 
-                          value={jobState} 
-                          onChange={(e) => setJobState(e.target.value)} 
-                          className="dashboard-select"
-                        >
-                          <option value="">Any State / Automatic</option>
-                          <option value="Odisha">Odisha</option>
-                          <option value="Karnataka">Karnataka</option>
-                          <option value="Maharashtra">Maharashtra</option>
-                          <option value="Delhi">Delhi</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">City/Town (Optional)</label>
+                        <label className="form-label">Location (Optional)</label>
                         <input 
                           type="text" 
-                          placeholder="e.g. Bangalore, Bhubaneswar" 
+                          placeholder="e.g. Odisha, Bangalore, India" 
                           value={jobLocation} 
                           onChange={(e) => setJobLocation(e.target.value)} 
                           className="dashboard-input" 
                         />
-                      </div>
-                    </div>
-                    
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginTop: "12px" }}>
-                      <div>
-                        <label className="form-label">Industry</label>
-                        <select 
-                          value={jobIndustry} 
-                          onChange={(e) => setJobIndustry(e.target.value)} 
-                          className="dashboard-select"
-                        >
-                          <option value="">Any Industry</option>
-                          <option value="Education">Education & Teaching</option>
-                          <option value="Healthcare">Healthcare & Medical</option>
-                          <option value="Technology">IT & Software</option>
-                          <option value="Engineering">Engineering</option>
-                          <option value="Finance">Finance & Banking</option>
-                          <option value="Management">Business & Management</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">Job Type</label>
-                        <select 
-                          value={jobType} 
-                          onChange={(e) => setJobType(e.target.value)} 
-                          className="dashboard-select"
-                        >
-                          <option value="">Any Type</option>
-                          <option value="Full-time">Full-time</option>
-                          <option value="Part-time">Part-time</option>
-                          <option value="Contract">Contract</option>
-                          <option value="Internship">Internship</option>
-                          <option value="Freelance">Freelance</option>
-                        </select>
                       </div>
                       <div>
                         <label className="form-label">Scope</label>
@@ -1921,43 +1803,636 @@ Sent ${selectedContacts.length} promotional messages.`);
                       <div style={{ color: "#64748b", fontStyle: "italic" }}>[IDLE] Job pipeline is ready...</div>
                     )}
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+            <button 
+              className={`sidebar-link ${activeTab === "students" ? "active" : ""}`}
+              onClick={() => setActiveTab("students")}
+            >
+              <GraduationCap size={20} />
+              <span>Students</span>
+            </button>
 
-                  {recentlyCrawledJobs.length > 0 && (
-                    <div style={{ marginTop: "24px" }}>
-                      <h4 className="card-sub-title" style={{ marginBottom: "12px", borderBottom: "1px solid #e2e8f0", paddingBottom: "8px" }}>Recently Ingested Jobs</h4>
-                      <table className="dashboard-table" style={{ fontSize: "0.9rem" }}>
-                        <thead>
-                          <tr>
-                            <th>Job Title</th>
-                            <th>Company & Location</th>
-                            <th>Salary/Type</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {recentlyCrawledJobs.map(job => (
-                            <tr key={job.id}>
-                              <td className="bold-cell">{job.title}</td>
-                              <td>
-                                <div>{job.companyName}</div>
-                                <div className="sub-cell">{job.location}</div>
-                              </td>
-                              <td>
-                                <div>{job.salaryRange}</div>
-                                <div className="sub-cell">{job.type}</div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+            <button 
+              className={`sidebar-link ${activeTab === "teachers" ? "active" : ""}`}
+              onClick={() => setActiveTab("teachers")}
+            >
+              <User size={20} />
+              <span>Teachers</span>
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "employers" ? "active" : ""}`}
+              onClick={() => setActiveTab("employers")}
+            >
+              <Users size={20} />
+              <span>Employers</span>
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "jobs" ? "active" : ""}`}
+              onClick={() => setActiveTab("jobs")}
+            >
+              <Briefcase size={20} />
+              <span>Job Listings</span>
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "verification" ? "active" : ""}`}
+              onClick={() => setActiveTab("verification")}
+            >
+              <Award size={20} />
+              <span>Verification</span>
+              {claims.length > 0 && <span className="tab-counter-badge warn">{claims.length}</span>}
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "suggestions" ? "active" : ""}`}
+              onClick={() => setActiveTab("suggestions")}
+            >
+              <MessageSquare size={20} />
+              <span>User Suggestions</span>
+              {suggestions.length > 0 && <span className="tab-counter-badge info">{suggestions.length}</span>}
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "reports" ? "active" : ""}`}
+              onClick={() => setActiveTab("reports")}
+            >
+              <Activity size={20} />
+              <span>Reports & Campaigns</span>
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "settings" ? "active" : ""}`}
+              onClick={() => setActiveTab("settings")}
+            >
+              <Settings size={20} />
+              <span>Settings</span>
+            </button>
+
+            <button onClick={logout} className="sidebar-link logout-sidebar-link">
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </nav>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="admin-main-viewport">
+          
+          {/* TAB 1: DASHBOARD VIEW */}
+          {activeTab === "dashboard" && (
+            <div className="tab-pane">
+              {/* Metric Cards Grid */}
+              <div className="metrics-row">
+                <div className="metric-card">
+                  <div className="metric-card-content">
+                    <span className="metric-card-label">Total Institutions</span>
+                    <span className="metric-card-value">{institutions.length}</span>
+                    <span className="metric-card-subtext">{claimedCount} Claimed</span>
+                  </div>
+                  <div className="metric-card-icon blue">
+                    <Landmark size={24} />
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-card-content">
+                    <span className="metric-card-label">Total Students</span>
+                    <span className="metric-card-value">{studentsList.length > 0 ? studentsList.length.toLocaleString() : "15,430"}</span>
+                    <span className="metric-card-subtext">Registered candidates</span>
+                  </div>
+                  <div className="metric-card-icon purple">
+                    <GraduationCap size={24} />
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-card-content">
+                    <span className="metric-card-label">Active Jobs</span>
+                    <span className="metric-card-value">{jobsList.length > 0 ? jobsList.length : "278"}</span>
+                    <span className="metric-card-subtext" style={{ color: "#10b981", fontWeight: "700" }}>+12 Today</span>
+                  </div>
+                  <div className="metric-card-icon green">
+                    <Briefcase size={24} />
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-card-content">
+                    <span className="metric-card-label">Premium Listings</span>
+                    <span className="metric-card-value">{premiumCount > 0 ? premiumCount : "320"}</span>
+                    <span className="metric-card-subtext">Paid placements tier</span>
+                  </div>
+                  <div className="metric-card-icon orange">
+                    <Award size={24} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Main dashboard grid */}
+              <div className="dashboard-grid-layout">
+                {/* Left Column */}
+                <div className="grid-column">
+                  
+                  {/* Pending Verifications */}
+                  <div className="dashboard-card">
+                    <div className="card-header-row">
+                      <h3 className="card-title">Pending Verifications</h3>
+                      <button onClick={() => setActiveTab("verification")} className="card-header-link">View All</button>
                     </div>
+                    <div className="card-body">
+                      {claims.length > 0 ? (
+                        <table className="dashboard-table">
+                          <thead>
+                            <tr>
+                              <th>Institution / Employer</th>
+                              <th>Type</th>
+                              <th style={{ textAlign: "right" }}>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {claims.slice(0, 4).map((claim) => (
+                              <tr key={claim.id}>
+                                <td>
+                                  <div className="bold-cell">{claim.instName}</div>
+                                  <div className="sub-cell">{claim.email}</div>
+                                </td>
+                                <td><span className="cell-pill">Verification</span></td>
+                                <td style={{ textAlign: "right" }}>
+                                  <button onClick={() => setActiveTab("verification")} className="table-action-btn">Review</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="empty-card-state">
+                          <CheckCircle2 size={32} style={{ color: "#10b981", marginBottom: "10px" }} />
+                          <p>All verifications completed! No pending items.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Analytics Overview */}
+                  <div className="dashboard-card">
+                    <div className="card-header-row">
+                      <h3 className="card-title">Analytics Overview</h3>
+                      <span className="card-header-subtext">Monthly Registrations</span>
+                    </div>
+                    <div className="card-body">
+                      {/* Premium SVG Line graph */}
+                      <div className="svg-chart-container">
+                        <svg viewBox="0 0 500 150" className="analytics-svg-chart">
+                          <defs>
+                            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2"/>
+                              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0"/>
+                            </linearGradient>
+                          </defs>
+                          {/* Grid lines */}
+                          <line x1="20" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="20" y1="60" x2="480" y2="60" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="20" y1="100" x2="480" y2="100" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="20" y1="130" x2="480" y2="130" stroke="#cbd5e1" strokeWidth="1.5" />
+                          
+                          {/* Chart Path */}
+                          <path 
+                            d="M 20 120 C 50 100, 80 80, 110 95 C 140 110, 170 120, 200 85 C 230 50, 260 75, 290 85 C 320 95, 350 40, 380 30 C 410 20, 440 60, 480 25" 
+                            fill="none" 
+                            stroke="#2563eb" 
+                            strokeWidth="3" 
+                          />
+                          <path 
+                            d="M 20 120 C 50 100, 80 80, 110 95 C 140 110, 170 120, 200 85 C 230 50, 260 75, 290 85 C 320 95, 350 40, 380 30 C 410 20, 440 60, 480 25 L 480 130 L 20 130 Z" 
+                            fill="url(#chartGrad)" 
+                          />
+
+                          {/* Interactive Graph Nodes */}
+                          <circle cx="20" cy="120" r="4" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                          <circle cx="110" cy="95" r="4" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                          <circle cx="200" cy="85" r="4" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                          <circle cx="290" cy="85" r="4" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                          <circle cx="380" cy="30" r="4" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                          <circle cx="480" cy="25" r="4" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+                        </svg>
+                        <div className="chart-labels-row">
+                          <span>Users</span>
+                          <span>Institutions</span>
+                          <span>Jobs</span>
+                        </div>
+                      </div>
+
+                      <div className="analytics-stats-footer">
+                        <div className="stat-col">
+                          <span className="stat-label">New Users</span>
+                          <span className="stat-value"><span style={{ color: "#10b981" }}>â–² +5.2%</span> 620</span>
+                        </div>
+                        <div className="stat-divider"></div>
+                        <div className="stat-col">
+                          <span className="stat-label">New Jobs</span>
+                          <span className="stat-value"><span style={{ color: "#ef4444" }}>â–¼ -1.5%</span> 58</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Right Column */}
+                <div className="grid-column">
+                  
+                  {/* User Suggestions */}
+                  <div className="dashboard-card">
+                    <div className="card-header-row">
+                      <h3 className="card-title">User Suggestions</h3>
+                      <button onClick={() => setActiveTab("suggestions")} className="card-header-link">Manage Suggestions â†—</button>
+                    </div>
+                    <div className="card-body">
+                      {suggestions.length > 0 ? (
+                        <div className="suggestions-list-vertical">
+                          {suggestions.slice(0, 3).map((sug) => (
+                            <div key={sug.id} className="suggestion-item-mini">
+                              <div className="suggestion-info">
+                                <span className="sug-title">{sug.name}</span>
+                                <span className="sug-meta">{sug.type} â€¢ {sug.townOrBlock}</span>
+                              </div>
+                              <div className="suggestion-badges">
+                                <span className="badge-status-pill new">New</span>
+                                <span className="badge-user-tag">{sug.contact ? sug.contact.slice(0, 6) : "Guest"}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="empty-card-state">
+                          <MessageSquare size={32} style={{ color: "#94a3b8", marginBottom: "10px" }} />
+                          <p>No new listings suggested by users currently.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Recent Job Listings */}
+                  <div className="dashboard-card">
+                    <div className="card-header-row">
+                      <h3 className="card-title">Recent Job Listings</h3>
+                      <button onClick={() => setActiveTab("jobs")} className="card-header-link">View All Jobs â†—</button>
+                    </div>
+                    <div className="card-body">
+                      {jobsList.length > 0 ? (
+                        <div className="jobs-list-vertical">
+                          {jobsList.slice(0, 3).map((job) => (
+                            <div key={job.id} className="job-item-mini">
+                              <div className="job-meta-left">
+                                <div className="job-company-avatar">
+                                  {job.employerName ? job.employerName[0] : "J"}
+                                </div>
+                                <div className="job-details-block">
+                                  <span className="job-title">{job.title}</span>
+                                  <span className="job-company">{job.employerName || "Employer"} â€” {job.location}</span>
+                                </div>
+                              </div>
+                              <div className="job-actions-right">
+                                {job.status === "active" || job.isApproved ? (
+                                  <span className="status-badge-active">Approved</span>
+                                ) : (
+                                  <button onClick={() => handleApproveJob(job.id)} className="job-approve-btn">Approve</button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="empty-card-state">
+                          <Briefcase size={32} style={{ color: "#cbd5e1", marginBottom: "10px" }} />
+                          <p>No recent job listings found in database.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          )}
+
+          
+          {/* TAB 2: INSTITUTIONS VIEW */}
+          {activeTab === "institutions" && (
+            <div className="tab-pane">
+              <div className="tab-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                <div>
+                  <h2>Listings Directory ({filteredInstitutions.length})</h2>
+                  <p>View, filter, and manage all your educational listings.</p>
+                </div>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <div style={{ display: "flex", background: "var(--bg-secondary)", borderRadius: "8px", padding: "4px", border: "1px solid var(--border-secondary)" }}>
+                    <button 
+                      onClick={() => setViewMode("cards")} 
+                      style={{ padding: "6px 12px", borderRadius: "6px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", background: viewMode === "cards" ? "var(--primary)" : "transparent", color: viewMode === "cards" ? "white" : "var(--text-muted)", transition: "all 0.2s" }}
+                    >
+                      <LayoutGrid size={16} /> <span style={{ fontSize: "0.85rem", fontWeight: "600" }}>Cards</span>
+                    </button>
+                    <button 
+                      onClick={() => setViewMode("table")} 
+                      style={{ padding: "6px 12px", borderRadius: "6px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", background: viewMode === "table" ? "var(--primary)" : "transparent", color: viewMode === "table" ? "white" : "var(--text-muted)", transition: "all 0.2s" }}
+                    >
+                      <List size={16} /> <span style={{ fontSize: "0.85rem", fontWeight: "600" }}>Table</span>
+                    </button>
+                  </div>
+                  <button 
+                    onClick={() => { resetForm(); setShowAddModal(true); }} 
+                    className="action-btn-primary" 
+                    style={{ padding: "10px 18px", fontSize: "0.85rem", gap: "6px" }}
+                  >
+                    <Plus size={16} />
+                    <span>Add Listing</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Filters Bar */}
+              <div className="dashboard-card" style={{ marginBottom: "20px", display: "flex", gap: "12px", flexWrap: "wrap", padding: "16px" }}>
+                <div style={{ flex: 1, minWidth: "150px" }}>
+                  <label className="form-label" style={{ fontSize: "0.75rem" }}>Country</label>
+                  <select className="dashboard-select" value={filterCountry} onChange={(e) => { setFilterCountry(e.target.value); if (e.target.value === "International") { setFilterState("All"); setFilterDistrict(""); } else { setFilterState("Odisha"); } }}>
+                    <option value="All">All Countries</option>
+                    <option value="India">India</option>
+                    <option value="International">International</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1, minWidth: "150px" }}>
+                  <label className="form-label" style={{ fontSize: "0.75rem" }}>State</label>
+                  {filterCountry === "India" ? (
+                    <select className="dashboard-select" value={filterState} onChange={(e) => { setFilterState(e.target.value); if (e.target.value !== "Odisha") setFilterDistrict(""); }}>
+                      <option value="All">All States</option>
+                      {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" className="dashboard-input" value={filterState} onChange={(e) => setFilterState(e.target.value)} placeholder="State" />
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: "150px" }}>
+                  <label className="form-label" style={{ fontSize: "0.75rem" }}>District</label>
+                  {filterState === "Odisha" ? (
+                    <select className="dashboard-select" value={filterDistrict} onChange={(e) => setFilterDistrict(e.target.value)}>
+                      <option value="">All Districts</option>
+                      {ODISHA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" className="dashboard-input" value={filterDistrict} onChange={(e) => setFilterDistrict(e.target.value)} placeholder="District" />
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: "150px" }}>
+                  <label className="form-label" style={{ fontSize: "0.75rem" }}>Category</label>
+                  <select className="dashboard-select" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+                    <option value="All">All Categories</option>
+                    <option value="school">Schools</option>
+                    <option value="university">Universities / Degree Colleges</option>
+                    <option value="engineering">Engineering Colleges</option>
+                    <option value="coaching">Coaching Centers / Tutorials</option>
+                    <option value="kindergarten">Play Schools / Kindergartens</option>
+                    <option value="vocational">ITI & Vocational Training</option>
+                    <option value="computer">Computer Training Institutes</option>
+                    <option value="sports">Sports Academies & Gyms</option>
+                    <option value="library">Libraries / Study Rooms</option>
+                    <option value="consultant">Educational Consultants</option>
+                    <option value="hostel">Student Hostels / PGs</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* LISTINGS RENDERING */}
+              <div className="dashboard-card" style={{ maxHeight: "700px", overflowY: "auto" }}>
+                {filteredInstitutions.length > 0 ? (
+                  viewMode === "table" ? (
+                    <table className="dashboard-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Location</th>
+                          <th>Category</th>
+                          <th>Status</th>
+                          <th style={{ textAlign: "right" }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredInstitutions.map((inst) => (
+                          <tr key={inst.id}>
+                            <td>
+                              <div style={{ fontWeight: "600", color: "#1e293b" }}>{inst.name}</div>
+                              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>{inst.phone || "No Phone"}</div>
+                            </td>
+                            <td>
+                              <div style={{ color: "#334155" }}>{inst.district}</div>
+                              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>{inst.townOrBlock || inst.location}</div>
+                            </td>
+                            <td>
+                              <span className="pill-badge" style={{ background: "#f1f5f9", color: "#475569" }}>
+                                {inst.type || "unknown"}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={`pill-badge ${inst.isClaimed ? "claimed" : "unclaimed"}`}>
+                                {inst.isClaimed ? "Claimed" : "Unclaimed"}
+                              </span>
+                            </td>
+                            <td style={{ textAlign: "right" }}>
+                              <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                                <a href={`/institutions/${inst.id}`} target="_blank" rel="noopener noreferrer" className="table-action-btn-secondary" style={{ padding: "6px 8px", fontSize: "0.75rem" }}>View</a>
+                                <button onClick={() => openEditModal(inst)} className="table-action-btn" style={{ padding: "6px 8px", fontSize: "0.75rem", background: "#f59e0b" }}>Edit</button>
+                                <button onClick={() => handleDeleteListing(inst.id, inst.name)} className="table-action-btn" style={{ padding: "6px 8px", fontSize: "0.75rem", background: "#ef4444" }}>Del</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "16px" }}>
+                      {filteredInstitutions.map((inst) => (
+                        <div key={inst.id} className="directory-list-item" style={{ border: "1px solid var(--border-secondary)", borderRadius: "12px", padding: "16px" }}>
+                          <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginBottom: "16px" }}>
+                            {inst.photoName ? (
+                              <img 
+                                src={`https://places.googleapis.com/v1/${inst.photoName}/media?maxHeightPx=100&maxWidthPx=100&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`} 
+                                alt={inst.name} 
+                                style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "10px" }} 
+                              />
+                            ) : (
+                              <div style={{ width: "60px", height: "60px", background: "rgba(79, 70, 229, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "10px", fontSize: "2rem" }}>
+                                {inst.logo || "ðŸ«"}
+                              </div>
+                            )}
+                            <div>
+                              <h4 style={{ fontSize: "1rem", fontWeight: "700", color: "#1e293b", margin: "0 0 4px 0", lineHeight: "1.3" }}>{inst.name}</h4>
+                              <p style={{ fontSize: "0.8rem", color: "#64748b", margin: 0, display: "flex", alignItems: "center", gap: "4px" }}>
+                                {inst.townOrBlock || inst.location}, {inst.district}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+                            <span className={`pill-badge ${inst.isClaimed ? "claimed" : "unclaimed"}`}>
+                              {inst.isClaimed ? "Claimed" : "Unclaimed"}
+                            </span>
+                            {inst.tier && inst.tier !== "free" && (
+                              <span className="pill-badge premium">
+                                {inst.tier.toUpperCase()}
+                              </span>
+                            )}
+                            {inst.phone && (
+                              <span className="pill-badge phone">ðŸ“ž {inst.phone}</span>
+                            )}
+                            {inst.website && (
+                              <a href={inst.website} target="_blank" rel="noreferrer" className="pill-badge" style={{ textDecoration: "none", background: "#e0f2fe", color: "#0369a1", border: "1px solid #bae6fd" }}>
+                                ðŸŒ Website
+                              </a>
+                            )}
+                          </div>
+                          
+                          <div style={{ display: "flex", gap: "8px", borderTop: "1px solid var(--border-secondary)", paddingTop: "16px" }}>
+                            <a href={`/institutions/${inst.id}`} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ flex: 1, textAlign: "center", padding: "8px", fontSize: "0.8rem" }}>View Profile</a>
+                            <button onClick={() => openEditModal(inst)} className="btn-primary" style={{ flex: 1, padding: "8px", fontSize: "0.8rem" }}>Edit Details</button>
+                            <button onClick={() => handleDeleteListing(inst.id, inst.name)} className="btn-secondary" style={{ padding: "8px", fontSize: "0.8rem", color: "var(--danger)", borderColor: "var(--danger)" }}>Delete</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <div className="empty-card-state">No institutions found matching your filters.</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* CRAWLER VIEW */}
+          {activeTab === "crawler" && (
+            <div className="tab-pane">
+              <div className="tab-header">
+                <h2>Data Crawler</h2>
+                <p>Ingest data from Google Places directly into your directory.</p>
+              </div>
+
+              <div className="dashboard-card" style={{ maxWidth: "800px" }}>
+                <h3 className="card-title" style={{ marginBottom: "16px" }}>Google Places Settings</h3>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "20px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div>
+                      <label className="form-label">Country</label>
+                      <select value={scrapingCountry} onChange={(e) => { setScrapingCountry(e.target.value); if (e.target.value === "International") { setScrapingState(""); setScrapingDistrict(""); } else { setScrapingState("Odisha"); setScrapingDistrict("Khordha"); } }} className="dashboard-select">
+                        <option value="India">India</option>
+                        <option value="International">International</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="form-label">State</label>
+                      {scrapingCountry === "India" ? (
+                        <select value={scrapingState} onChange={(e) => { setScrapingState(e.target.value); if (e.target.value !== "Odisha") setScrapingDistrict(""); }} className="dashboard-select">
+                          {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      ) : (
+                        <input type="text" value={scrapingState} onChange={(e) => setScrapingState(e.target.value)} placeholder="Enter State/Region" className="dashboard-input" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: "12px" }} className="claim-card-inner">
+                    <div>
+                      <label className="form-label">District *</label>
+                      {scrapingState === "Odisha" ? (
+                        <select value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} className="dashboard-select">
+                          {ODISHA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                      ) : (
+                        <input type="text" value={scrapingDistrict} onChange={(e) => setScrapingDistrict(e.target.value)} placeholder="Enter District/County" className="dashboard-input" />
+                      )}
+                    </div>
+                    <div>
+                      <label className="form-label">Town/City/Block</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Patia" 
+                        value={scrapingTown} 
+                        onChange={(e) => setScrapingTown(e.target.value)} 
+                        className="dashboard-input" 
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Pin Code</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. 751024" 
+                        value={scrapingPinCode} 
+                        onChange={(e) => setScrapingPinCode(e.target.value)} 
+                        className="dashboard-input" 
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Category Type *</label>
+                    <select value={scrapingCategory} onChange={(e) => setScrapingCategory(e.target.value)} className="dashboard-select">
+                      <option value="school">Schools</option>
+                      <option value="university">Universities / Degree Colleges</option>
+                      <option value="engineering">Engineering Colleges</option>
+                      <option value="coaching">Coaching Centers / Tutorials</option>
+                      <option value="kindergarten">Play Schools / Kindergartens</option>
+                      <option value="vocational">ITI & Vocational Training</option>
+                      <option value="computer">Computer Training Institutes</option>
+                      <option value="sports">Sports Academies & Gyms</option>
+                      <option value="library">Libraries / Study Rooms</option>
+                      <option value="consultant">Educational Consultants</option>
+                      <option value="hostel">Student Hostels / PGs</option>
+                      <option value="custom">Custom / Add New...</option>
+                    </select>
+                    
+                    {scrapingCategory === "custom" && (
+                      <input 
+                        type="text" 
+                        placeholder="Enter Custom Category Type" 
+                        value={scrapingCustomCategory} 
+                        onChange={(e) => setScrapingCustomCategory(e.target.value)} 
+                        className="dashboard-input" 
+                        style={{ marginTop: "10px" }}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
+                  <button onClick={() => runPlacesScraper(false)} disabled={isScraping} className="action-btn-primary" style={{ flex: 2 }}>
+                    {isScraping ? <RefreshCw className="spinner" size={16} /> : <Play size={16} />}
+                    <span>Trigger Google Places Sync</span>
+                  </button>
+                  {hasMoreListings && institutions.length > 0 && (
+                    <button onClick={() => runPlacesScraper(true)} disabled={isScraping} className="action-btn-secondary" style={{ flex: 1 }}>
+                      Load Next Page
+                    </button>
+                  )}
+                </div>
+
+                <h4 className="card-sub-title">System Ingestion Log</h4>
+                <div className="log-console" style={{ minHeight: "150px" }}>
+                  {scraperLog.length > 0 ? (
+                    scraperLog.map((log, i) => <div key={i} className="log-line">{log}</div>)
+                  ) : (
+                    <div style={{ color: "#64748b", fontStyle: "italic" }}>[IDLE] Crawler pipeline is ready...</div>
                   )}
                 </div>
               </div>
             </div>
           )}
 
-
-          {/* TAB 3: STUDENTS VIEW */}
+{/* TAB 3: STUDENTS VIEW */}
           {activeTab === "students" && (
             <div className="tab-pane">
               <div className="tab-header">
@@ -2127,7 +2602,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                             <div className="sub-cell">{job.location}</div>
                           </td>
                           <td>
-                            <div className="bold-cell" style={{ color: "#10b981" }}>{job.salary || "₹15,000 / mo"}</div>
+                            <div className="bold-cell" style={{ color: "#10b981" }}>{job.salary || "â‚¹15,000 / mo"}</div>
                             <div className="sub-cell">{job.type || "Full Time"}</div>
                           </td>
                           <td>
@@ -2231,7 +2706,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                       <div key={sug.id} className="suggestion-item-card">
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
                           <div>
-                            <span className="sug-logo-pill">{sug.logo || "🏫"}</span>
+                            <span className="sug-logo-pill">{sug.logo || "ðŸ«"}</span>
                             <h4 className="sug-name-title" style={{ display: "inline-block", margin: "0 0 0 10px", fontSize: "1.1rem", fontWeight: "800" }}>{sug.name}</h4>
                             
                             <div className="sug-meta-grid">
@@ -2343,7 +2818,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                               <tr key={ref.id}>
                                 <td><span className="mono-code">{ref.referrerId}</span></td>
                                 <td>{new Date(ref.timestamp).toLocaleString()}</td>
-                                <td style={{ textAlign: "right" }}><span style={{ color: "#10b981", fontWeight: "700" }}>Click Hits ✔</span></td>
+                                <td style={{ textAlign: "right" }}><span style={{ color: "#10b981", fontWeight: "700" }}>Click Hits âœ”</span></td>
                               </tr>
                             ))}
                           </tbody>
@@ -2374,7 +2849,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                     
                     {profile?.role === "manager" ? (
                       <div className="denied-box">
-                        ⚠️ Access Restricted: Managers are not authorized to register new administrative accounts.
+                        âš ï¸ Access Restricted: Managers are not authorized to register new administrative accounts.
                       </div>
                     ) : (
                       <form onSubmit={handleCreateStaff} className="staff-creation-form">
@@ -2432,7 +2907,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                     
                     {profile?.role === "manager" ? (
                       <div className="denied-box">
-                        ⚠️ Access Restricted: Directory data visible to Administrators only.
+                        âš ï¸ Access Restricted: Directory data visible to Administrators only.
                       </div>
                     ) : (
                       <div className="staff-list-container">
@@ -2523,1396 +2998,3 @@ Sent ${selectedContacts.length} promotional messages.`);
                   <div className="form-grid">
                     <div>
                       <label className="form-label">Listing Claim Status</label>
-                      <select value={formIsClaimed ? "claimed" : "unclaimed"} onChange={(e) => setFormIsClaimed(e.target.value === "claimed")} className="dashboard-select">
-                        <option value="unclaimed">Unclaimed</option>
-                        <option value="claimed">Claimed</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="form-label">Placement Tier</label>
-                      <select value={formTier} onChange={(e) => setFormTier(e.target.value)} className="dashboard-select">
-                        <option value="free">Free Listing</option>
-                        <option value="paid-tier-1">Premium Listing (Tier 1)</option>
-                        <option value="paid-tier-2">Premium Placement Listing (Tier 2)</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="modal-actions">
-                    <button type="button" onClick={() => setShowAddModal(false)} className="action-btn-secondary">Cancel</button>
-                    <button type="submit" className="action-btn-primary">Save Listing</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Edit Manual Listing Modal */}
-          {showEditModal && (
-            <div className="modal-backdrop">
-              <div className="modal-card">
-                <div className="modal-header">
-                  <h3>Edit Institution Listing</h3>
-                  <button onClick={() => { setShowEditModal(false); resetForm(); }} className="close-modal-btn"><X size={18} /></button>
-                </div>
-                <form onSubmit={handleEditSubmit} className="modal-form">
-                  <div className="form-grid">
-                    <div>
-                      <label className="form-label">Name *</label>
-                      <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)} className="dashboard-input" required />
-                    </div>
-                    <div>
-                      <label className="form-label">Category Type *</label>
-                      <select value={formType} onChange={(e) => setFormType(e.target.value)} className="dashboard-select">
-                        <option value="high-school">School</option>
-                        <option value="university">College / University</option>
-                        <option value="coaching">Coaching Center</option>
-                        <option value="kindergarten">Play School</option>
-                        <option value="vocational">ITI / Vocational Training</option>
-                        <option value="computer">Computer Training</option>
-                        <option value="sports">Sports Academy</option>
-                        <option value="custom">Custom / Add New...</option>
-                      </select>
-                      {formType === "custom" && (
-                        <input type="text" placeholder="Custom Category Name" value={formCustomType} onChange={(e) => setFormCustomType(e.target.value)} className="dashboard-input" style={{ marginTop: "10px" }} required />
-                      )}
-                    </div>
-                    <div>
-                      <label className="form-label">District *</label>
-                      <select value={formDistrict} onChange={(e) => setFormDistrict(e.target.value)} className="dashboard-select">
-                        {ODISHA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="form-label">Town / City / Block</label>
-                      <input type="text" value={formTown} onChange={(e) => setFormTown(e.target.value)} className="dashboard-input" />
-                    </div>
-                    <div>
-                      <label className="form-label">Pin Code</label>
-                      <input type="text" value={formPinCode} onChange={(e) => setFormPinCode(e.target.value)} className="dashboard-input" placeholder="e.g. 751024" />
-                    </div>
-                    <div>
-                      <label className="form-label">Phone</label>
-                      <input type="text" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} className="dashboard-input" />
-                    </div>
-                    <div>
-                      <label className="form-label">Website URL</label>
-                      <input type="url" value={formWebsite} onChange={(e) => setFormWebsite(e.target.value)} className="dashboard-input" />
-                    </div>
-                    <div>
-                      <label className="form-label">Google Maps URL</label>
-                      <input type="url" value={formMapUri} onChange={(e) => setFormMapUri(e.target.value)} className="dashboard-input" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="form-label">Address</label>
-                    <input type="text" value={formAddress} onChange={(e) => setFormAddress(e.target.value)} className="dashboard-input" />
-                  </div>
-                  <div>
-                    <label className="form-label">Description</label>
-                    <textarea value={formDescription} onChange={(e) => setFormDescription(e.target.value)} className="dashboard-textarea" style={{ height: "60px" }} />
-                  </div>
-                  <div className="form-grid">
-                    <div>
-                      <label className="form-label">Listing Claim Status</label>
-                      <select value={formIsClaimed ? "claimed" : "unclaimed"} onChange={(e) => setFormIsClaimed(e.target.value === "claimed")} className="dashboard-select">
-                        <option value="unclaimed">Unclaimed</option>
-                        <option value="claimed">Claimed</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="form-label">Placement Tier</label>
-                      <select value={formTier} onChange={(e) => setFormTier(e.target.value)} className="dashboard-select">
-                        <option value="free">Free Listing</option>
-                        <option value="paid-tier-1">Premium Listing (Tier 1)</option>
-                        <option value="paid-tier-2">Premium Placement Listing (Tier 2)</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="modal-actions">
-                    <button type="button" onClick={() => { setShowEditModal(false); resetForm(); }} className="action-btn-secondary">Cancel</button>
-                    <button type="submit" className="action-btn-primary">Update Listing</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-        </main>
-      </div>
-
-      {/* Embedded CSS rules for premium dark/light layout */}
-      <style jsx global>{`
-        body {
-          margin: 0;
-          padding: 0;
-          background: #f1f5f9;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          color: #1e293b;
-        }
-
-        .admin-dashboard-container {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-        }
-
-        /* Top Navigation Header */
-        .admin-navbar {
-          background: #0f294a;
-          color: #ffffff;
-          height: 64px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 24px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-          position: sticky;
-          top: 0;
-          z-index: 100;
-        }
-
-        .nav-left {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .nav-logo {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 1.25rem;
-          font-weight: 800;
-          letter-spacing: -0.02em;
-          color: #ffffff;
-        }
-
-        .nav-divider {
-          width: 1px;
-          height: 24px;
-          background: rgba(255, 255, 255, 0.15);
-        }
-
-        .nav-welcome {
-          font-size: 0.875rem;
-          color: #94a3b8;
-          font-weight: 500;
-        }
-
-        .nav-right {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        .nav-search-wrapper {
-          position: relative;
-          width: 240px;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #64748b;
-        }
-
-        .navbar-search-input {
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 9999px;
-          padding: 8px 12px 8px 36px;
-          color: #ffffff;
-          font-size: 0.85rem;
-          width: 100%;
-          outline: none;
-          transition: all 0.2s;
-        }
-
-        .navbar-search-input::placeholder {
-          color: #94a3b8;
-        }
-
-        .navbar-search-input:focus {
-          background: rgba(255, 255, 255, 0.15);
-          border-color: #3b82f6;
-          width: 280px;
-        }
-
-        .nav-notification {
-          position: relative;
-          cursor: pointer;
-          color: #cbd5e1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 4px;
-          border-radius: 50%;
-          transition: background 0.2s;
-        }
-
-        .nav-notification:hover {
-          background: rgba(255, 255, 255, 0.08);
-          color: #ffffff;
-        }
-
-        .notification-badge {
-          position: absolute;
-          top: -2px;
-          right: -2px;
-          background: #ef4444;
-          color: #ffffff;
-          font-size: 0.65rem;
-          font-weight: 700;
-          border-radius: 50%;
-          width: 15px;
-          height: 15px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 2px solid #0f294a;
-        }
-
-        .nav-profile-menu-container {
-          position: relative;
-        }
-
-        .nav-profile-button {
-          background: none;
-          border: none;
-          color: #ffffff;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          cursor: pointer;
-          font-size: 0.85rem;
-          font-weight: 600;
-          padding: 6px 12px;
-          border-radius: 8px;
-          transition: background 0.2s;
-        }
-
-        .nav-profile-button:hover {
-          background: rgba(255, 255, 255, 0.08);
-        }
-
-        .nav-avatar {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          object-fit: cover;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .nav-profile-name {
-          color: #f1f5f9;
-        }
-
-        .nav-dropdown-menu {
-          position: absolute;
-          right: 0;
-          top: 48px;
-          background: #ffffff;
-          border-radius: 8px;
-          box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-          border: 1px solid #e2e8f0;
-          width: 180px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          z-index: 200;
-        }
-
-        .dropdown-item {
-          padding: 10px 16px;
-          font-size: 0.85rem;
-          color: #334155;
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          background: none;
-          border: none;
-          width: 100%;
-          text-align: left;
-          cursor: pointer;
-          transition: background 0.15s;
-        }
-
-        .dropdown-item:hover {
-          background: #f1f5f9;
-        }
-
-        .logout-item {
-          border-top: 1px solid #f1f5f9;
-          color: #ef4444;
-        }
-
-        .logout-item:hover {
-          background: #fef2f2;
-        }
-
-        /* Layout Structure */
-        .admin-body-layout {
-          flex: 1;
-          display: flex;
-        }
-
-        /* Left Sidebar styling */
-        .admin-sidebar {
-          width: 240px;
-          background: #0d2b6b;
-          border-right: 1px solid rgba(255, 255, 255, 0.08);
-          display: flex;
-          flex-direction: column;
-          padding: 16px 0;
-          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
-        }
-
-        .sidebar-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          padding: 0 12px;
-        }
-
-        .sidebar-link {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          color: #cbd5e1;
-          background: none;
-          border: none;
-          border-radius: 8px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          cursor: pointer;
-          width: 100%;
-          text-align: left;
-          position: relative;
-          transition: all 0.2s;
-        }
-
-        .sidebar-link:hover {
-          color: #ffffff;
-          background: rgba(255, 255, 255, 0.08);
-        }
-
-        .sidebar-link.active {
-          color: #ffffff;
-          background: #1d4ed8;
-          box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.15);
-        }
-
-        .tab-counter-badge {
-          position: absolute;
-          right: 16px;
-          font-size: 0.7rem;
-          font-weight: 700;
-          padding: 2px 6px;
-          border-radius: 9999px;
-          line-height: 1;
-        }
-
-        .tab-counter-badge.warn {
-          background: #f59e0b;
-          color: #ffffff;
-        }
-
-        .tab-counter-badge.info {
-          background: #3b82f6;
-          color: #ffffff;
-        }
-
-        .logout-sidebar-link {
-          margin-top: 24px;
-          color: #fca5a5;
-        }
-
-        .logout-sidebar-link:hover {
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444;
-        }
-
-        /* Main Viewport panel */
-        .admin-main-viewport {
-          flex: 1;
-          padding: 24px;
-          overflow-y: auto;
-          background: #f4f6f8;
-        }
-
-        .tab-pane {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .tab-header {
-          border-bottom: 1px solid #e2e8f0;
-          padding-bottom: 16px;
-          margin-bottom: 8px;
-        }
-
-        .tab-header h2 {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0 0 4px 0;
-        }
-
-        .tab-header p {
-          font-size: 0.875rem;
-          color: #64748b;
-          margin: 0;
-        }
-
-        /* Metric Cards Grid */
-        .metrics-row {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 20px;
-        }
-
-        .metric-card {
-          background: #ffffff;
-          border-radius: 12px;
-          border: 1px solid #e2e8f0;
-          padding: 20px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
-        }
-
-        .metric-card-content {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .metric-card-label {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .metric-card-value {
-          font-size: 1.85rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 6px 0;
-          line-height: 1;
-        }
-
-        .metric-card-subtext {
-          font-size: 0.8rem;
-          color: #94a3b8;
-          font-weight: 500;
-        }
-
-        .metric-card-icon {
-          padding: 12px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .metric-card-icon.blue { background: rgba(59, 130, 246, 0.08); color: #3b82f6; }
-        .metric-card-icon.purple { background: rgba(139, 92, 246, 0.08); color: #8b5cf6; }
-        .metric-card-icon.green { background: rgba(16, 185, 129, 0.08); color: #10b981; }
-        .metric-card-icon.orange { background: rgba(245, 158, 11, 0.08); color: #f59e0b; }
-
-        /* Main Dashboard Grid */
-        .dashboard-grid-layout {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 20px;
-        }
-
-        @media (min-width: 1024px) {
-          .dashboard-grid-layout {
-            grid-template-columns: 1.2fr 1fr;
-          }
-        }
-
-        .grid-column {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        /* Card panels */
-        .dashboard-card {
-          background: #ffffff;
-          border-radius: 12px;
-          border: 1px solid #e2e8f0;
-          padding: 24px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-        }
-
-        .card-header-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 18px;
-          border-bottom: 1px solid #f1f5f9;
-          padding-bottom: 12px;
-        }
-
-        .card-title {
-          font-size: 1.1rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0;
-        }
-
-        .card-header-link {
-          background: none;
-          border: none;
-          color: #2563eb;
-          font-size: 0.825rem;
-          font-weight: 700;
-          cursor: pointer;
-          padding: 4px 8px;
-          border-radius: 4px;
-          transition: background 0.15s;
-        }
-
-        .card-header-link:hover {
-          background: #eff6ff;
-          text-decoration: underline;
-        }
-
-        .card-header-subtext {
-          font-size: 0.8rem;
-          color: #64748b;
-          font-weight: 600;
-        }
-
-        /* General Tables inside cards */
-        .dashboard-table {
-          width: 100%;
-          border-collapse: collapse;
-          text-align: left;
-        }
-
-        .dashboard-table th {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #64748b;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          padding: 10px 12px;
-          background: #f8fafc;
-          border-bottom: 1.5px solid #e2e8f0;
-        }
-
-        .dashboard-table td {
-          padding: 12px;
-          border-bottom: 1px solid #f1f5f9;
-          font-size: 0.85rem;
-          vertical-align: middle;
-        }
-
-        .dashboard-table tr:last-child td {
-          border-bottom: none;
-        }
-
-        .bold-cell {
-          font-weight: 700;
-          color: #1e293b;
-        }
-
-        .sub-cell {
-          font-size: 0.75rem;
-          color: #64748b;
-          margin-top: 2px;
-        }
-
-        .email-cell {
-          font-family: monospace;
-          color: #475569;
-        }
-
-        .cell-pill {
-          font-size: 0.75rem;
-          font-weight: 700;
-          background: #eff6ff;
-          color: #2563eb;
-          padding: 4px 8px;
-          border-radius: 6px;
-        }
-
-        .table-action-btn {
-          background: #2563eb;
-          color: #ffffff;
-          border: none;
-          font-weight: 700;
-          font-size: 0.8rem;
-          padding: 6px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: background 0.15s;
-        }
-
-        .table-action-btn:hover {
-          background: #1d4ed8;
-        }
-
-        .table-action-btn-secondary {
-          background: #ffffff;
-          border: 1px solid #cbd5e1;
-          color: #334155;
-          font-weight: 700;
-          font-size: 0.8rem;
-          padding: 6px 12px;
-          border-radius: 6px;
-          text-decoration: none;
-          display: inline-block;
-          transition: background 0.15s;
-        }
-
-        .table-action-btn-secondary:hover {
-          background: #f8fafc;
-        }
-
-        .table-btn-approve {
-          background: #10b981;
-          color: #ffffff;
-          border: none;
-          font-weight: 700;
-          font-size: 0.775rem;
-          padding: 6px 10px;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .table-btn-approve:hover { background: #059669; }
-
-        .table-btn-reject {
-          background: #ef4444;
-          color: #ffffff;
-          border: none;
-          font-weight: 700;
-          font-size: 0.775rem;
-          padding: 6px 10px;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .table-btn-reject:hover { background: #dc2626; }
-
-        .empty-card-state {
-          padding: 30px 10px;
-          text-align: center;
-          color: #94a3b8;
-          font-size: 0.85rem;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        /* SVG Line Graph styles */
-        .svg-chart-container {
-          background: #ffffff;
-          border: 1px solid #f1f5f9;
-          border-radius: 8px;
-          padding: 10px;
-          margin-bottom: 16px;
-        }
-
-        .analytics-svg-chart {
-          width: 100%;
-          height: auto;
-          overflow: visible;
-        }
-
-        .chart-labels-row {
-          display: flex;
-          justify-content: space-around;
-          font-size: 0.75rem;
-          color: #64748b;
-          font-weight: 700;
-          border-top: 1px solid #f1f5f9;
-          padding-top: 10px;
-          margin-top: 10px;
-        }
-
-        .chart-labels-row span {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .chart-labels-row span::before {
-          content: '';
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #2563eb;
-          display: inline-block;
-        }
-
-        .chart-labels-row span:nth-child(2)::before { background: #8b5cf6; }
-        .chart-labels-row span:nth-child(3)::before { background: #10b981; }
-
-        .analytics-stats-footer {
-          display: flex;
-          justify-content: space-between;
-          background: #f8fafc;
-          border-radius: 8px;
-          padding: 14px;
-        }
-
-        .stat-col {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .stat-divider {
-          width: 1px;
-          background: #cbd5e1;
-          margin: 0 16px;
-        }
-
-        .stat-label {
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: #64748b;
-          text-transform: uppercase;
-        }
-
-        .stat-value {
-          font-size: 0.95rem;
-          font-weight: 800;
-          color: #1e293b;
-          margin-top: 4px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        /* Suggestions mini vertical list */
-        .suggestions-list-vertical {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .suggestion-item-mini {
-          padding: 12px;
-          background: #f8fafc;
-          border: 1px solid #f1f5f9;
-          border-radius: 8px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .suggestion-info {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .sug-title {
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: #0f172a;
-        }
-
-        .sug-meta {
-          font-size: 0.725rem;
-          color: #64748b;
-          margin-top: 2px;
-        }
-
-        .suggestion-badges {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 4px;
-        }
-
-        .badge-status-pill {
-          font-size: 0.65rem;
-          font-weight: 800;
-          padding: 2px 6px;
-          border-radius: 4px;
-          text-transform: uppercase;
-        }
-
-        .badge-status-pill.new {
-          background: rgba(16, 185, 129, 0.1);
-          color: #059669;
-        }
-
-        .badge-user-tag {
-          font-size: 0.65rem;
-          font-weight: 700;
-          color: #f59e0b;
-          background: rgba(245, 158, 11, 0.1);
-          padding: 2px 6px;
-          border-radius: 4px;
-        }
-
-        /* Jobs list mini */
-        .jobs-list-vertical {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .job-item-mini {
-          padding: 12px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .job-meta-left {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .job-company-avatar {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-          background: #eff6ff;
-          color: #2563eb;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 800;
-          font-size: 0.9rem;
-        }
-
-        .job-details-block {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .job-title {
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: #1e293b;
-        }
-
-        .job-company {
-          font-size: 0.725rem;
-          color: #64748b;
-          margin-top: 2px;
-        }
-
-        .job-actions-right {
-          display: flex;
-          align-items: center;
-        }
-
-        .job-approve-btn {
-          background: #10b981;
-          color: #ffffff;
-          border: none;
-          font-size: 0.75rem;
-          font-weight: 700;
-          padding: 6px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .status-badge-active {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: #059669;
-          background: rgba(16, 185, 129, 0.1);
-          padding: 4px 8px;
-          border-radius: 6px;
-        }
-
-        /* Scraper and directory components */
-        .dashboard-select {
-          width: 100%;
-          padding: 10px;
-          border-radius: 8px;
-          border: 1px solid #cbd5e1;
-          background: #ffffff;
-          color: #334155;
-          font-size: 0.875rem;
-          outline: none;
-        }
-
-        .action-btn-primary {
-          background: #2563eb;
-          color: #ffffff;
-          border: none;
-          padding: 12px 20px;
-          border-radius: 8px;
-          font-weight: 700;
-          font-size: 0.9rem;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .action-btn-primary:hover { background: #1d4ed8; }
-
-        .action-btn-secondary {
-          background: #ffffff;
-          border: 1px solid #cbd5e1;
-          color: #334155;
-          padding: 12px 20px;
-          border-radius: 8px;
-          font-weight: 700;
-          font-size: 0.9rem;
-          cursor: pointer;
-          text-align: center;
-        }
-
-        .action-btn-secondary:hover { background: #f8fafc; }
-
-        .log-console {
-          background: #090d16;
-          border: 1px solid #1e293b;
-          border-radius: 8px;
-          padding: 16px;
-          font-family: 'Courier New', Courier, monospace;
-          font-size: 0.775rem;
-          color: #34d399;
-          height: 150px;
-          overflow-y: auto;
-          line-height: 1.5;
-          margin-top: 10px;
-        }
-
-        .log-line {
-          margin-bottom: 4px;
-        }
-
-        .listings-vertical-flow {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .directory-list-item {
-          padding: 16px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          transition: border-color 0.15s;
-        }
-
-        .directory-list-item:hover {
-          border-color: #cbd5e1;
-        }
-
-        .pill-badge {
-          font-size: 0.7rem;
-          font-weight: 700;
-          padding: 3px 8px;
-          border-radius: 9999px;
-        }
-
-        .pill-badge.claimed { background: rgba(16, 185, 129, 0.1); color: #059669; }
-        .pill-badge.unclaimed { background: rgba(100, 116, 139, 0.1); color: #475569; }
-        .pill-badge.premium { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
-        .pill-badge.phone { background: rgba(245, 158, 11, 0.1); color: #d97706; }
-
-        /* Claims & Verifications Cards */
-        .verification-item-card {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 20px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 16px;
-        }
-
-        .verification-details {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .verification-title {
-          font-size: 1rem;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0;
-        }
-
-        .verification-meta {
-          display: flex;
-          gap: 16px;
-          font-size: 0.775rem;
-          color: #64748b;
-          flex-wrap: wrap;
-        }
-
-        .docs-link {
-          font-size: 0.775rem;
-          color: #2563eb;
-          text-decoration: underline;
-          font-weight: 600;
-        }
-
-        .verification-actions {
-          display: flex;
-          gap: 8px;
-        }
-
-        .reject-btn {
-          background: #ffffff;
-          border: 1px solid #fca5a5;
-          color: #ef4444;
-          font-weight: 700;
-          font-size: 0.8rem;
-          padding: 8px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .reject-btn:hover { background: #fef2f2; }
-
-        .approve-btn {
-          background: #10b981;
-          color: #ffffff;
-          border: none;
-          font-weight: 700;
-          font-size: 0.8rem;
-          padding: 8px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .approve-btn:hover { background: #059669; }
-
-        .access-denied-badge {
-          font-size: 0.75rem;
-          color: #94a3b8;
-          font-style: italic;
-          background: #f1f5f9;
-          padding: 6px 12px;
-          border-radius: 6px;
-        }
-
-        /* Suggestions Panels */
-        .suggestion-item-card {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 20px;
-        }
-
-        .sug-logo-pill {
-          font-size: 1.25rem;
-          background: #f1f5f9;
-          padding: 6px 10px;
-          border-radius: 8px;
-        }
-
-        .sug-meta-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 8px 16px;
-          margin-top: 14px;
-          font-size: 0.8rem;
-          color: #475569;
-          border-top: 1px solid #f1f5f9;
-          padding-top: 12px;
-        }
-
-        .sug-actions-row {
-          display: flex;
-          gap: 8px;
-        }
-
-        .sug-reject-btn {
-          background: #ffffff;
-          border: 1px solid #fca5a5;
-          color: #ef4444;
-          font-weight: 700;
-          font-size: 0.775rem;
-          padding: 8px 12px;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .sug-reject-btn:hover { background: #fef2f2; }
-
-        .sug-approve-btn {
-          background: #10b981;
-          color: #ffffff;
-          border: none;
-          font-weight: 700;
-          font-size: 0.775rem;
-          padding: 8px 14px;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .sug-approve-btn:hover { background: #059669; }
-
-        /* Campaign Broadcaster components */
-        .contacts-select-box {
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          background: #f8fafc;
-          padding: 12px;
-          margin-bottom: 16px;
-        }
-
-        .checkbox-list-scroll {
-          height: 150px;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-top: 8px;
-        }
-
-        .checkbox-list-label {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.85rem;
-          color: #334155;
-          cursor: pointer;
-        }
-
-        .dashboard-textarea {
-          width: 100%;
-          height: 80px;
-          padding: 10px;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          outline: none;
-          font-size: 0.85rem;
-          color: #334155;
-          resize: none;
-        }
-
-        .dashboard-textarea:focus { border-color: #3b82f6; }
-
-        .broadcast-send-btn {
-          width: 100%;
-          padding: 12px;
-          background: #10b981;
-          color: #ffffff;
-          border: none;
-          border-radius: 8px;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          cursor: pointer;
-        }
-
-        .broadcast-send-btn:hover { background: #059669; }
-
-        .campaign-logs-panel {
-          margin-top: 16px;
-          background: #090d16;
-          border-radius: 8px;
-          padding: 12px;
-          font-family: monospace;
-          font-size: 0.725rem;
-          color: #10b981;
-          height: 100px;
-          overflow-y: auto;
-          line-height: 1.5;
-        }
-
-        .mono-code {
-          font-family: monospace;
-          background: #e2e8f0;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 0.775rem;
-          color: #1e293b;
-        }
-
-        /* Settings and Staff management */
-        .staff-creation-form {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .dashboard-input {
-          width: 100%;
-          padding: 10px 12px;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          font-size: 0.875rem;
-          color: #334155;
-          outline: none;
-        }
-
-        .dashboard-input:focus { border-color: #3b82f6; }
-
-        .denied-box {
-          padding: 16px;
-          background: #fff5f5;
-          border: 1px dashed #fecaca;
-          border-radius: 8px;
-          color: #ef4444;
-          font-size: 0.85rem;
-          font-weight: 600;
-        }
-
-        .staff-list-container {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .staff-member-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px 16px;
-          background: #f8fafc;
-          border: 1px solid #f1f5f9;
-          border-radius: 8px;
-        }
-
-        .staff-member-details {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .staff-member-name {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: #1e293b;
-        }
-
-        .staff-member-email {
-          font-size: 0.75rem;
-          color: #64748b;
-          margin-top: 2px;
-        }
-
-        .staff-role-tag {
-          font-size: 0.675rem;
-          font-weight: 800;
-          padding: 3px 8px;
-          border-radius: 9999px;
-          text-transform: uppercase;
-        }
-
-        .staff-role-tag.super_admin { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
-        .staff-role-tag.admin { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
-        .staff-role-tag.manager { background: rgba(245, 158, 11, 0.1); color: #d97706; }
-        /* Modal overlay styling */
-        .modal-backdrop {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: rgba(15, 23, 42, 0.6);
-          backdrop-filter: blur(4px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 999;
-          padding: 20px;
-          box-sizing: border-box;
-        }
-
-        .modal-card {
-          background: #ffffff;
-          border-radius: 16px;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-          max-width: 640px;
-          width: 100%;
-          max-height: 90vh;
-          overflow-y: auto;
-          border: 1px solid #e2e8f0;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px 24px;
-          border-bottom: 1px solid #e2e8f0;
-        }
-
-        .modal-header h3 {
-          margin: 0;
-          font-size: 1.25rem;
-          font-weight: 800;
-          color: #0f172a;
-        }
-
-        .close-modal-btn {
-          background: none;
-          border: none;
-          color: #64748b;
-          cursor: pointer;
-          padding: 6px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.15s;
-        }
-
-        .close-modal-btn:hover {
-          background: #f1f5f9;
-          color: #0f172a;
-        }
-
-        .modal-form {
-          padding: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          box-sizing: border-box;
-        }
-
-        .form-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 16px;
-        }
-
-        .modal-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          border-top: 1px solid #f1f5f9;
-          padding-top: 20px;
-          margin-top: 10px;
-        }
-      `}</style>
-    </div>
-  );
-}

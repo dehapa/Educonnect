@@ -45,6 +45,7 @@ export async function POST(request) {
     }
 
     const jobsResult = data.jobs_results || [];
+    let ingestedJobs = [];
     let ingestedCount = 0;
     let skippedCount = 0;
 
@@ -61,7 +62,7 @@ export async function POST(request) {
       
       if (existingJobs.empty) {
         // Create new job
-        await addDoc(jobsRef, {
+        const jobData = {
           title: job.title,
           companyName: job.company_name,
           location: job.location || location || "Remote",
@@ -73,7 +74,9 @@ export async function POST(request) {
           applyLink: job.related_links?.[0]?.link || null,
           source: "SerpApi",
           companyLogo: job.thumbnail || null
-        });
+        };
+        const docRef = await addDoc(jobsRef, jobData);
+        ingestedJobs.push({ id: docRef.id, ...jobData });
         ingestedCount++;
       } else {
         skippedCount++;
@@ -83,7 +86,8 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       message: `Successfully ingested ${ingestedCount} jobs. Skipped ${skippedCount} duplicates.`,
-      ingested: ingestedCount
+      ingested: ingestedCount,
+      jobs: ingestedJobs
     });
 
   } catch (error) {
