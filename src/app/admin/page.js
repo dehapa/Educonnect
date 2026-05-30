@@ -3917,6 +3917,67 @@ Sent ${selectedContacts.length} promotional messages.`);
           margin-top: 10px;
         }
       `}</style>
+          
+          {/* Edit Job Modal */}
+          {showEditJobModal && editingJob && (
+            <div className="modal-backdrop">
+              <div className="modal-card">
+                <div className="modal-header">
+                  <h3>Edit / Review Job Listing</h3>
+                  <button onClick={() => setShowEditJobModal(false)} className="close-modal-btn"><X size={18} /></button>
+                </div>
+                <form onSubmit={handleUpdateJob} className="modal-form">
+                  <div className="form-grid">
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <label className="form-label">Job Title / Position *</label>
+                      <input type="text" value={editingJob.title || ""} onChange={(e) => setEditingJob({...editingJob, title: e.target.value})} className="dashboard-input" required />
+                    </div>
+                    <div>
+                      <label className="form-label">Company/Employer Name</label>
+                      <input type="text" value={editingJob.employerName || editingJob.companyName || ""} onChange={(e) => setEditingJob({...editingJob, employerName: e.target.value, companyName: e.target.value})} className="dashboard-input" />
+                    </div>
+                    <div>
+                      <label className="form-label">Location</label>
+                      <input type="text" value={editingJob.location || ""} onChange={(e) => setEditingJob({...editingJob, location: e.target.value})} className="dashboard-input" />
+                    </div>
+                    <div>
+                      <label className="form-label">Salary/Package</label>
+                      <input type="text" value={editingJob.salary || editingJob.salaryRange || ""} onChange={(e) => setEditingJob({...editingJob, salary: e.target.value, salaryRange: e.target.value})} className="dashboard-input" />
+                    </div>
+                    <div>
+                      <label className="form-label">Job Type</label>
+                      <select value={editingJob.type || "Full-time"} onChange={(e) => setEditingJob({...editingJob, type: e.target.value})} className="dashboard-select">
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                        <option value="Freelance">Freelance</option>
+                      </select>
+                    </div>
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <label className="form-label">Direct Apply Link (External)</label>
+                      <input type="url" value={editingJob.applyLink || ""} onChange={(e) => setEditingJob({...editingJob, applyLink: e.target.value})} className="dashboard-input" placeholder="https://" />
+                      <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px" }}>If provided, the Apply button on the public page will link directly here.</div>
+                    </div>
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <label className="form-label">Job Description / SEO Details</label>
+                      <textarea 
+                        value={editingJob.description || ""} 
+                        onChange={(e) => setEditingJob({...editingJob, description: e.target.value})} 
+                        className="dashboard-textarea" 
+                        rows="6"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div className="modal-actions">
+                    <button type="button" onClick={() => setShowEditJobModal(false)} className="action-btn-secondary">Cancel</button>
+                    <button type="submit" className="action-btn-primary">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
     </div>
   );
 }
