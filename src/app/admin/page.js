@@ -101,7 +101,7 @@ export default function AdminDashboard() {
   const [scraperLog, setScraperLog] = useState([]);
   // Job Crawler State
   const [jobQuery, setJobQuery] = useState("");
-  const [jobLocation, setJobLocation] = useState("");
+  const [jobLocation, setJobLocation] = useState("");\n  const [jobState, setJobState] = useState("");\n  const [jobIndustry, setJobIndustry] = useState("");\n  const [jobType, setJobType] = useState("");
   const [isInternationalJob, setIsInternationalJob] = useState(false);
   const [isScrapingJobs, setIsScrapingJobs] = useState(false);
   const [jobScraperLog, setJobScraperLog] = useState([]);
@@ -112,16 +112,23 @@ export default function AdminDashboard() {
       return;
     }
     
+    let finalQuery = jobQuery;
+    if (jobIndustry) finalQuery += ` ${jobIndustry}`;
+    if (jobType) finalQuery += ` ${jobType}`;
+    
+    let finalLocation = jobLocation;
+    if (jobState) finalLocation = finalLocation ? `${finalLocation}, ${jobState}` : jobState;
+    
     setIsScrapingJobs(true);
-    setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] Starting job crawler for: "${jobQuery}" in "${jobLocation || 'Any'}"...`, ...prev]);
+    setJobScraperLog(prev => [`[${new Date().toLocaleTimeString()}] Starting job crawler for: "${finalQuery}" in "${finalLocation || 'Any'}"...`, ...prev]);
     
     try {
       const res = await fetch("/api/scrape-jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          searchQuery: jobQuery, 
-          location: jobLocation,
+          searchQuery: finalQuery, 
+          location: finalLocation,
           isInternational: isInternationalJob
         })
       });
