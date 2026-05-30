@@ -1128,11 +1128,19 @@ Sent ${selectedContacts.length} promotional messages.`);
             </button>
 
             <button 
-              className={`sidebar-link ${activeTab === "crawler" ? "active" : ""}`}
-              onClick={() => setActiveTab("crawler")}
+              className={`sidebar-link ${activeTab === "places_crawler" ? "active" : ""}`}
+              onClick={() => setActiveTab("places_crawler")}
             >
               <Database size={20} />
-              <span>Data Crawler</span>
+              <span>Places Crawler</span>
+            </button>
+
+            <button 
+              className={`sidebar-link ${activeTab === "jobs_crawler" ? "active" : ""}`}
+              onClick={() => setActiveTab("jobs_crawler")}
+            >
+              <Briefcase size={20} />
+              <span>Jobs Crawler</span>
             </button>
 
             <button 
