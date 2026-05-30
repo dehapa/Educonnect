@@ -2,20 +2,14 @@
 
 import { useState } from "react";
 import { Search, MapPin, Layers } from "lucide-react";
+import SuggestionModal from "./SuggestionModal";
 
 export default function SearchBar({ onSearch }) {
   const [query, setQuery] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
+  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
 
-  const locations = [
-    { value: "", label: "All Locations (Odisha)" },
-    { value: "bhubaneswar", label: "Bhubaneswar" },
-    { value: "cuttack", label: "Cuttack" },
-    { value: "rourkela", label: "Rourkela" },
-    { value: "sambalpur", label: "Sambalpur" },
-    { value: "puri", label: "Puri" },
-  ];
 
   const categories = [
     { value: "", label: "All Categories" },
@@ -68,16 +62,14 @@ export default function SearchBar({ onSearch }) {
             {/* Location Filter */}
             <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
               <MapPin style={{ position: "absolute", left: "16px", color: "var(--text-muted)", zIndex: 10 }} size={20} />
-              <select 
+              <input 
+                type="text" 
+                placeholder="Location (e.g. District, State, Country)" 
+                className="form-input" 
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="form-input"
-                style={{ paddingLeft: "48px", appearance: "none", cursor: "pointer" }}
-              >
-                {locations.map((loc) => (
-                  <option key={loc.value} value={loc.value}>{loc.label}</option>
-                ))}
-              </select>
+                style={{ paddingLeft: "48px" }}
+              />
             </div>
 
             {/* Category Filter */}
@@ -103,9 +95,19 @@ export default function SearchBar({ onSearch }) {
 
           </div>
         </form>
+
+        <div style={{ marginTop: "12px", textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)" }}>
+          Can't find your school, college, or coaching center?{" "}
+          <span 
+            onClick={() => setIsSuggestionOpen(true)}
+            style={{ color: "var(--primary)", cursor: "pointer", fontWeight: "700", textDecoration: "underline" }}
+          >
+            Suggest it here
+          </span>
+        </div>
       </div>
 
-
+      <SuggestionModal isOpen={isSuggestionOpen} onClose={() => setIsSuggestionOpen(false)} />
     </div>
   );
 }

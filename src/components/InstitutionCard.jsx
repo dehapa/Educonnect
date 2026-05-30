@@ -1,6 +1,7 @@
 "use client";
 
 import { MapPin, ArrowRight, Award, CheckCircle, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function InstitutionCard({ institution, onClaim }) {
   const { 
@@ -117,7 +118,7 @@ export default function InstitutionCard({ institution, onClaim }) {
               Claim Listing
             </button>
           )}
-          <a 
+          <Link 
             href={`/institutions/${id}`} 
             className="btn-primary" 
             style={{ 
@@ -128,11 +129,10 @@ export default function InstitutionCard({ institution, onClaim }) {
               background: isClaimed ? undefined : "linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%)",
               boxShadow: isClaimed ? undefined : "0 4px 14px 0 rgba(6, 182, 212, 0.25)"
             }}
-            onClick={(e) => e.preventDefault()} // Just mock link click for now
           >
             <span>View Profile</span>
             <ArrowRight size={14} />
-          </a>
+          </Link>
         </div>
 
       </div>

@@ -63,8 +63,8 @@ export default function Header() {
               {link.name}
             </Link>
           ))}
-          {/* Admin Panel Link (Only show if logged in user is admin) */}
-          {profile?.role === "admin" && (
+          {/* Admin Panel Link (Show if logged in user is super_admin, admin, or manager) */}
+          {profile && ["super_admin", "admin", "manager"].includes(profile?.role) && (
             <Link 
               href="/admin" 
               style={{ fontWeight: "600", fontSize: "0.95rem", color: "var(--accent)", display: "flex", alignItems: "center", gap: "6px" }}
@@ -90,31 +90,33 @@ export default function Header() {
           {user ? (
             /* User Panel (Logged In) */
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "0.9rem", fontWeight: "700", color: "var(--text-primary)" }}>
-                  {profile?.name || user.displayName || "User"}
+              <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} title="Go to Dashboard">
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "0.9rem", fontWeight: "700", color: "var(--text-primary)" }}>
+                    {profile?.name || user.displayName || "User"}
+                  </div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: "600" }}>
+                    {formatRole(profile?.role) || "User"}
+                  </div>
                 </div>
-                <div style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: "600" }}>
-                  {formatRole(profile?.role) || "User"}
+                
+                {/* Profile Image / Initials */}
+                <div style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  background: "var(--primary)",
+                  color: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "700",
+                  fontSize: "1rem",
+                  boxShadow: "var(--shadow-sm)"
+                }}>
+                  {(profile?.name || user.displayName || "U").charAt(0).toUpperCase()}
                 </div>
-              </div>
-              
-              {/* Profile Image / Initials */}
-              <div style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                background: "var(--primary)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "700",
-                fontSize: "1rem",
-                boxShadow: "var(--shadow-sm)"
-              }}>
-                {(profile?.name || user.displayName || "U").charAt(0).toUpperCase()}
-              </div>
+              </Link>
 
               {/* Logout Button */}
               <button 
@@ -180,7 +182,7 @@ export default function Header() {
               {link.name}
             </Link>
           ))}
-          {profile?.role === "admin" && (
+          {profile && ["super_admin", "admin", "manager"].includes(profile?.role) && (
             <Link 
               href="/admin" 
               onClick={() => setIsMenuOpen(false)}

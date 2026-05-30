@@ -9,7 +9,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 
 const AuthContext = createContext({});
@@ -29,10 +29,44 @@ export function AuthProvider({ children }) {
         // Fetch user role profile from Firestore
         try {
           const docRef = doc(db, "users", currentUser.uid);
-          const docSnap = await getDoc(docRef);
+          let docSnap = await getDoc(docRef);
+          let data = null;
           
           if (docSnap.exists()) {
-            setProfile(docSnap.data());
+            data = docSnap.data();
+          } else {
+            // Check if there is an existing pre-created profile with this email (e.g. created by admin)
+            const emailClean = currentUser.email.trim().toLowerCase();
+            const q = query(collection(db, "users"), where("email", "==", emailClean));
+            const querySnap = await getDocs(q);
+            
+            if (!querySnap.empty) {
+              const matchedDoc = querySnap.docs[0];
+              const preCreatedData = matchedDoc.data();
+              
+              // Copy data to the new UID document
+              const updatedProfile = {
+                ...preCreatedData,
+                uid: currentUser.uid,
+              };
+              
+              await setDoc(doc(db, "users", currentUser.uid), updatedProfile);
+              
+              // Delete the old placeholder document if it used a temporary ID
+              if (matchedDoc.id !== currentUser.uid) {
+                await deleteDoc(doc(db, "users", matchedDoc.id));
+              }
+              
+              data = updatedProfile;
+            }
+          }
+          
+          if (data) {
+            // Automatically promote shyamdash@gmail.com to super_admin
+            if (currentUser.email.trim().toLowerCase() === "shyamdash@gmail.com" && data.role !== "super_admin") {
+              data.role = "super_admin";
+            }
+            setProfile(data);
           } else {
             setProfile(null);
           }
@@ -55,11 +89,16 @@ export function AuthProvider({ children }) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser = userCredential.user;
       
+      let finalRole = role;
+      if (email.trim().toLowerCase() === "shyamdash@gmail.com") {
+        finalRole = "super_admin";
+      }
+      
       const userProfile = {
         uid: newUser.uid,
         name,
         email,
-        role, // "student" | "teacher" | "employer" | "admin"
+        role: finalRole, // "student" | "teacher" | "employer" | "admin" | "super_admin"
         createdAt: new Date().toISOString(),
       };
       
@@ -107,11 +146,15 @@ export function AuthProvider({ children }) {
   const saveUserProfile = async (uid, name, email, role) => {
     setLoading(true);
     try {
+      let finalRole = role;
+      if (email.trim().toLowerCase() === "shyamdash@gmail.com") {
+        finalRole = "super_admin";
+      }
       const userProfile = {
         uid,
         name,
         email,
-        role, // "student" | "teacher" | "employer" | "admin"
+        role: finalRole, // "student" | "teacher" | "employer" | "admin" | "super_admin"
         createdAt: new Date().toISOString(),
       };
       await setDoc(doc(db, "users", uid), userProfile);

@@ -10,6 +10,7 @@ import { Landmark, Sparkles, Briefcase, RefreshCw } from "lucide-react";
 import { collection, getDocs, doc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import ShareButtons from "../components/ShareButtons";
+import Link from "next/link";
 
 // Mock database for placement opportunities
 const mockJobs = [
@@ -48,12 +49,14 @@ const mockJobs = [
 export default function Home() {
   const [institutions, setInstitutions] = useState([]);
   const [filteredInstitutions, setFilteredInstitutions] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Load institutions from Firestore educonnect database
+  // Load institutions and jobs from Firestore educonnect database
   useEffect(() => {
-    const fetchInstitutions = async () => {
+    const fetchData = async () => {
       try {
+        // 1. Fetch institutions
         const querySnapshot = await getDocs(collection(db, "institutions"));
         const data = [];
         querySnapshot.forEach((doc) => {
@@ -63,14 +66,46 @@ export default function Home() {
         data.sort((a, b) => b.rating - a.rating);
         setInstitutions(data);
         setFilteredInstitutions(data);
+
+        // 2. Fetch jobs
+        const jobsSnap = await getDocs(collection(db, "jobs"));
+        let jobsData = [];
+        jobsSnap.forEach((doc) => {
+          jobsData.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Auto-seed mock jobs if collection is empty
+        if (jobsData.length === 0) {
+          for (const job of mockJobs) {
+            const seedId = job.id;
+            const seedData = {
+              employerId: "seed-employer",
+              employerName: job.company,
+              title: job.title,
+              location: job.location,
+              salary: job.salary,
+              type: job.type,
+              skills: job.skills,
+              description: "Full eligibility details and interview sessions are configured by administrative representatives.",
+              createdAt: new Date().toISOString()
+            };
+            await setDoc(doc(db, "jobs", seedId), seedData);
+            jobsData.push({ id: seedId, ...seedData });
+          }
+        }
+
+        // Sort by newest first
+        jobsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setJobs(jobsData);
+
       } catch (e) {
-        console.error("Error loading institutions from Firestore:", e);
+        console.error("Error loading institutions or jobs from Firestore:", e);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInstitutions();
+    fetchData();
   }, []);
 
   // Handle Referral Click Ingestion
@@ -243,21 +278,23 @@ export default function Home() {
                   
                   {/* Job List Preview */}
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "32px" }}>
-                    {mockJobs.map((job) => (
-                      <div key={job.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", background: "var(--bg-tertiary)", borderRadius: "10px", border: "1px solid var(--border-primary)" }}>
-                        <div style={{ fontSize: "1.5rem" }}>{job.logo}</div>
-                        <div style={{ flex: 1 }}>
-                          <h4 style={{ fontSize: "0.9rem", fontWeight: "700" }}>{job.title}</h4>
-                          <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{job.company} • {job.location}</p>
+                    {jobs.slice(0, 4).map((job) => (
+                      <Link key={job.id} href={`/jobs/${job.id}`}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", background: "var(--bg-tertiary)", borderRadius: "10px", border: "1px solid var(--border-primary)", cursor: "pointer", transition: "all 0.2s" }} className="job-row">
+                          <div style={{ fontSize: "1.5rem" }}>💼</div>
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{ fontSize: "0.9rem", fontWeight: "700" }}>{job.title}</h4>
+                            <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{job.employerName} • {job.location}</p>
+                          </div>
+                          <span style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: "700" }}>{job.type}</span>
                         </div>
-                        <span style={{ fontSize: "0.75rem", color: "var(--primary)", fontWeight: "700" }}>{job.type}</span>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
-                <button className="btn-primary" style={{ width: "100%", background: "linear-gradient(135deg, var(--success) 0%, #059669 100%)", boxShadow: "0 4px 14px 0 rgba(16, 185, 129, 0.25)" }}>
+                <Link href="/dashboard" className="btn-primary" style={{ width: "100%", background: "linear-gradient(135deg, var(--success) 0%, #059669 100%)", boxShadow: "0 4px 14px 0 rgba(16, 185, 129, 0.25)" }}>
                   Explore Job Openings
-                </button>
+                </Link>
               </div>
 
             </div>
