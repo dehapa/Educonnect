@@ -101,7 +101,10 @@ export default function AdminDashboard() {
   const [scraperLog, setScraperLog] = useState([]);
   // Job Crawler State
   const [jobQuery, setJobQuery] = useState("");
-  const [jobLocation, setJobLocation] = useState("");\n  const [jobState, setJobState] = useState("");\n  const [jobIndustry, setJobIndustry] = useState("");\n  const [jobType, setJobType] = useState("");
+  const [jobLocation, setJobLocation] = useState("");
+  const [jobState, setJobState] = useState("");
+  const [jobIndustry, setJobIndustry] = useState("");
+  const [jobType, setJobType] = useState("");
   const [isInternationalJob, setIsInternationalJob] = useState(false);
   const [isScrapingJobs, setIsScrapingJobs] = useState(false);
   const [jobScraperLog, setJobScraperLog] = useState([]);
