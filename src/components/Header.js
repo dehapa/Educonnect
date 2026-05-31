@@ -1,19 +1,21 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
-import { BookOpen, User, LogIn, Menu, X, ChevronDown } from "lucide-react";
+import { BookOpen, User, LogIn, Menu, X, ChevronDown, Loader } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   
   if (pathname && (pathname.startsWith("/admin") || pathname.startsWith("/dashboard"))) return null;
   const [pages, setPages] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -164,9 +166,13 @@ export default function Header() {
               </Link>
               <button 
                 onClick={async () => {
+                  setIsLoggingOut(true);
                   await logout();
-                  window.location.href = "/";
+                  router.push("/");
+                  router.refresh();
+                  setTimeout(() => { window.location.href = "/"; }, 100);
                 }}
+                disabled={isLoggingOut}
                 className="desktop-dashboard-btn" 
                 style={{ 
                   display: "none", 
@@ -176,12 +182,14 @@ export default function Header() {
                   padding: "8px 16px", 
                   borderRadius: "8px", 
                   border: "1px solid rgba(239, 68, 68, 0.3)",
-                  cursor: "pointer",
+                  cursor: isLoggingOut ? "not-allowed" : "pointer",
                   fontWeight: "600",
                   fontSize: "0.9rem",
+                  gap: "8px"
                 }}
               >
-                Log out
+                {isLoggingOut ? <Loader className="spinner" size={16} /> : null}
+                {isLoggingOut ? "..." : "Log out"}
               </button>
             </div>
           ) : (
@@ -286,13 +294,17 @@ export default function Header() {
                 <li>
                   <button 
                     onClick={async () => {
-                      setIsMobileMenuOpen(false);
+                      setIsLoggingOut(true);
                       await logout();
-                      window.location.href = "/";
+                      router.push("/");
+                      router.refresh();
+                      setTimeout(() => { window.location.href = "/"; }, 100);
                     }}
-                    style={{ color: "#ef4444", background: "none", border: "none", textAlign: "left", fontSize: "1.1rem", fontWeight: "600", display: "block", padding: "8px 0", cursor: "pointer", width: "100%" }}
+                    disabled={isLoggingOut}
+                    style={{ color: "#ef4444", background: "none", border: "none", textAlign: "left", fontSize: "1.1rem", fontWeight: "600", display: "flex", alignItems: "center", gap: "8px", padding: "8px 0", cursor: isLoggingOut ? "not-allowed" : "pointer", width: "100%" }}
                   >
-                    Log out
+                    {isLoggingOut ? <Loader className="spinner" size={16} /> : null}
+                    {isLoggingOut ? "Logging out..." : "Log out"}
                   </button>
                 </li>
               </>

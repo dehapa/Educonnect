@@ -21,6 +21,7 @@ export default function DashboardRouter() {
   const [authPassword, setAuthPassword] = useState("");
   const [authName, setAuthName] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
 
   // Removed aggressive auto-redirect to avoid glitchy UI experience
@@ -303,12 +304,17 @@ export default function DashboardRouter() {
             </button>
             <button 
               onClick={async () => {
+                setIsLoggingOut(true);
                 await logout();
-                window.location.href = "/";
+                router.push("/");
+                router.refresh();
+                setTimeout(() => { window.location.href = "/"; }, 100);
               }}
-              style={{ width: "100%", padding: "12px", background: "transparent", border: "1px solid var(--border-primary)", color: "var(--text-secondary)", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}
+              disabled={isLoggingOut}
+              style={{ width: "100%", padding: "12px", background: "transparent", border: "1px solid var(--border-primary)", color: "var(--text-secondary)", borderRadius: "8px", cursor: isLoggingOut ? "not-allowed" : "pointer", fontWeight: "600", display: "inline-flex", justifyContent: "center", gap: "8px" }}
             >
-              Sign Out
+              {isLoggingOut ? <Loader className="spinner" size={18} /> : null}
+              {isLoggingOut ? "Logging out..." : "Sign Out"}
             </button>
           </div>
         </main>

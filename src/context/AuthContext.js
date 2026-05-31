@@ -193,8 +193,16 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       await signOut(auth);
-      // Wait for Firebase to clear IndexedDB/Local storage tokens
-      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Forcefully clear web storage where Firebase might cache fallback tokens
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+
+      // Wait 500ms for Firebase to clear IndexedDB/Local storage tokens to prevent race conditions
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       setUser(null);
       setProfile(null);
     } catch (e) {
