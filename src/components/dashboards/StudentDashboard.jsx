@@ -57,6 +57,15 @@ export default function StudentDashboard() {
   const [endJob, setEndJob] = useState("");
   const [isCurrentJob, setIsCurrentJob] = useState(false);
   
+  // Privacy Settings
+  const [privacySettings, setPrivacySettings] = useState(profile?.privacySettings || {
+    showPhone: false,
+    showWhatsApp: false,
+    showAddress: false,
+    showEmail: false,
+    showResume: false
+  });
+  
   const [allInstitutions, setAllInstitutions] = useState([]);
   const [applications, setApplications] = useState([]);
   const [localTimeline, setLocalTimeline] = useState(profile?.education || []);
@@ -117,11 +126,11 @@ export default function StudentDashboard() {
       let updateData = {};
       
       if (step === 1) {
-        updateData = { name, whatsapp, phone, presentAddress, permanentAddress };
+        updateData = { name, whatsapp, phone, presentAddress, permanentAddress, privacySettings };
       } else if (step === 2) {
         const hobbiesArray = hobbies.split(",").map(s => s.trim()).filter(s => s.length > 0);
         const skillsArray = skills.split(",").map(s => s.trim()).filter(s => s.length > 0);
-        updateData = { priorities, hobbies: hobbiesArray, skills: skillsArray, bio, resumeLink };
+        updateData = { priorities, hobbies: hobbiesArray, skills: skillsArray, bio, resumeLink, privacySettings };
       }
       
       await updateDoc(userRef, updateData);
@@ -599,14 +608,59 @@ export default function StudentDashboard() {
                       </div>
                     ))
                   ) : (
-                    <div style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)", fontSize: "0.95rem", border: "2px dashed var(--border-secondary)", borderRadius: "12px" }}>
-                      <Briefcase size={32} style={{ margin: "0 auto 12px", opacity: 0.5 }} />
-                      You haven't applied for any placements yet.
-                    </div>
+                    <div style={{ padding: "20px", textAlign: "center", color: "var(--text-muted)", fontSize: "0.85rem", border: "1px dashed var(--border-secondary)", borderRadius: "10px" }}>No applications found. Use the search to find and apply for jobs!</div>
                   )}
                 </div>
+              </div>
 
-                <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "40px" }}>
+              {/* Privacy Settings Card */}
+              <div className="glass-card" style={{ padding: "40px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                  <div>
+                    <h2 style={{ fontSize: "1.4rem", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Shield size={20} style={{ color: "var(--warning)" }} />
+                      Privacy Settings
+                    </h2>
+                    <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>Control what information is visible on your public profile.</p>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {Object.keys(privacySettings).map(key => (
+                    <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", background: "var(--bg-tertiary)", borderRadius: "10px", border: "1px solid var(--border-primary)" }}>
+                      <div>
+                        <div style={{ fontWeight: "600", fontSize: "0.95rem" }}>
+                          {key === 'showPhone' ? 'Show Phone Number' : 
+                           key === 'showWhatsApp' ? 'Show WhatsApp Number' : 
+                           key === 'showAddress' ? 'Show Location/Addresses' : 
+                           key === 'showEmail' ? 'Show Email Address' : 
+                           'Show Resume/CV Link'}
+                        </div>
+                        <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                          If turned off, users must "Request Access" to see this.
+                        </div>
+                      </div>
+                      <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                        <input 
+                          type="checkbox" 
+                          checked={privacySettings[key]} 
+                          onChange={(e) => {
+                            const newSettings = { ...privacySettings, [key]: e.target.checked };
+                            setPrivacySettings(newSettings);
+                            updateDoc(doc(db, "users", user.uid), { privacySettings: newSettings })
+                              .then(() => setStatusMessage("Privacy settings updated!"))
+                              .catch(() => alert("Failed to save settings."));
+                            setTimeout(() => setStatusMessage(""), 3000);
+                          }} 
+                          style={{ width: "18px", height: "18px", accentColor: "var(--primary)" }} 
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-start", marginTop: "40px" }}>
                   <button type="button" onClick={() => setCurrentStep(1)} className="btn-secondary" style={{ padding: "10px 20px" }}>
                     <Settings size={16} style={{ marginRight: "8px" }} /> Edit Profile Settings
                   </button>

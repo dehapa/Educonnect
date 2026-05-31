@@ -7,7 +7,7 @@ import Footer from "../../../components/Footer";
 import ShareButtons from "../../../components/ShareButtons";
 import { 
   Users, Award, MapPin, Globe, Mail, ArrowLeft, 
-  ShieldCheck, Star, RefreshCw, BookOpen, Link as LinkIcon
+  ShieldCheck, Star, RefreshCw, BookOpen, Link as LinkIcon, Lock, Phone, MessageSquare
 } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
@@ -149,13 +149,12 @@ export default function TeacherPublicProfile() {
 
                 <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <Mail size={16} /> {teacher.email}
+                    {teacher.privacySettings?.showEmail ? (
+                      <><Mail size={16} /> {teacher.email}</>
+                    ) : (
+                      <><Lock size={14} /> Email Hidden</>
+                    )}
                   </span>
-                  {teacher.resumeLink && (
-                    <a href={teacher.resumeLink} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--accent)", textDecoration: "underline" }}>
-                      <LinkIcon size={16} /> View Credentials/Resume
-                    </a>
-                  )}
                 </div>
               </div>
             </div>
@@ -185,6 +184,58 @@ export default function TeacherPublicProfile() {
 
             {/* Right Column: Sharing */}
             <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+              
+              {/* Contact Information & Privacy Request */}
+              <div className="glass-card" style={{ padding: "32px", border: "1px solid var(--primary-light)" }}>
+                <h3 style={{ fontSize: "1.3rem", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Phone size={18} style={{ color: "var(--primary)" }} />
+                  Contact Information
+                </h3>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
+                  {/* Phone */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem" }}>
+                    <span style={{ color: "var(--text-muted)", width: "80px" }}>Phone:</span>
+                    {teacher.privacySettings?.showPhone && teacher.phone ? (
+                      <span style={{ fontWeight: "600" }}>{teacher.phone}</span>
+                    ) : (
+                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontStyle: "italic" }}><Lock size={14}/> Hidden</span>
+                    )}
+                  </div>
+
+                  {/* WhatsApp */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem" }}>
+                    <span style={{ color: "var(--text-muted)", width: "80px" }}>WhatsApp:</span>
+                    {teacher.privacySettings?.showWhatsApp && teacher.whatsapp ? (
+                      <span style={{ fontWeight: "600" }}>{teacher.whatsapp}</span>
+                    ) : (
+                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontStyle: "italic" }}><Lock size={14}/> Hidden</span>
+                    )}
+                  </div>
+
+                  {/* Resume */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem" }}>
+                    <span style={{ color: "var(--text-muted)", width: "80px" }}>Resume/CV:</span>
+                    {teacher.privacySettings?.showResume && teacher.resumeLink ? (
+                      <a href={teacher.resumeLink} target="_blank" rel="noopener noreferrer" style={{ fontWeight: "600", color: "var(--primary)", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <LinkIcon size={14} /> View Document
+                      </a>
+                    ) : (
+                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontStyle: "italic" }}><Lock size={14}/> Hidden</span>
+                    )}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => alert("Chat functionality coming in Phase 2! A message will be sent to request access.")} 
+                  className="btn-primary" 
+                  style={{ width: "100%", justifyContent: "center", gap: "8px", padding: "12px" }}
+                >
+                  <MessageSquare size={18} />
+                  Message to Request Access
+                </button>
+              </div>
+
               {/* Viral share loops */}
               <ShareButtons institutionId={null} institutionName={`Faculty Profile of ${teacher.name}`} />
             </div>

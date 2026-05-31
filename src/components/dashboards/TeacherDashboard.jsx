@@ -25,6 +25,15 @@ export default function TeacherDashboard() {
   const [subject, setSubject] = useState(profile?.subject || "");
   const [resumeLink, setResumeLink] = useState(profile?.resumeLink || "");
 
+  // Privacy Settings
+  const [privacySettings, setPrivacySettings] = useState(profile?.privacySettings || {
+    showPhone: false,
+    showWhatsApp: false,
+    showAddress: false,
+    showEmail: false,
+    showResume: false
+  });
+
   // Step 2: Affiliation Search
   const [instSearch, setInstSearch] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -66,7 +75,7 @@ export default function TeacherDashboard() {
     try {
       const userRef = doc(db, "users", user.uid);
       if (step === 1) {
-        await updateDoc(userRef, { bio, subject, resumeLink });
+        await updateDoc(userRef, { bio, subject, resumeLink, privacySettings });
       }
       
       setCurrentStep(step + 1);
@@ -345,6 +354,54 @@ export default function TeacherDashboard() {
                       <span style={{ color: "var(--text-muted)", fontWeight: "600", fontSize: "0.85rem" }}>Bio</span>
                       <span style={{ fontSize: "0.9rem" }}>{profile?.bio || "No bio provided."}</span>
                     </div>
+                  </div>
+                </div>
+
+                {/* Privacy Settings Card */}
+                <div className="glass-card" style={{ padding: "32px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                    <div>
+                      <h3 style={{ fontSize: "1.3rem", display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                        <ShieldAlert size={20} style={{ color: "var(--warning)" }} /> Privacy Settings
+                      </h3>
+                      <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Control what information is visible on your public profile.</p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    {Object.keys(privacySettings).map(key => (
+                      <div key={key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", background: "var(--bg-tertiary)", borderRadius: "8px", border: "1px solid var(--border-primary)" }}>
+                        <div>
+                          <div style={{ fontWeight: "600", fontSize: "0.9rem" }}>
+                            {key === 'showPhone' ? 'Show Phone Number' : 
+                             key === 'showWhatsApp' ? 'Show WhatsApp Number' : 
+                             key === 'showAddress' ? 'Show Location/Addresses' : 
+                             key === 'showEmail' ? 'Show Email Address' : 
+                             'Show Resume/CV Link'}
+                          </div>
+                          <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                            If turned off, users must "Request Access" to see this.
+                          </div>
+                        </div>
+                        <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                          <input 
+                            type="checkbox" 
+                            checked={privacySettings[key]} 
+                            onChange={(e) => {
+                              const newSettings = { ...privacySettings, [key]: e.target.checked };
+                              setPrivacySettings(newSettings);
+                              updateDoc(doc(db, "users", user.uid), { privacySettings: newSettings })
+                                .then(() => {
+                                  setStatusMessage("Privacy settings updated!");
+                                  setTimeout(() => setStatusMessage(""), 3000);
+                                })
+                                .catch(() => alert("Failed to save settings."));
+                            }} 
+                            style={{ width: "16px", height: "16px", accentColor: "var(--primary)" }} 
+                          />
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

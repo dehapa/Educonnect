@@ -7,7 +7,7 @@ import Footer from "../../../components/Footer";
 import ShareButtons from "../../../components/ShareButtons";
 import { 
   GraduationCap, Briefcase, MapPin, Globe, Mail, ArrowLeft, 
-  ShieldCheck, Award, Star, RefreshCw, Sparkles, Code
+  ShieldCheck, Award, Star, RefreshCw, Sparkles, Code, Phone, MessageSquare, Lock, Link as LinkIcon
 } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
@@ -125,13 +125,19 @@ export default function StudentPublicProfile() {
 
                 <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <Mail size={16} /> {student.email}
+                    {student.privacySettings?.showEmail ? (
+                      <><Mail size={16} /> {student.email}</>
+                    ) : (
+                      <><Lock size={14} /> Email Hidden</>
+                    )}
                   </span>
-                  {student.location && (
-                    <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <MapPin size={16} /> {student.location}
-                    </span>
-                  )}
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    {student.privacySettings?.showAddress && (student.location || student.presentAddress) ? (
+                      <><MapPin size={16} /> {student.presentAddress || student.location}</>
+                    ) : (
+                      <><Lock size={14} /> Location Hidden</>
+                    )}
+                  </span>
                 </div>
               </div>
 
@@ -224,6 +230,57 @@ export default function StudentPublicProfile() {
             {/* Right Column: Bio, skills & sharing */}
             <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
               
+              {/* Contact Information & Privacy Request */}
+              <div className="glass-card" style={{ padding: "32px", border: "1px solid var(--primary-light)" }}>
+                <h3 style={{ fontSize: "1.3rem", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Phone size={18} style={{ color: "var(--primary)" }} />
+                  Contact Information
+                </h3>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
+                  {/* Phone */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem" }}>
+                    <span style={{ color: "var(--text-muted)", width: "80px" }}>Phone:</span>
+                    {student.privacySettings?.showPhone && student.phone ? (
+                      <span style={{ fontWeight: "600" }}>{student.phone}</span>
+                    ) : (
+                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontStyle: "italic" }}><Lock size={14}/> Hidden</span>
+                    )}
+                  </div>
+
+                  {/* WhatsApp */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem" }}>
+                    <span style={{ color: "var(--text-muted)", width: "80px" }}>WhatsApp:</span>
+                    {student.privacySettings?.showWhatsApp && student.whatsapp ? (
+                      <span style={{ fontWeight: "600" }}>{student.whatsapp}</span>
+                    ) : (
+                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontStyle: "italic" }}><Lock size={14}/> Hidden</span>
+                    )}
+                  </div>
+
+                  {/* Resume */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem" }}>
+                    <span style={{ color: "var(--text-muted)", width: "80px" }}>Resume/CV:</span>
+                    {student.privacySettings?.showResume && student.resumeLink ? (
+                      <a href={student.resumeLink} target="_blank" rel="noopener noreferrer" style={{ fontWeight: "600", color: "var(--primary)", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <LinkIcon size={14} /> View Document
+                      </a>
+                    ) : (
+                      <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontStyle: "italic" }}><Lock size={14}/> Hidden</span>
+                    )}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => alert("Chat functionality coming in Phase 2! A message will be sent to request access.")} 
+                  className="btn-primary" 
+                  style={{ width: "100%", justifyContent: "center", gap: "8px", padding: "12px" }}
+                >
+                  <MessageSquare size={18} />
+                  Message to Request Access
+                </button>
+              </div>
+
               {/* About & Bio */}
               <div className="glass-card" style={{ padding: "32px" }}>
                 <h3 style={{ fontSize: "1.3rem", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
