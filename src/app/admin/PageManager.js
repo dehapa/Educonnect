@@ -335,7 +335,7 @@ export default function PageManager() {
                   </td>
                   <td style={{ padding: "16px" }}>
                     <span style={{ fontSize: "0.75rem", padding: "4px 8px", background: "#f1f5f9", color: "#475569", borderRadius: "999px", fontWeight: "500", textTransform: "capitalize" }}>
-                      {page.layout.replace("-", " ")}
+                      {(page.layout || "wide").replace("-", " ")}
                     </span>
                   </td>
                   <td style={{ padding: "16px", textAlign: "right" }}>
