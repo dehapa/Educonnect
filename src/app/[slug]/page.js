@@ -177,7 +177,7 @@ export default function DynamicPage({ params }) {
             components.map((comp, idx) => {
               if (comp.type === "hero") {
                 return (
-                  <div key={idx} className="pb-hero" style={{ backgroundImage: comp.props.imageUrl ? \`url(\${comp.props.imageUrl})\` : 'none' }}>
+                  <div key={idx} className="pb-hero" style={{ backgroundImage: comp.props.imageUrl ? `url(${comp.props.imageUrl})` : 'none' }}>
                     <div className="pb-hero-content">
                       {comp.props.title && <h1 className="pb-hero-title">{comp.props.title}</h1>}
                       {comp.props.subtitle && <p className="pb-hero-subtitle">{comp.props.subtitle}</p>}
