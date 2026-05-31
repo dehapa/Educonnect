@@ -117,6 +117,9 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: "select_account"
+      });
       const userCredential = await signInWithPopup(auth, provider);
       const loggedUser = userCredential.user;
       
