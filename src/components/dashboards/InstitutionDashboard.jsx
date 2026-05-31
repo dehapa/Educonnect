@@ -10,7 +10,8 @@ import {
   Briefcase, DollarSign, Calendar, Clock, ArrowRight, Shield
 } from "lucide-react";
 import { doc, getDoc, updateDoc, collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../../lib/firebase";
 
 export default function InstitutionDashboard() {
   const { user, profile } = useAuth();
@@ -27,6 +28,11 @@ export default function InstitutionDashboard() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [heroUrl, setHeroUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
 
   // Verification lists state
   const [pendingTeachers, setPendingTeachers] = useState([]);
@@ -58,6 +64,9 @@ export default function InstitutionDashboard() {
         setAddress(data.address || "");
         setPhone(data.phone || "");
         setWebsite(data.website || "");
+        setLogoUrl(data.logoUrl || "");
+        setHeroUrl(data.heroUrl || "");
+        setVideoUrl(data.videoUrl || "");
       }
 
       // 2. Fetch pending teachers affiliation requests
@@ -159,6 +168,27 @@ export default function InstitutionDashboard() {
     }
   };
 
+  const handleImageUpload = async (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (type === 'logo') setUploadingLogo(true);
+    else setUploadingHero(true);
+    
+    try {
+      const imageRef = ref(storage, `institutions/${profile.institutionId}/${type}_${Date.now()}_${file.name}`);
+      await uploadBytes(imageRef, file);
+      const url = await getDownloadURL(imageRef);
+      if (type === 'logo') setLogoUrl(url);
+      else setHeroUrl(url);
+    } catch (err) {
+      alert("Upload failed: " + err.message);
+    } finally {
+      if (type === 'logo') setUploadingLogo(false);
+      else setUploadingHero(false);
+    }
+  };
+
   useEffect(() => {
     loadInstitutionData();
   }, [profile]);
@@ -175,7 +205,10 @@ export default function InstitutionDashboard() {
         description,
         address,
         phone,
-        website
+        website,
+        logoUrl,
+        heroUrl,
+        videoUrl
       });
       setStatusMessage("School profile directory updated successfully!");
       setInst(prev => ({ ...prev, name, description, address, phone, website }));
@@ -321,6 +354,43 @@ export default function InstitutionDashboard() {
                 <ShieldCheck size={24} style={{ color: "var(--success)" }} />
               </h1>
               <p style={{ color: "var(--text-secondary)" }}>Verify student enrollments, authorize teacher profiles, and edit public listing records.</p>
+              
+              {/* Profile Completion Logic */}
+              {inst && (
+                <div style={{ marginTop: "16px", marginBottom: "8px", maxWidth: "400px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "4px" }}>
+                    <span>Profile Completion</span>
+                    <span style={{ fontWeight: "bold" }}>
+                      {Math.round(((
+                        (inst.name ? 1 : 0) + 
+                        (inst.description ? 1 : 0) + 
+                        (inst.logoUrl ? 1 : 0) + 
+                        (inst.heroUrl ? 1 : 0) + 
+                        (inst.address ? 1 : 0)
+                      ) / 5) * 100)}%
+                    </span>
+                  </div>
+                  <div style={{ height: "6px", background: "var(--bg-tertiary)", borderRadius: "4px", overflow: "hidden" }}>
+                    <div style={{ 
+                      height: "100%", 
+                      background: "var(--success)", 
+                      width: `${((
+                        (inst.name ? 1 : 0) + 
+                        (inst.description ? 1 : 0) + 
+                        (inst.logoUrl ? 1 : 0) + 
+                        (inst.heroUrl ? 1 : 0) + 
+                        (inst.address ? 1 : 0)
+                      ) / 5) * 100}%` 
+                    }}></div>
+                  </div>
+                  {(!inst.logoUrl || !inst.heroUrl || !inst.description) && (
+                    <div style={{ fontSize: "0.75rem", color: "var(--warning)", marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+                      <Check size={12} /> Complete your profile (Logo, Banner, Description) to improve your public ranking!
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "8px", flexWrap: "wrap" }}>
                 <span style={{ fontSize: "0.75rem", padding: "4px 8px", background: "var(--bg-secondary)", borderRadius: "6px", border: "1px solid var(--border-secondary)", display: "inline-flex", alignItems: "center", gap: "4px", fontWeight: "600", color: "var(--text-muted)" }}>
                   Listing ID: <strong style={{ color: "var(--text-secondary)" }}>{inst?.id}</strong>
@@ -475,7 +545,55 @@ export default function InstitutionDashboard() {
                     />
                   </div>
 
-                  <button type="submit" disabled={updatingInst} className="btn-primary" style={{ alignSelf: "flex-end", padding: "10px 24px", fontSize: "0.85rem" }}>
+                  <div style={{ padding: "20px", background: "var(--bg-tertiary)", border: "1px dashed var(--border-secondary)", borderRadius: "10px", marginTop: "8px" }}>
+                    <h4 style={{ fontSize: "1rem", marginBottom: "16px", color: "var(--text-primary)" }}>Media Gallery</h4>
+                    
+                    <div style={{ marginBottom: "20px" }}>
+                      <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "6px", fontWeight: "600" }}>
+                        Institution Logo (500x500px recommended)
+                      </label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", border: "1px solid var(--border-primary)" }}>
+                          {logoUrl ? <img src={logoUrl} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>None</span>}
+                        </div>
+                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'logo')} disabled={uploadingLogo} style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }} />
+                        {uploadingLogo && <span style={{ fontSize: "0.8rem", color: "var(--primary)" }}>Uploading...</span>}
+                      </div>
+                      <p style={{ fontSize: "0.7rem", color: "var(--warning)", marginTop: "6px" }}>* If image is not a square, it will be automatically center-cropped.</p>
+                    </div>
+
+                    <div style={{ marginBottom: "20px" }}>
+                      <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "6px", fontWeight: "600" }}>
+                        Hero Banner Background (1920x600px recommended)
+                      </label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexDirection: "column", alignItems: "flex-start" }}>
+                        <div style={{ width: "100%", height: "100px", borderRadius: "8px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", border: "1px solid var(--border-primary)" }}>
+                          {heroUrl ? <img src={heroUrl} alt="Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>No Banner Uploaded</span>}
+                        </div>
+                        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'hero')} disabled={uploadingHero} style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }} />
+                          {uploadingHero && <span style={{ fontSize: "0.8rem", color: "var(--primary)" }}>Uploading...</span>}
+                        </div>
+                      </div>
+                      <p style={{ fontSize: "0.7rem", color: "var(--warning)", marginTop: "6px" }}>* Images will be stretched/cropped to fit wide displays.</p>
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "6px", fontWeight: "600" }}>
+                        Public Campus Video Link (YouTube / Vimeo)
+                      </label>
+                      <input 
+                        type="url" 
+                        className="form-input" 
+                        placeholder="e.g. https://www.youtube.com/watch?v=..." 
+                        value={videoUrl} 
+                        onChange={(e) => setVideoUrl(e.target.value)} 
+                      />
+                      <p style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "6px" }}>Direct video uploads are not supported to save bandwidth. Paste a public video link instead.</p>
+                    </div>
+                  </div>
+
+                  <button type="submit" disabled={updatingInst} className="btn-primary" style={{ alignSelf: "flex-end", padding: "10px 24px", fontSize: "0.85rem", marginTop: "16px" }}>
                     {updatingInst ? "Updating..." : "Save Public Changes"}
                   </button>
                 </form>

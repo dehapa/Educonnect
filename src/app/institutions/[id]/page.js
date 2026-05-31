@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import ShareButtons from "../../../components/ShareButtons";
+import AdSlot from "../../../components/AdSlot";
 import { 
   Landmark, MapPin, Phone, Globe, Star, ArrowLeft, ShieldCheck, 
   Users, Award, BookOpen, UserCheck, RefreshCw, Send, CheckCircle2, ChevronRight
@@ -228,6 +229,9 @@ export default function InstitutionDetails() {
             <ArrowLeft size={16} /> Back to Listings
           </button>
 
+          {/* Top Banner AdSlot */}
+          <AdSlot area="top_banner" height="90px" />
+
           {/* Institutional Banner Image */}
           <div style={{ 
             width: "100%", 
@@ -239,7 +243,18 @@ export default function InstitutionDetails() {
             background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
             boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.05)"
           }}>
-            {inst.photoName ? (
+            {inst.heroUrl ? (
+              <img 
+                src={inst.heroUrl}
+                alt={`${inst.name} Banner`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block"
+                }}
+              />
+            ) : inst.photoName ? (
               <img 
                 src={`https://places.googleapis.com/v1/${inst.photoName}/media?key=${GOOGLE_MAPS_KEY}&maxHeightPx=600`}
                 alt={inst.name}
@@ -296,13 +311,18 @@ export default function InstitutionDetails() {
                   width: "80px",
                   height: "80px",
                   borderRadius: "16px",
-                  background: "var(--primary-light)",
+                  background: "var(--bg-secondary)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "3rem"
+                  fontSize: "3rem",
+                  overflow: "hidden"
                 }}>
-                  {inst.logo || "🏫"}
+                  {inst.logoUrl ? (
+                    <img src={inst.logoUrl} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    inst.logo || "🏫"
+                  )}
                 </div>
 
                 <div>
@@ -353,8 +373,22 @@ export default function InstitutionDetails() {
               {/* Description summary */}
               <div className="glass-card" style={{ padding: "32px" }}>
                 <h3 style={{ fontSize: "1.3rem", marginBottom: "16px" }}>About</h3>
+                
+                {inst.videoUrl && (
+                  <div style={{ width: "100%", borderRadius: "12px", overflow: "hidden", marginBottom: "20px", aspectRatio: "16/9" }}>
+                    <iframe 
+                      src={inst.videoUrl.replace("watch?v=", "embed/")} 
+                      width="100%" 
+                      height="100%" 
+                      style={{ border: "none" }} 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen 
+                    />
+                  </div>
+                )}
+                
                 <p style={{ color: "var(--text-secondary)", lineHeight: "1.7", fontSize: "1rem" }}>
-                  {inst.description}. This educational directory profile is generated using real maps data. You can explore courses, associated students, faculty grids, and campus placements details.
+                  {inst.description || "No description provided yet."}
                 </p>
               </div>
 
@@ -538,9 +572,14 @@ export default function InstitutionDetails() {
                 </div>
               )}
 
+              {/* Sidebar AdSlot */}
+              <AdSlot area="right_sidebar" minHeight="250px" />
+              
             </div>
 
           </div>
+
+          <AdSlot area="bottom_page" />
 
         </div>
       </main>

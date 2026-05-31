@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { AlertCircle, MapPin, 
   Shield, Lock, Landmark, Search, Play, RefreshCw, Check, X, 
@@ -47,6 +48,12 @@ const selectEmoji = (category) => {
 
 export default function AdminDashboard() {
   const { user, profile, loading, login, loginWithGoogle, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/";
+  };
   
   // Staff Login State
   const [adminEmail, setAdminEmail] = useState("");
@@ -867,6 +874,12 @@ Sent ${selectedContacts.length} promotional messages.`);
             </p>
           </div>
 
+          <div style={{ textAlign: "center", marginBottom: "20px" }}>
+            <a href="/" style={{ color: "#3b82f6", fontSize: "0.85rem", textDecoration: "none", fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <ChevronRight size={14} /> Return to Homepage
+            </a>
+          </div>
+
           {loginError && (
             <div className="error-alert">
               {loginError}
@@ -1225,7 +1238,7 @@ Sent ${selectedContacts.length} promotional messages.`);
                   <Landmark size={16} />
                   <span>Main Directory</span>
                 </a>
-                <button onClick={logout} className="dropdown-item logout-item">
+                <button onClick={handleLogout} className="dropdown-item logout-item">
                   <LogOut size={16} />
                   <span>Log Out</span>
                 </button>
@@ -1330,7 +1343,7 @@ Sent ${selectedContacts.length} promotional messages.`);
               <button className={`sidebar-link ${activeTab === "settings" ? "active" : ""}`} onClick={() => setActiveTab("settings")}>
                 <Settings size={20} /><span>Settings</span>
               </button>
-              <button onClick={logout} className="sidebar-link logout-sidebar-link">
+              <button onClick={handleLogout} className="sidebar-link logout-sidebar-link">
                 <LogOut size={20} /><span>Logout</span>
               </button>
             </div>
