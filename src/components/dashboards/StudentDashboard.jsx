@@ -279,11 +279,18 @@ export default function StudentDashboard() {
         <div className="container" style={{ maxWidth: "800px" }}>
           
           {/* Welcome Title */}
-          <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div style={{ textAlign: "center", marginBottom: "24px" }}>
             <h1 style={{ fontSize: "2.2rem", color: "var(--text-primary)", fontWeight: "800", marginBottom: "8px" }}>
               Welcome, {profile?.name || "Student"}
             </h1>
             <p style={{ color: "var(--text-secondary)" }}>Complete your profile to get the most out of EduConnect.</p>
+          </div>
+
+          <div style={{ padding: "16px", background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--primary)", borderRadius: "12px", fontSize: "0.95rem", marginBottom: "32px", display: "flex", alignItems: "flex-start", gap: "12px", animation: "fadeIn 0.5s ease" }}>
+            <AlertCircle size={24} style={{ flexShrink: 0 }} />
+            <div>
+              <strong>Action Required:</strong> Please fill out your profile details below to get the full EduConnect experience. If you don't have time right now, you can skip steps and come back later using the menu!
+            </div>
           </div>
 
           {renderProgressBar()}

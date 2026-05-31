@@ -12,7 +12,7 @@ export default function Header() {
   const router = useRouter();
   const { user, logout } = useAuth();
   
-  if (pathname && (pathname.startsWith("/admin") || pathname.startsWith("/dashboard"))) return null;
+  if (pathname && pathname.startsWith("/admin")) return null;
   const [pages, setPages] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
