@@ -356,12 +356,26 @@ export default function PageManager() {
                                     <span style={{ fontWeight: "600", fontSize: "0.85rem", color: "#475569" }}>COLUMN {colIdx + 1}</span>
                                     <select value={col.type || "empty"} onChange={e => updateGridColumnType(idx, colIdx, e.target.value)} style={{ padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}>
                                       <option value="empty">-- Empty --</option>
+                                      <option value="hero">Hero Section</option>
                                       <option value="text">Text / HTML</option>
                                       <option value="image">Image</option>
                                       <option value="data">Data Feed</option>
                                       <option value="search_bar">Search Widget</option>
                                     </select>
                                   </div>
+
+                                  {col.type === "hero" && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                      <input type="text" placeholder="Hero Title" value={col.props?.title || ""} onChange={e => updateGridColumnProps(idx, colIdx, "title", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      <input type="text" placeholder="Hero Subtitle" value={col.props?.subtitle || ""} onChange={e => updateGridColumnProps(idx, colIdx, "subtitle", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      <input type="text" placeholder="Background Image URL" value={col.props?.bgImage || ""} onChange={e => updateGridColumnProps(idx, colIdx, "bgImage", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      <input type="text" placeholder="Button 1 Text (e.g. Explore Institutions)" value={col.props?.btn1Text || ""} onChange={e => updateGridColumnProps(idx, colIdx, "btn1Text", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      <input type="text" placeholder="Button 1 Link (e.g. /institutions)" value={col.props?.btn1Link || ""} onChange={e => updateGridColumnProps(idx, colIdx, "btn1Link", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      <input type="text" placeholder="Button 2 Text (e.g. Find Jobs)" value={col.props?.btn2Text || ""} onChange={e => updateGridColumnProps(idx, colIdx, "btn2Text", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      <input type="text" placeholder="Button 2 Link (e.g. /jobs)" value={col.props?.btn2Link || ""} onChange={e => updateGridColumnProps(idx, colIdx, "btn2Link", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      <input type="text" placeholder="Hero Height (e.g. 400px or 60vh)" value={col.props?.height || ""} onChange={e => updateGridColumnProps(idx, colIdx, "height", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                    </div>
+                                  )}
 
                                   {col.type === "text" && (
                                     <textarea placeholder="Write text or HTML here..." value={col.props?.content || ""} onChange={e => updateGridColumnProps(idx, colIdx, "content", e.target.value)} rows="4" style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px", resize: "vertical" }} />

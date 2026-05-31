@@ -31,6 +31,9 @@ export default function SearchWidget({ placeholder }) {
         >
           <option value="jobs">Jobs</option>
           <option value="institutions">Institutions</option>
+          <option value="students">Students</option>
+          <option value="teachers">Teachers</option>
+          <option value="companies">Companies</option>
         </select>
         
         {/* Keyword Input */}

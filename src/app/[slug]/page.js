@@ -235,13 +235,6 @@ export default function DynamicPage({ params }) {
         }
       `}} />
 
-      {/* Top Header Widgets */}
-      {topHeaderWidgets.length > 0 && (
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "20px" }}>
-          {topHeaderWidgets.map(widget => <WidgetRenderer key={widget.id} widget={widget} />)}
-        </div>
-      )}
-
       <div className="cms-layout">
         {(layout === "left-sidebar" || layout === "both-sidebars") && (
           <aside className="cms-sidebar">
@@ -295,6 +288,22 @@ export default function DynamicPage({ params }) {
                         )}
                         {col.type === "image" && col.props.imageUrl && (
                           <img src={col.props.imageUrl} alt="" style={{ maxWidth: "100%", height: "auto", borderRadius: "8px" }} />
+                        )}
+                        {col.type === "hero" && (
+                          <div className="pb-hero" style={{ backgroundImage: `url(${col.props.bgImage || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070'})`, minHeight: col.props.height || "300px", padding: "40px 20px" }}>
+                            <div className="pb-hero-content">
+                              <h1 className="pb-hero-title">{col.props.title || "Hero Title"}</h1>
+                              <p className="pb-hero-subtitle">{col.props.subtitle || "Hero Subtitle goes here"}</p>
+                              <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
+                                {col.props.btn1Text && col.props.btn1Link && (
+                                  <Link href={col.props.btn1Link} className="pb-btn">{col.props.btn1Text}</Link>
+                                )}
+                                {col.props.btn2Text && col.props.btn2Link && (
+                                  <Link href={col.props.btn2Link} className="pb-btn" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>{col.props.btn2Text}</Link>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         )}
                         {col.type === "search_bar" && (
                           <SearchWidget placeholder={col.props.placeholder} />
