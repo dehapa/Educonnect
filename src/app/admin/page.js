@@ -1333,31 +1333,6 @@ Sent ${selectedContacts.length} promotional messages.`);
           </nav>
         </aside>
 
-        <style jsx global>{`
-          .sidebar-group-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            color: #94a3b8;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: color 0.2s;
-          }
-          .sidebar-group-header:hover { color: #f8fafc; }
-          .sidebar-group-content {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: max-height 0.3s ease-in-out;
-          }
-          .sidebar-group-content.collapsed { max-height: 0; }
-          .sidebar-group-content.expanded { max-height: 600px; }
-        `}</style>
 
         {/* Main Content Area */}
         <main className="admin-main-viewport">
@@ -4061,6 +4036,31 @@ Sent ${selectedContacts.length} promotional messages.`);
           padding-top: 20px;
           margin-top: 10px;
         }
+
+        /* Sidebar Accordion Styles */
+        .sidebar-group-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px 16px;
+          color: #94a3b8;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+          cursor: pointer;
+          margin-top: 12px;
+          transition: color 0.2s;
+        }
+        .sidebar-group-header:hover { color: #f8fafc; }
+        .sidebar-group-content {
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          transition: max-height 0.3s ease-in-out;
+        }
+        .sidebar-group-content.collapsed { max-height: 0; }
+        .sidebar-group-content.expanded { max-height: 600px; }
       `}</style>
           
           {/* Edit Job Modal */}
