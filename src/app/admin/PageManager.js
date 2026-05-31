@@ -376,9 +376,15 @@ export default function PageManager() {
                                         <option value="jobs">Jobs List</option>
                                         <option value="institutions">Institutions List</option>
                                       </select>
+                                      
+                                      <select value={col.props?.displayStyle || "list"} onChange={e => updateGridColumnProps(idx, colIdx, "displayStyle", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }}>
+                                        <option value="list">List View (Vertical)</option>
+                                        <option value="grid">Grid View (Horizontal Cards)</option>
+                                      </select>
+
                                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                         <span style={{ fontSize: "0.85rem", color: "#475569" }}>Limit:</span>
-                                        <input type="number" min="1" max="10" value={col.props?.limit || 2} onChange={e => updateGridColumnProps(idx, colIdx, "limit", parseInt(e.target.value))} style={{ width: "60px", padding: "4px 8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                        <input type="number" min="1" max="20" value={col.props?.limit || 2} onChange={e => updateGridColumnProps(idx, colIdx, "limit", parseInt(e.target.value))} style={{ width: "60px", padding: "4px 8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
                                       </div>
                                     </div>
                                   )}
