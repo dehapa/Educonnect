@@ -12,7 +12,7 @@ import { Loader, Lock, GraduationCap, Users, Briefcase, Landmark, Shield } from 
 import { useRouter } from "next/navigation";
 
 export default function DashboardRouter() {
-  const { user, profile, loading, loginWithGoogle, saveUserProfile, login, signup } = useAuth();
+  const { user, profile, loading, loginWithGoogle, saveUserProfile, login, signup, logout } = useAuth();
   const [selectedRole, setSelectedRole] = useState("");
   const [roleLoading, setRoleLoading] = useState(false);
   const [error, setError] = useState("");
@@ -297,9 +297,18 @@ export default function DashboardRouter() {
             <button 
               onClick={() => router.push("/admin")} 
               className="btn-primary" 
-              style={{ width: "100%", padding: "14px", display: "inline-flex", gap: "10px", justifyContent: "center" }}
+              style={{ width: "100%", padding: "14px", display: "inline-flex", gap: "10px", justifyContent: "center", marginBottom: "12px" }}
             >
               Go to Admin Panel
+            </button>
+            <button 
+              onClick={async () => {
+                await logout();
+                window.location.href = "/";
+              }}
+              style={{ width: "100%", padding: "12px", background: "transparent", border: "1px solid var(--border-primary)", color: "var(--text-secondary)", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}
+            >
+              Sign Out
             </button>
           </div>
         </main>

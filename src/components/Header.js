@@ -9,7 +9,7 @@ import { BookOpen, User, LogIn, Menu, X, ChevronDown } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   if (pathname && (pathname.startsWith("/admin") || pathname.startsWith("/dashboard"))) return null;
   const [pages, setPages] = useState([]);
@@ -162,6 +162,27 @@ export default function Header() {
               }}>
                 Dashboard
               </Link>
+              <button 
+                onClick={async () => {
+                  await logout();
+                  window.location.href = "/";
+                }}
+                className="desktop-dashboard-btn" 
+                style={{ 
+                  display: "none", 
+                  alignItems: "center", 
+                  background: "transparent", 
+                  color: "#ef4444", 
+                  padding: "8px 16px", 
+                  borderRadius: "8px", 
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  fontSize: "0.9rem",
+                }}
+              >
+                Log out
+              </button>
             </div>
           ) : (
             <div className="desktop-auth" style={{ display: "flex", gap: "12px" }}>
@@ -230,7 +251,7 @@ export default function Header() {
               </li>
             ))}
             
-            {!user && (
+            {!user ? (
               <>
                 <li>
                   <Link 
@@ -249,6 +270,30 @@ export default function Header() {
                   >
                     Register
                   </Link>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link 
+                    href="/dashboard" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{ color: "#ffffff", textDecoration: "none", fontSize: "1.1rem", fontWeight: "600", display: "block", padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                  >
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <button 
+                    onClick={async () => {
+                      setIsMobileMenuOpen(false);
+                      await logout();
+                      window.location.href = "/";
+                    }}
+                    style={{ color: "#ef4444", background: "none", border: "none", textAlign: "left", fontSize: "1.1rem", fontWeight: "600", display: "block", padding: "8px 0", cursor: "pointer", width: "100%" }}
+                  >
+                    Log out
+                  </button>
                 </li>
               </>
             )}
