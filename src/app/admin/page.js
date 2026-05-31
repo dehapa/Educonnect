@@ -13,6 +13,7 @@ import { db } from "../../lib/firebase";
 import AdsManager from "./AdsManager";
 import PageManager from "./PageManager";
 import WidgetManager from "./WidgetManager";
+import MenuManager from "./MenuManager";
 
 const ODISHA_DISTRICTS = [
   "Khordha", "Cuttack", "Puri", "Baleswar", "Ganjam", "Sambalpur", 
@@ -1316,6 +1317,9 @@ Sent ${selectedContacts.length} promotional messages.`);
               <button className={`sidebar-link ${activeTab === "pages" ? "active" : ""}`} onClick={() => setActiveTab("pages")}>
                 <Globe size={20} /><span>Pages (CMS)</span>
               </button>
+              <button className={`sidebar-link ${activeTab === "menus" ? "active" : ""}`} onClick={() => setActiveTab("menus")}>
+                <List size={20} /><span>Menus Builder</span>
+              </button>
               <button className={`sidebar-link ${activeTab === "widgets" ? "active" : ""}`} onClick={() => setActiveTab("widgets")}>
                 <LayoutTemplate size={20} /><span>Widget Manager</span>
               </button>
@@ -2481,6 +2485,7 @@ Sent ${selectedContacts.length} promotional messages.`);
           {/* TAB 10: SETTINGS (STAFF ROLES) */}
           {activeTab === "ads" && <AdsManager />}
           {activeTab === "pages" && <PageManager />}
+          {activeTab === "menus" && <MenuManager />}
           {activeTab === "widgets" && <WidgetManager />}
 
           {activeTab === "settings" && (
