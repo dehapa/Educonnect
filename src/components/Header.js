@@ -37,6 +37,24 @@ export default function Header() {
     fetchPages();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const refId = urlParams.get("ref");
+    if (refId && !sessionStorage.getItem(`tracked_ref_${refId}`)) {
+      import("firebase/firestore").then(({ collection, addDoc, serverTimestamp }) => {
+        addDoc(collection(db, "referrals"), {
+          referrerId: refId,
+          path: window.location.pathname,
+          timestamp: serverTimestamp(),
+          userAgent: navigator.userAgent
+        }).then(() => {
+          sessionStorage.setItem(`tracked_ref_${refId}`, "true");
+        }).catch(err => console.error("Error tracking referral:", err));
+      });
+    }
+  }, []);
+
   return (
     <header style={{
       position: "fixed",

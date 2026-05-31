@@ -9,6 +9,7 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import { ArrowLeft, Building2, MapPin, Briefcase, Clock, IndianRupee, ExternalLink, Share2, Bookmark, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import ShareButtons from "../../../components/ShareButtons";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -231,6 +232,8 @@ export default function JobDetails() {
                 {job.description}
               </div>
             </div>
+            
+            <ShareButtons title={job.title} description={`Apply for ${job.title} at ${job.employerName || "Confidential Employer"} in ${job.location}`} />
             
           </div>
           

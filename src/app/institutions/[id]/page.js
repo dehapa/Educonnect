@@ -480,7 +480,7 @@ export default function InstitutionDetails() {
               </div>
 
               {/* Viral loop sharing */}
-              <ShareButtons institutionId={inst.id} institutionName={inst.name} />
+              <ShareButtons title={inst.name} description={`Check out ${inst.name} on EduConnect!`} />
 
               {/* Claim section */}
               {!inst.isClaimed && (

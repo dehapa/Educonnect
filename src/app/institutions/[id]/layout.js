@@ -18,6 +18,7 @@ export async function generateMetadata({ params }) {
         openGraph: {
           title: `${data.name} - EduConnect Verification`,
           description: `Verified listing for ${data.name}. View programs, rating, and address details.`,
+          images: data.logo || data.image || data.logoUrl ? [data.logo || data.image || data.logoUrl] : [],
         }
       };
     }

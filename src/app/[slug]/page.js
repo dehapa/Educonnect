@@ -6,6 +6,8 @@ import WidgetRenderer from "../../components/widgets/WidgetRenderer";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { limit as firestoreLimit } from "firebase/firestore";
+import ShareButtons from "../../components/ShareButtons";
+import SearchWidget from "../../components/widgets/SearchWidget";
 
 function DynamicDataFeed({ dataType, limit, displayStyle, title }) {
   const [data, setData] = useState([]);
@@ -294,6 +296,9 @@ export default function DynamicPage({ params }) {
                         {col.type === "image" && col.props.imageUrl && (
                           <img src={col.props.imageUrl} alt="" style={{ maxWidth: "100%", height: "auto", borderRadius: "8px" }} />
                         )}
+                        {col.type === "search_bar" && (
+                          <SearchWidget placeholder={col.props.placeholder} />
+                        )}
                         {col.type === "data" && (
                           <DynamicDataFeed dataType={col.props.dataType} limit={col.props.limit} displayStyle={col.props.displayStyle} title={col.props.title} />
                         )}
@@ -304,6 +309,13 @@ export default function DynamicPage({ params }) {
               }
               return null;
             })
+          )}
+          
+          {/* Universal Share Component for all pages */}
+          {pageData && (
+            <div style={{ marginTop: "40px" }}>
+              <ShareButtons title={pageData.title || slug} description={`Check out ${pageData.title || slug} on EduConnect!`} />
+            </div>
           )}
         </main>
 

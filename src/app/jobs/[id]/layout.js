@@ -16,6 +16,7 @@ export async function generateMetadata({ params }) {
         openGraph: {
           title: `${data.title} - ${data.employerName}`,
           description: `Active career placement vacancy. Postings are verified directly on the EduConnect Network.`,
+          images: data.companyLogo || data.logo ? [data.companyLogo || data.logo] : [],
         }
       };
     }

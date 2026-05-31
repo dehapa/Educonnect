@@ -359,6 +359,7 @@ export default function PageManager() {
                                       <option value="text">Text / HTML</option>
                                       <option value="image">Image</option>
                                       <option value="data">Data Feed</option>
+                                      <option value="search_bar">Search Widget</option>
                                     </select>
                                   </div>
 
@@ -368,6 +369,10 @@ export default function PageManager() {
                                   
                                   {col.type === "image" && (
                                     <input type="text" placeholder="Image URL" value={col.props?.imageUrl || ""} onChange={e => updateGridColumnProps(idx, colIdx, "imageUrl", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                  )}
+
+                                  {col.type === "search_bar" && (
+                                    <input type="text" placeholder="Placeholder text e.g. Search jobs..." value={col.props?.placeholder || ""} onChange={e => updateGridColumnProps(idx, colIdx, "placeholder", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
                                   )}
 
                                   {col.type === "data" && (
