@@ -186,13 +186,16 @@ export default function PageManager() {
             </div>
           </h3>
 
-          <form onSubmit={handleSubmit}>
+          <div style={{ display: "flex", gap: "40px", alignItems: "flex-start" }}>
+            {/* LEFT COLUMN: Editor */}
+            <div style={{ flex: "1 1 50%" }}>
+              <form onSubmit={handleSubmit}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px", paddingBottom: "24px", borderBottom: "1px solid #e2e8f0" }}>
               
               {/* Basic Info */}
               {!editingId && templates.length > 0 && (
                 <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                  <label style={{ display: "block", fontSize: "0.9rem", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>Copy from Template (Optional)</label>
+                  <div style={{ display: "block", fontSize: "1rem", fontWeight: "700", color: "#0f172a", marginBottom: "8px" }}>Copy from Template (Optional)</div>
                   <select onChange={e => handleTemplateSelect(e.target.value)} style={{ width: "100%", padding: "10px 12px", border: "1px solid #cbd5e1", borderRadius: "6px" }}>
                     <option value="">-- Select a template --</option>
                     {templates.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
@@ -201,23 +204,23 @@ export default function PageManager() {
               )}
 
               <div className="form-group">
-                <label style={{ display: "block", fontSize: "0.9rem", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>Page Title</label>
+                <div style={{ display: "block", fontSize: "1rem", fontWeight: "700", color: "#0f172a", marginBottom: "8px" }}>Page Title</div>
                 <div style={{ position: "relative" }}>
                   <FileText size={18} color="#94a3b8" style={{ position: "absolute", left: "12px", top: "11px" }} />
-                  <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g. About Us" style={{ width: "100%", padding: "10px 12px 10px 38px", border: "1px solid #cbd5e1", borderRadius: "6px", outline: "none" }} />
+                  <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g. About Us" style={{ width: "100%", padding: "10px 12px 10px 38px", border: "2px solid #94a3b8", borderRadius: "6px", outline: "none", fontWeight: "600", color: "#0f172a" }} />
                 </div>
               </div>
               
               <div className="form-group">
-                <label style={{ display: "block", fontSize: "0.9rem", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>URL Slug</label>
+                <div style={{ display: "block", fontSize: "1rem", fontWeight: "700", color: "#0f172a", marginBottom: "8px" }}>URL Slug</div>
                 <div style={{ position: "relative" }}>
                   <LinkIcon size={18} color="#94a3b8" style={{ position: "absolute", left: "12px", top: "11px" }} />
-                  <input required type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} placeholder="about-us" disabled={formData.slug === "home"} style={{ width: "100%", padding: "10px 12px 10px 38px", border: "1px solid #cbd5e1", borderRadius: "6px", outline: "none", background: formData.slug === "home" ? "#f1f5f9" : "white" }} />
+                  <input required type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} placeholder="about-us" disabled={formData.slug === "home"} style={{ width: "100%", padding: "10px 12px 10px 38px", border: "2px solid #94a3b8", borderRadius: "6px", outline: "none", fontWeight: "600", color: "#0f172a", background: formData.slug === "home" ? "#f1f5f9" : "white" }} />
                 </div>
               </div>
 
               <div className="form-group" style={{ gridColumn: "1 / -1" }}>
-                <label style={{ display: "block", fontSize: "0.9rem", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>Page Layout</label>
+                <div style={{ display: "block", fontSize: "1rem", fontWeight: "700", color: "#0f172a", marginBottom: "8px" }}>Page Layout</div>
                 <div style={{ display: "flex", gap: "16px" }}>
                   {["wide", "left-sidebar", "right-sidebar", "both-sidebars"].map(lyt => (
                     <div 
@@ -257,52 +260,120 @@ export default function PageManager() {
                         
                         {comp.type === "hero" && (
                           <>
-                            <input type="text" placeholder="Hero Headline" value={comp.props.title} onChange={e => updateComponentProps(idx, "title", e.target.value)} style={{ padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: "6px" }} />
-                            <textarea placeholder="Hero Subtitle" value={comp.props.subtitle} onChange={e => updateComponentProps(idx, "subtitle", e.target.value)} style={{ padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: "6px", resize: "vertical" }} />
+                            <input type="text" placeholder="Hero Headline" value={comp.props.title} onChange={e => updateComponentProps(idx, "title", e.target.value)} style={{ padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                            <textarea placeholder="Hero Subtitle" value={comp.props.subtitle} onChange={e => updateComponentProps(idx, "subtitle", e.target.value)} style={{ padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", resize: "vertical", fontWeight: "600", color: "#0f172a", outline: "none" }} />
                             
                             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                               <div style={{ flex: 1, position: "relative" }}>
-                                <ImageIcon size={18} color="#94a3b8" style={{ position: "absolute", left: "12px", top: "9px" }} />
-                                <input type="text" placeholder="Image URL or Upload ->" value={comp.props.imageUrl} onChange={e => updateComponentProps(idx, "imageUrl", e.target.value)} style={{ width: "100%", padding: "8px 12px 8px 36px", border: "1px solid #cbd5e1", borderRadius: "6px" }} />
+                                <ImageIcon size={18} color="#94a3b8" style={{ position: "absolute", left: "12px", top: "11px" }} />
+                                <input type="text" placeholder="Image URL or Upload ->" value={comp.props.imageUrl} onChange={e => updateComponentProps(idx, "imageUrl", e.target.value)} style={{ width: "100%", padding: "10px 12px 10px 38px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
                               </div>
-                              <label style={{ background: "#f1f5f9", padding: "8px 16px", borderRadius: "6px", fontSize: "0.85rem", cursor: "pointer", border: "1px solid #cbd5e1", fontWeight: "600" }}>
+                              <label style={{ background: "#f1f5f9", padding: "10px 16px", borderRadius: "6px", fontSize: "0.9rem", cursor: "pointer", border: "2px solid #94a3b8", fontWeight: "700", color: "#0f172a" }}>
                                 {uploadingImage ? "Uploading..." : "Upload File"}
                                 <input type="file" style={{ display: "none" }} accept="image/*" onChange={(e) => handleImageUpload(e, idx)} disabled={uploadingImage} />
                               </label>
                             </div>
-                            <p style={{ fontSize: "0.7rem", color: "#64748b", margin: "-6px 0 0 0" }}>Recommended size: 1920x1080px (Landscape)</p>
+                            <p style={{ fontSize: "0.8rem", color: "#475569", margin: "-6px 0 0 0", fontWeight: "600" }}>Recommended size: 1920x1080px (Landscape)</p>
 
                             <div style={{ display: "flex", gap: "12px" }}>
-                              <input type="text" placeholder="Button Text (e.g. Learn More)" value={comp.props.buttonText} onChange={e => updateComponentProps(idx, "buttonText", e.target.value)} style={{ flex: 1, padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: "6px" }} />
-                              <input type="text" placeholder="Button Link URL (e.g. /jobs)" value={comp.props.buttonLink} onChange={e => updateComponentProps(idx, "buttonLink", e.target.value)} style={{ flex: 1, padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: "6px" }} />
+                              <input type="text" placeholder="Button Text (e.g. Learn More)" value={comp.props.buttonText} onChange={e => updateComponentProps(idx, "buttonText", e.target.value)} style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                              <input type="text" placeholder="Button Link URL (e.g. /jobs)" value={comp.props.buttonLink} onChange={e => updateComponentProps(idx, "buttonLink", e.target.value)} style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
                             </div>
                           </>
                         )}
 
                         {comp.type === "text" && (
-                          <textarea placeholder="Write content here..." value={comp.props.content} onChange={e => updateComponentProps(idx, "content", e.target.value)} rows="5" style={{ padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: "6px", resize: "vertical" }} />
+                          <textarea placeholder="Write content here..." value={comp.props.content} onChange={e => updateComponentProps(idx, "content", e.target.value)} rows="5" style={{ padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", resize: "vertical", fontWeight: "600", color: "#0f172a", outline: "none" }} />
                         )}
                         
+                        {comp.type === "image" && (
+                          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                            <div style={{ flex: 1, position: "relative" }}>
+                              <ImageIcon size={18} color="#94a3b8" style={{ position: "absolute", left: "12px", top: "11px" }} />
+                              <input type="text" placeholder="Image URL or Upload ->" value={comp.props.imageUrl} onChange={e => updateComponentProps(idx, "imageUrl", e.target.value)} style={{ width: "100%", padding: "10px 12px 10px 38px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                            </div>
+                            <label style={{ background: "#f1f5f9", padding: "10px 16px", borderRadius: "6px", fontSize: "0.9rem", cursor: "pointer", border: "2px solid #94a3b8", fontWeight: "700", color: "#0f172a" }}>
+                              {uploadingImage ? "Uploading..." : "Upload File"}
+                              <input type="file" style={{ display: "none" }} accept="image/*" onChange={(e) => handleImageUpload(e, idx)} disabled={uploadingImage} />
+                            </label>
+                          </div>
+                        )}
+
+                        {comp.type === "grid" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                            <div style={{ display: "flex", gap: "12px" }}>
+                              <input type="text" placeholder="Col 1 Title" value={comp.props.col1Title} onChange={e => updateComponentProps(idx, "col1Title", e.target.value)} style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                              <input type="text" placeholder="Col 2 Title" value={comp.props.col2Title} onChange={e => updateComponentProps(idx, "col2Title", e.target.value)} style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                            </div>
+                            <div style={{ display: "flex", gap: "12px" }}>
+                              <textarea placeholder="Col 1 Text" value={comp.props.col1Text} onChange={e => updateComponentProps(idx, "col1Text", e.target.value)} rows="3" style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", resize: "vertical", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                              <textarea placeholder="Col 2 Text" value={comp.props.col2Text} onChange={e => updateComponentProps(idx, "col2Text", e.target.value)} rows="3" style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", resize: "vertical", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
-                <button type="button" onClick={() => addComponent("hero")} style={{ padding: "8px 16px", background: "#f8fafc", border: "1px dashed #cbd5e1", borderRadius: "6px", cursor: "pointer", fontWeight: "600", color: "#3b82f6" }}>+ Add Hero</button>
-                <button type="button" onClick={() => addComponent("text")} style={{ padding: "8px 16px", background: "#f8fafc", border: "1px dashed #cbd5e1", borderRadius: "6px", cursor: "pointer", fontWeight: "600", color: "#3b82f6" }}>+ Add Text Block</button>
+              <div style={{ display: "flex", gap: "12px", marginTop: "16px", flexWrap: "wrap" }}>
+                <button type="button" onClick={() => addComponent("hero")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Hero</button>
+                <button type="button" onClick={() => addComponent("text")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Text Block</button>
+                <button type="button" onClick={() => addComponent("image")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Image</button>
+                <button type="button" onClick={() => addComponent("grid")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Grid</button>
               </div>
             </div>
             
-            <div style={{ display: "flex", justifyContent: "flex-end", borderTop: "1px solid #e2e8f0", paddingTop: "20px" }}>
-              <button type="submit" className="action-btn-primary" style={{ padding: "10px 24px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600", display: "flex", alignItems: "center", gap: "8px" }}>
-                <Save size={18} />
-                {editingId ? "Update Page" : "Save Page"}
-              </button>
+              <div style={{ display: "flex", justifyContent: "flex-end", borderTop: "2px solid #e2e8f0", paddingTop: "20px" }}>
+                <button type="submit" className="action-btn-primary" style={{ padding: "10px 24px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "700", fontSize: "1rem", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Save size={18} />
+                  {editingId ? "Update Page" : "Save Page"}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* RIGHT COLUMN: Live Preview */}
+          <div style={{ flex: "1 1 50%", background: "#f8fafc", borderRadius: "12px", border: "2px solid #e2e8f0", padding: "24px", position: "sticky", top: "24px" }}>
+            <h4 style={{ fontSize: "1.25rem", fontWeight: "800", color: "#0f172a", marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Eye size={20} /> Live Preview
+            </h4>
+            
+            <div style={{ background: "white", border: "2px dashed #cbd5e1", borderRadius: "12px", padding: "24px", minHeight: "500px", overflowY: "auto", maxHeight: "800px" }}>
+              {formData.components.length === 0 ? (
+                <div style={{ textAlign: "center", color: "#94a3b8", marginTop: "100px" }}>
+                  <Layout size={48} style={{ margin: "0 auto 16px auto", opacity: 0.5 }} />
+                  <p style={{ fontWeight: "600", fontSize: "1.1rem" }}>Add sections to see preview</p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+                  {formData.components.map((comp, idx) => (
+                    <div key={idx}>
+                      {comp.type === "hero" && (
+                        <div style={{ background: comp.props.imageUrl ? `url(${comp.props.imageUrl})` : "#1e293b", backgroundSize: "cover", backgroundPosition: "center", padding: "40px 20px", borderRadius: "12px", textAlign: "center", color: "white", position: "relative" }}>
+                          <div style={{ position: "absolute", inset: 0, background: "rgba(11, 17, 32, 0.6)", borderRadius: "12px", zIndex: 1 }}></div>
+                          <div style={{ position: "relative", zIndex: 2 }}>
+                            <h2 style={{ fontSize: "1.8rem", fontWeight: "800", marginBottom: "12px", lineHeight: "1.2" }}>{comp.props.title || "Hero Title"}</h2>
+                            <p style={{ fontSize: "1rem", color: "#cbd5e1", marginBottom: "20px" }}>{comp.props.subtitle || "Hero Subtitle goes here..."}</p>
+                            {comp.props.buttonText && <button style={{ padding: "10px 20px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", fontWeight: "700" }}>{comp.props.buttonText}</button>}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {comp.type === "text" && (
+                        <div style={{ fontSize: "1rem", color: "#334155", whiteSpace: "pre-wrap", lineHeight: "1.7" }}>
+                          {comp.props.content || "Text block content will appear here..."}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </form>
+          </div>
         </div>
+      </div>
       )}
 
       {/* Pages List */}

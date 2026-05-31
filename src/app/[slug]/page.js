@@ -193,6 +193,29 @@ export default function DynamicPage({ params }) {
               if (comp.type === "text") {
                 return <div key={idx} className="pb-text">{comp.props.content}</div>;
               }
+              if (comp.type === "image") {
+                return (
+                  <div key={idx} style={{ marginBottom: "30px", textAlign: "center" }}>
+                    {comp.props.imageUrl ? (
+                      <img src={comp.props.imageUrl} alt="Page Image" style={{ maxWidth: "100%", height: "auto", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }} />
+                    ) : null}
+                  </div>
+                );
+              }
+              if (comp.type === "grid") {
+                return (
+                  <div key={idx} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px", marginBottom: "30px" }}>
+                    <div style={{ background: "#1e293b", padding: "30px", borderRadius: "12px", border: "1px solid #334155" }}>
+                      {comp.props.col1Title && <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "white", marginBottom: "12px" }}>{comp.props.col1Title}</h3>}
+                      {comp.props.col1Text && <p style={{ fontSize: "0.95rem", color: "#94a3b8", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>{comp.props.col1Text}</p>}
+                    </div>
+                    <div style={{ background: "#1e293b", padding: "30px", borderRadius: "12px", border: "1px solid #334155" }}>
+                      {comp.props.col2Title && <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "white", marginBottom: "12px" }}>{comp.props.col2Title}</h3>}
+                      {comp.props.col2Text && <p style={{ fontSize: "0.95rem", color: "#94a3b8", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>{comp.props.col2Text}</p>}
+                    </div>
+                  </div>
+                );
+              }
               return null;
             })
           )}
