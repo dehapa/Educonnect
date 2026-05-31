@@ -304,6 +304,7 @@ export default function DashboardRouter() {
             </button>
             <button 
               onClick={async () => {
+                alert("Executing Nuclear Logout Sequence...");
                 setIsLoggingOut(true);
                 await logout();
                 router.push("/");

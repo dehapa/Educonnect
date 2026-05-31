@@ -198,6 +198,13 @@ export function AuthProvider({ children }) {
       if (typeof window !== "undefined") {
         localStorage.clear();
         sessionStorage.clear();
+        
+        // Nuke the Firebase IndexedDB database from orbit to guarantee session destruction
+        try {
+          indexedDB.deleteDatabase("firebaseLocalStorageDb");
+        } catch (err) {
+          console.error("IndexedDB delete failed", err);
+        }
       }
 
       // Wait 500ms for Firebase to clear IndexedDB/Local storage tokens to prevent race conditions
