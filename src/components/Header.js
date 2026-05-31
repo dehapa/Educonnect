@@ -60,7 +60,7 @@ export default function Header() {
             <h1 style={{ fontSize: "1.5rem", fontWeight: "800", color: "#f8fafc", margin: 0, letterSpacing: "-0.5px" }}>
               EduConnect
             </h1>
-            <p style={{ fontSize: "0.75rem", color: "#94a3b8", margin: 0, fontWeight: "500", textTransform: "uppercase", letterSpacing: "1px" }}>
+            <p className="desktop-slogan" style={{ fontSize: "0.75rem", color: "#94a3b8", margin: 0, fontWeight: "500", textTransform: "uppercase", letterSpacing: "1px" }}>
               Learn • Grow • Succeed
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function Header() {
               </div>
             </Link>
           ) : (
-            <div style={{ display: "flex", gap: "12px" }}>
+            <div className="desktop-auth" style={{ display: "flex", gap: "12px" }}>
               <Link href="/dashboard" style={{ 
                 display: "flex", alignItems: "center", gap: "8px", 
                 background: "rgba(255,255,255,0.1)", color: "white", 
@@ -168,10 +168,16 @@ export default function Header() {
         @media (min-width: 768px) {
           .desktop-nav { display: block !important; }
           .user-name-display { display: flex !important; }
+          .desktop-auth { display: flex !important; }
         }
         @media (max-width: 767px) {
           .mobile-menu-btn { display: block !important; }
           .user-name-display { display: none !important; }
+          .desktop-auth { display: none !important; }
+        }
+        @media (max-width: 480px) {
+          .desktop-slogan { display: none !important; }
+          h1 { fontSize: "1.2rem" !important; }
         }
       `}} />
 
@@ -190,6 +196,29 @@ export default function Header() {
                 </Link>
               </li>
             ))}
+            
+            {!user && (
+              <>
+                <li>
+                  <Link 
+                    href="/dashboard" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{ color: "#3b82f6", textDecoration: "none", fontSize: "1.1rem", fontWeight: "600", display: "block", padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                  >
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/dashboard" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{ color: "#10b981", textDecoration: "none", fontSize: "1.1rem", fontWeight: "600", display: "block", padding: "8px 0" }}
+                  >
+                    Register
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       )}
