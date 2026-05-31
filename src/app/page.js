@@ -56,11 +56,16 @@ export default function Home() {
         }
         .dark-premium-theme a { text-decoration: none; }
         .cms-layout { display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
-        .cms-main { flex: 1; min-width: 0; }
+        .cms-main { flex: 1; min-width: 0; order: 2; }
         .cms-sidebar { width: 300px; flex-shrink: 0; }
+        .cms-sidebar.left-sidebar { order: 1; }
+        .cms-sidebar.right-sidebar { order: 3; }
         @media (max-width: 1024px) {
           .cms-layout { flex-direction: column; }
           .cms-sidebar { width: 100%; }
+          .cms-sidebar.left-sidebar { display: none; }
+          .cms-main { order: 1; }
+          .cms-sidebar.right-sidebar { order: 2; }
         }
       `}} />
 
@@ -77,7 +82,7 @@ export default function Home() {
       ) : (
         <div className="cms-layout">
           {leftSidebar.length > 0 && (
-            <aside className="cms-sidebar">
+            <aside className="cms-sidebar left-sidebar">
               {leftSidebar.map(widget => <WidgetRenderer key={widget.id} widget={widget} />)}
             </aside>
           )}
@@ -87,7 +92,7 @@ export default function Home() {
           </main>
 
           {rightSidebar.length > 0 && (
-            <aside className="cms-sidebar">
+            <aside className="cms-sidebar right-sidebar">
               {rightSidebar.map(widget => <WidgetRenderer key={widget.id} widget={widget} />)}
             </aside>
           )}

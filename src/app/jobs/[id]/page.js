@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
+import { useAuth } from "../../../context/AuthContext";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import { ArrowLeft, Building2, MapPin, Briefcase, Clock, IndianRupee, ExternalLink, Share2, Bookmark, CheckCircle2 } from "lucide-react";
@@ -14,6 +15,9 @@ export default function JobDetails() {
   const router = useRouter();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user, profile } = useAuth();
+  const [isApplying, setIsApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -36,6 +40,59 @@ export default function JobDetails() {
     
     fetchJob();
   }, [id]);
+
+  useEffect(() => {
+    const checkApplication = async () => {
+      if (!user || !id) return;
+      const q = query(
+        collection(db, "applications"),
+        where("jobId", "==", id),
+        where("studentId", "==", user.uid)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        setHasApplied(true);
+      }
+    };
+    checkApplication();
+  }, [user, id]);
+
+  const handleApply = async () => {
+    if (!user) {
+      alert("Please log in to apply for this job.");
+      router.push("/dashboard");
+      return;
+    }
+    // Only students/teachers should apply (not institutions or employers), but we won't strictly block here, just a loose check if needed
+    setIsApplying(true);
+    try {
+      await addDoc(collection(db, "applications"), {
+        jobId: job.id,
+        jobTitle: job.title,
+        employerId: job.employerId || "unknown",
+        employerName: job.employerName || job.companyName || "Unknown",
+        studentId: user.uid,
+        studentName: profile?.name || user.displayName || "Applicant",
+        studentEmail: user.email,
+        studentProfile: {
+          bio: profile?.bio || "",
+          skills: profile?.skills || [],
+          education: profile?.education || [],
+          employment: profile?.employment || [],
+          resumeLink: profile?.resumeLink || ""
+        },
+        status: "pending",
+        appliedAt: serverTimestamp()
+      });
+      setHasApplied(true);
+      alert("Application sent successfully via 1-Click Apply!");
+    } catch (err) {
+      console.error("Failed to apply:", err);
+      alert("Could not send application.");
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   const timeAgo = (timestamp) => {
     if (!timestamp) return "Recently";
@@ -139,9 +196,13 @@ export default function JobDetails() {
                       Apply Direct to Employer <ExternalLink size={18} />
                     </button>
                   </a>
+                ) : hasApplied ? (
+                  <button className="btn-secondary" disabled style={{ padding: "12px 32px", fontSize: "1rem", borderRadius: "8px", background: "#f1f5f9", color: "#64748b", border: "1px solid #cbd5e1", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <CheckCircle2 size={18} /> Application Sent
+                  </button>
                 ) : (
-                  <button className="btn-primary" style={{ padding: "12px 32px", fontSize: "1rem", borderRadius: "8px" }}>
-                    Apply on EduConnect
+                  <button onClick={handleApply} disabled={isApplying} className="btn-primary" style={{ padding: "12px 32px", fontSize: "1rem", borderRadius: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    {isApplying ? "Sending Resume..." : "1-Click Apply"}
                   </button>
                 )}
                 

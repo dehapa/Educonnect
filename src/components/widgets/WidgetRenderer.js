@@ -6,6 +6,8 @@ import Link from "next/link";
 import AdSpace from "../AdSpace";
 import { Star, MapPin, ChevronRight, Briefcase, GraduationCap, Users } from "lucide-react";
 
+import NetworkFeedWidget from "./NetworkFeedWidget";
+
 export default function WidgetRenderer({ widget }) {
   if (!widget) return null;
 
@@ -22,6 +24,10 @@ export default function WidgetRenderer({ widget }) {
       return <YouTubeWidget widget={widget} />;
     case "social":
       return <SocialWidget widget={widget} />;
+    case "adsense":
+      return <AdSenseWidget widget={widget} />;
+    case "network-feed":
+      return <NetworkFeedWidget widget={widget} />;
     default:
       return null;
   }
@@ -221,6 +227,37 @@ function SocialWidget({ widget }) {
       >
         View {widget.socialPlatform} Feed
       </a>
+    </section>
+  );
+}
+
+function AdSenseWidget({ widget }) {
+  useEffect(() => {
+    try {
+      if (window && typeof window !== 'undefined') {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    } catch (e) {
+      console.error("AdSense error", e);
+    }
+  }, []);
+
+  if (!widget.adClient || !widget.adSlot) {
+    return (
+      <section style={{ marginBottom: "40px", padding: "20px", background: "#1e293b", borderRadius: "12px", border: "1px dashed #475569", textAlign: "center", color: "#94a3b8" }}>
+        Google AdSense Placeholder (Missing Client ID or Slot ID)
+      </section>
+    );
+  }
+
+  return (
+    <section style={{ marginBottom: "40px", textAlign: "center" }}>
+      <ins className="adsbygoogle"
+           style={{ display: "block" }}
+           data-ad-client={widget.adClient}
+           data-ad-slot={widget.adSlot}
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
     </section>
   );
 }

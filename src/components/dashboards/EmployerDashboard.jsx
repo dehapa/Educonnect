@@ -6,7 +6,7 @@ import Header from "../Header";
 import Footer from "../Footer";
 import { 
   Briefcase, Plus, Users, Globe, MapPin, DollarSign, Calendar, 
-  Trash2, Award, CheckCircle2, UserCheck, Send, Loader, UserX, UserMinus
+  Trash2, Award, CheckCircle2, UserCheck, Send, Loader, UserX, UserMinus, Search, ExternalLink
 } from "lucide-react";
 import { doc, updateDoc, collection, getDocs, addDoc, query, where, deleteDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
@@ -34,6 +34,11 @@ export default function EmployerDashboard() {
   // Database loaded states
   const [jobs, setJobs] = useState([]);
   const [applicants, setApplicants] = useState([]);
+
+  // Talent Search states
+  const [talentQuery, setTalentQuery] = useState("");
+  const [talentResults, setTalentResults] = useState([]);
+  const [searchingTalent, setSearchingTalent] = useState(false);
 
   // Load jobs and applications
   const loadEmployerData = async () => {
@@ -152,6 +157,38 @@ export default function EmployerDashboard() {
     } catch (e) {
       console.error(e);
       alert("Failed to update status.");
+    }
+  };
+
+  const handleTalentSearch = async (e) => {
+    e.preventDefault();
+    if (!talentQuery.trim()) return;
+    setSearchingTalent(true);
+    try {
+      // For simplicity without a complex search engine (like Algolia), 
+      // we'll fetch all students and filter locally by the query (skills or name)
+      // Note: In production with thousands of users, use Algolia/Typesense.
+      const q = query(collection(db, "users"), where("role", "in", ["student", "teacher"]));
+      const snap = await getDocs(q);
+      const results = [];
+      const queryLower = talentQuery.toLowerCase();
+      
+      snap.forEach(d => {
+        const userData = d.data();
+        const nameMatch = (userData.name || "").toLowerCase().includes(queryLower);
+        const skillsMatch = (userData.skills || []).some(s => s.toLowerCase().includes(queryLower));
+        const roleMatch = (userData.role || "").toLowerCase().includes(queryLower);
+        const subjectMatch = (userData.subject || "").toLowerCase().includes(queryLower);
+        
+        if (nameMatch || skillsMatch || roleMatch || subjectMatch) {
+          results.push({ id: d.id, ...userData });
+        }
+      });
+      setTalentResults(results);
+    } catch (err) {
+      console.error("Talent search error:", err);
+    } finally {
+      setSearchingTalent(false);
     }
   };
 
@@ -277,6 +314,70 @@ export default function EmployerDashboard() {
                     <div style={{ padding: "20px", textAlign: "center", color: "var(--text-muted)", fontSize: "0.85rem" }}>
                       No active job postings. Post your first listing above!
                     </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Talent Search Section */}
+              <div className="glass-card" style={{ padding: "32px" }}>
+                <h3 style={{ fontSize: "1.3rem", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Search size={20} style={{ color: "var(--accent)" }} />
+                  Talent Search
+                </h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginBottom: "20px" }}>
+                  Search our verified pool of students and teachers by skills, subjects, or names.
+                </p>
+
+                <form onSubmit={handleTalentSearch} style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
+                  <input 
+                    type="text" 
+                    placeholder="Search e.g., 'React', 'Physics', 'John Doe'..." 
+                    className="form-input" 
+                    value={talentQuery}
+                    onChange={(e) => setTalentQuery(e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <button type="submit" disabled={searchingTalent} className="btn-primary" style={{ padding: "10px 24px" }}>
+                    {searchingTalent ? <Loader className="spinner" size={16} /> : "Search"}
+                  </button>
+                </form>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {talentResults.length > 0 ? (
+                    talentResults.map((t) => (
+                      <div key={t.id} style={{ padding: "16px", background: "var(--bg-tertiary)", borderRadius: "10px", border: "1px solid var(--border-primary)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <h4 style={{ fontSize: "1rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+                            {t.name}
+                            {t.tier === "premium" && <CheckCircle2 size={14} style={{ color: "var(--primary)" }} />}
+                          </h4>
+                          <span style={{ fontSize: "0.75rem", color: "var(--primary)", textTransform: "uppercase", fontWeight: "700" }}>{t.role}</span>
+                          
+                          {t.skills && t.skills.length > 0 && (
+                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "8px" }}>
+                              {t.skills.slice(0, 3).map((sk, i) => (
+                                <span key={i} style={{ fontSize: "0.65rem", padding: "2px 6px", background: "var(--bg-secondary)", border: "1px solid var(--border-secondary)", borderRadius: "4px", color: "var(--text-secondary)" }}>
+                                  {sk}
+                                </span>
+                              ))}
+                              {t.skills.length > 3 && <span style={{ fontSize: "0.65rem", color: "var(--text-muted)" }}>+{t.skills.length - 3}</span>}
+                            </div>
+                          )}
+                          {t.subject && (
+                            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "4px" }}>Subj: {t.subject}</p>
+                          )}
+                        </div>
+                        <a href={`/${t.role}/${t.id}`} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: "8px 12px", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "6px" }}>
+                          Profile <ExternalLink size={14} />
+                        </a>
+                      </div>
+                    ))
+                  ) : (
+                    talentQuery && !searchingTalent ? (
+                      <div style={{ padding: "20px", textAlign: "center", color: "var(--text-muted)", fontSize: "0.85rem" }}>
+                        No users found matching "{talentQuery}".
+                      </div>
+                    ) : null
                   )}
                 </div>
               </div>

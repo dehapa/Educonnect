@@ -14,9 +14,9 @@ import { db } from "../../lib/firebase";
 export default function TeacherDashboard() {
   const { user, profile } = useAuth();
   
-  // States
   const [bio, setBio] = useState(profile?.bio || "");
   const [subject, setSubject] = useState(profile?.subject || "");
+  const [resumeLink, setResumeLink] = useState(profile?.resumeLink || "");
   const [savingProfile, setSavingProfile] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -64,7 +64,8 @@ export default function TeacherDashboard() {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         bio,
-        subject
+        subject,
+        resumeLink
       });
       setStatusMessage("Profile updated successfully!");
       setTimeout(() => setStatusMessage(""), 3000);
@@ -305,6 +306,17 @@ export default function TeacherDashboard() {
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       style={{ height: "120px", resize: "none" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "6px", fontWeight: "600" }}>Resume Link (Google Drive / PDF Link)</label>
+                    <input 
+                      type="url" 
+                      placeholder="https://drive.google.com/..." 
+                      className="form-input"
+                      value={resumeLink}
+                      onChange={(e) => setResumeLink(e.target.value)}
                     />
                   </div>
 

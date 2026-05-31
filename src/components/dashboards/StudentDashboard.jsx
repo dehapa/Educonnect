@@ -19,6 +19,7 @@ export default function StudentDashboard() {
   // Forms states
   const [bio, setBio] = useState(profile?.bio || "");
   const [skills, setSkills] = useState(profile?.skills?.join(", ") || "");
+  const [resumeLink, setResumeLink] = useState(profile?.resumeLink || "");
   const [savingProfile, setSavingProfile] = useState(false);
   
   // Academic Timeline states
@@ -93,7 +94,8 @@ export default function StudentDashboard() {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         bio,
-        skills: skillsArray
+        skills: skillsArray,
+        resumeLink
       });
       setStatusMessage("Profile updated successfully!");
       setTimeout(() => setStatusMessage(""), 3000);
@@ -518,6 +520,17 @@ export default function StudentDashboard() {
                       className="form-input"
                       value={skills}
                       onChange={(e) => setSkills(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: "6px", fontWeight: "600" }}>Resume Link (Google Drive / PDF Link)</label>
+                    <input 
+                      type="url" 
+                      placeholder="https://drive.google.com/..." 
+                      className="form-input"
+                      value={resumeLink}
+                      onChange={(e) => setResumeLink(e.target.value)}
                     />
                   </div>
 

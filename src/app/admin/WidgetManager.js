@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where, orderBy } from "firebase/firestore";
 import { db } from "../../lib/firebase";
-import { Plus, Trash2, Edit, Save, X, Layout, Layers, Settings, Image as ImageIcon, Video, Type, Share2, Grid } from "lucide-react";
+import { Plus, Trash2, Edit, Save, X, Layout, Layers, Settings, Image as ImageIcon, Video, Type, Share2, Grid, MessageSquare } from "lucide-react";
 
 export default function WidgetManager() {
   const [pages, setPages] = useState([]);
@@ -39,7 +39,10 @@ export default function WidgetManager() {
     youtubeId: "",
     
     socialPlatform: "facebook",
-    socialUrl: ""
+    socialUrl: "",
+
+    adClient: "",
+    adSlot: ""
   });
 
   const fetchData = async () => {
@@ -99,6 +102,11 @@ export default function WidgetManager() {
       } else if (formData.type === "social") {
         payload.socialPlatform = formData.socialPlatform;
         payload.socialUrl = formData.socialUrl;
+      } else if (formData.type === "adsense") {
+        payload.adClient = formData.adClient;
+        payload.adSlot = formData.adSlot;
+      } else if (formData.type === "network-feed") {
+        // network-feed doesn't need specific form data yet, it just renders the feed component
       }
 
       if (editingId) {
@@ -136,7 +144,9 @@ export default function WidgetManager() {
       adPlacement: widget.adPlacement || "banner_standard",
       youtubeId: widget.youtubeId || "",
       socialPlatform: widget.socialPlatform || "facebook",
-      socialUrl: widget.socialUrl || ""
+      socialUrl: widget.socialUrl || "",
+      adClient: widget.adClient || "",
+      adSlot: widget.adSlot || ""
     });
     setEditingId(widget.id);
     setShowForm(true);
@@ -159,8 +169,10 @@ export default function WidgetManager() {
       case "grid": return <Grid size={16} color="#8b5cf6" />;
       case "html": return <Type size={16} color="#10b981" />;
       case "ad": return <Layers size={16} color="#f59e0b" />;
+      case "adsense": return <Layers size={16} color="#f59e0b" />;
       case "youtube": return <Video size={16} color="#ef4444" />;
       case "social": return <Share2 size={16} color="#ec4899" />;
+      case "network-feed": return <MessageSquare size={16} color="#06b6d4" />;
       default: return <Settings size={16} />;
     }
   };
@@ -232,9 +244,11 @@ export default function WidgetManager() {
                     { id: "hero", label: "Hero Banner", icon: <ImageIcon size={16}/> },
                     { id: "grid", label: "Dynamic Grid", icon: <Grid size={16}/> },
                     { id: "html", label: "Custom HTML", icon: <Type size={16}/> },
-                    { id: "ad", label: "Ad Banner", icon: <Layers size={16}/> },
+                    { id: "ad", label: "Custom Ad Banner", icon: <Layers size={16}/> },
+                    { id: "adsense", label: "Google AdSense", icon: <Layers size={16}/> },
                     { id: "youtube", label: "YouTube Embed", icon: <Video size={16}/> },
-                    { id: "social", label: "Social Stream", icon: <Share2 size={16}/> }
+                    { id: "social", label: "Social Stream", icon: <Share2 size={16}/> },
+                    { id: "network-feed", label: "EduConnect Feed", icon: <MessageSquare size={16}/> }
                   ].map(type => (
                     <button 
                       key={type.id} 
@@ -342,6 +356,19 @@ export default function WidgetManager() {
                   <div className="form-group">
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>Page URL / Handle</label>
                     <input type="text" value={formData.socialUrl} onChange={e => setFormData({...formData, socialUrl: e.target.value})} placeholder="https://facebook.com/educonnect" style={{ width: "100%", padding: "10px", border: "1px solid #cbd5e1", borderRadius: "6px" }} />
+                  </div>
+                </div>
+              )}
+
+              {formData.type === "adsense" && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <div className="form-group">
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>Ad Client (data-ad-client)</label>
+                    <input type="text" value={formData.adClient} onChange={e => setFormData({...formData, adClient: e.target.value})} placeholder="ca-pub-XXXXXXXXXXXXXXXX" style={{ width: "100%", padding: "10px", border: "1px solid #cbd5e1", borderRadius: "6px" }} />
+                  </div>
+                  <div className="form-group">
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>Ad Slot (data-ad-slot)</label>
+                    <input type="text" value={formData.adSlot} onChange={e => setFormData({...formData, adSlot: e.target.value})} placeholder="1234567890" style={{ width: "100%", padding: "10px", border: "1px solid #cbd5e1", borderRadius: "6px" }} />
                   </div>
                 </div>
               )}
