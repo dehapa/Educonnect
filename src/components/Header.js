@@ -21,9 +21,9 @@ export default function Header() {
         const q = query(collection(db, "pages"), where("status", "==", "published"));
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Ensure home page is first, and sort the rest
-        const homePage = data.find(p => p.slug === "home" && !p.isTemplate);
-        const otherPages = data.filter(p => p.slug !== "home" && !p.isTemplate).sort((a, b) => a.title.localeCompare(b.title));
+        // Filter to only include pages with showInMenu = true
+        const homePage = data.find(p => p.slug === "home" && p.showInMenu);
+        const otherPages = data.filter(p => p.slug !== "home" && p.showInMenu).sort((a, b) => a.title.localeCompare(b.title));
         
         let finalPages = [];
         if (homePage) finalPages.push(homePage);
@@ -84,25 +84,6 @@ export default function Header() {
               </p>
             </div>
           </Link>
-          
-          {/* Dashboard button right of logo if logged in */}
-          {user && (
-            <Link href="/dashboard" className="desktop-dashboard-btn" style={{ 
-              display: "none", 
-              alignItems: "center", 
-              gap: "8px", 
-              background: "rgba(59, 130, 246, 0.15)", 
-              color: "#3b82f6", 
-              padding: "8px 16px", 
-              borderRadius: "8px", 
-              textDecoration: "none", 
-              fontWeight: "600", 
-              fontSize: "0.9rem",
-              border: "1px solid rgba(59, 130, 246, 0.3)"
-            }}>
-              Dashboard
-            </Link>
-          )}
         </div>
 
         {/* MIDDLE: Desktop Navigation */}
@@ -165,6 +146,21 @@ export default function Header() {
                     <User size={24} color="#94a3b8" />
                   </div>
                 )}
+              </Link>
+              <Link href="/dashboard" className="desktop-dashboard-btn" style={{ 
+                display: "none", 
+                alignItems: "center", 
+                gap: "8px", 
+                background: "rgba(59, 130, 246, 0.15)", 
+                color: "#3b82f6", 
+                padding: "8px 16px", 
+                borderRadius: "8px", 
+                textDecoration: "none", 
+                fontWeight: "600", 
+                fontSize: "0.9rem",
+                border: "1px solid rgba(59, 130, 246, 0.3)"
+              }}>
+                Dashboard
               </Link>
             </div>
           ) : (

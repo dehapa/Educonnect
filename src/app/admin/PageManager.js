@@ -19,6 +19,7 @@ export default function PageManager() {
     status: "published",
     layout: "wide",
     isTemplate: false,
+    showInMenu: false,
     components: []
   };
 
@@ -77,6 +78,7 @@ export default function PageManager() {
       status: page.status || "published",
       layout: page.layout || "wide",
       isTemplate: page.isTemplate || false,
+      showInMenu: page.showInMenu || false,
       components: page.components || []
     });
     setEditingId(page.id);
@@ -224,6 +226,10 @@ export default function PageManager() {
               <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
                 <input type="checkbox" checked={formData.isTemplate} onChange={e => setFormData({...formData, isTemplate: e.target.checked})} />
                 Save as Template
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", marginLeft: "12px" }}>
+                <input type="checkbox" checked={formData.showInMenu} onChange={e => setFormData({...formData, showInMenu: e.target.checked})} />
+                Show in Header Menu
               </label>
             </div>
           </h3>
