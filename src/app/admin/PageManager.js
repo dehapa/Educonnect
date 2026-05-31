@@ -116,6 +116,14 @@ export default function PageManager() {
       newComponent.props = { title: "", subtitle: "", imageUrl: "", buttonText: "", buttonLink: "" };
     } else if (type === "text") {
       newComponent.props = { content: "" };
+    } else if (type === "grid") {
+      newComponent.props = { 
+        columnCount: 2, 
+        columns: [
+          { type: "empty", props: {} },
+          { type: "empty", props: {} }
+        ] 
+      };
     }
     setFormData({ ...formData, components: [...formData.components, newComponent] });
   };
@@ -139,6 +147,40 @@ export default function PageManager() {
   const updateComponentProps = (index, key, value) => {
     const newComps = [...formData.components];
     newComps[index].props[key] = value;
+    setFormData({ ...formData, components: newComps });
+  };
+
+  const updateGridColumnCount = (index, count) => {
+    const newComps = [...formData.components];
+    const grid = newComps[index];
+    grid.props.columnCount = count;
+    
+    // adjust columns array length
+    if (grid.props.columns.length < count) {
+      for (let i = grid.props.columns.length; i < count; i++) {
+        grid.props.columns.push({ type: "empty", props: {} });
+      }
+    } else if (grid.props.columns.length > count) {
+      grid.props.columns = grid.props.columns.slice(0, count);
+    }
+    setFormData({ ...formData, components: newComps });
+  };
+
+  const updateGridColumnType = (compIndex, colIndex, type) => {
+    const newComps = [...formData.components];
+    const col = newComps[compIndex].props.columns[colIndex];
+    col.type = type;
+    if (type === "text") col.props = { content: "" };
+    else if (type === "image") col.props = { imageUrl: "" };
+    else if (type === "html") col.props = { code: "" };
+    else if (type === "data") col.props = { dataType: "jobs", limit: 2 };
+    else col.props = {};
+    setFormData({ ...formData, components: newComps });
+  };
+
+  const updateGridColumnProps = (compIndex, colIndex, key, value) => {
+    const newComps = [...formData.components];
+    newComps[compIndex].props.columns[colIndex].props[key] = value;
     setFormData({ ...formData, components: newComps });
   };
 
@@ -300,14 +342,48 @@ export default function PageManager() {
                         )}
 
                         {comp.type === "grid" && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                            <div style={{ display: "flex", gap: "12px" }}>
-                              <input type="text" placeholder="Col 1 Title" value={comp.props.col1Title} onChange={e => updateComponentProps(idx, "col1Title", e.target.value)} style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
-                              <input type="text" placeholder="Col 2 Title" value={comp.props.col2Title} onChange={e => updateComponentProps(idx, "col2Title", e.target.value)} style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "#f8fafc", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                              <span style={{ fontWeight: "600", color: "#334155" }}>Columns:</span>
+                              {[1, 2, 3, 4].map(num => (
+                                <button key={num} type="button" onClick={() => updateGridColumnCount(idx, num)} style={{ padding: "6px 12px", borderRadius: "4px", border: "1px solid #cbd5e1", background: comp.props.columnCount === num ? "#3b82f6" : "white", color: comp.props.columnCount === num ? "white" : "#334155", cursor: "pointer", fontWeight: "600" }}>{num}</button>
+                              ))}
                             </div>
-                            <div style={{ display: "flex", gap: "12px" }}>
-                              <textarea placeholder="Col 1 Text" value={comp.props.col1Text} onChange={e => updateComponentProps(idx, "col1Text", e.target.value)} rows="3" style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", resize: "vertical", fontWeight: "600", color: "#0f172a", outline: "none" }} />
-                              <textarea placeholder="Col 2 Text" value={comp.props.col2Text} onChange={e => updateComponentProps(idx, "col2Text", e.target.value)} rows="3" style={{ flex: 1, padding: "10px 12px", border: "2px solid #94a3b8", borderRadius: "6px", resize: "vertical", fontWeight: "600", color: "#0f172a", outline: "none" }} />
+                            <div style={{ display: "grid", gridTemplateColumns: `repeat(${comp.props.columnCount || 2}, 1fr)`, gap: "16px" }}>
+                              {(comp.props.columns || []).map((col, colIdx) => (
+                                <div key={colIdx} style={{ background: "#f1f5f9", padding: "16px", borderRadius: "8px", border: "1px dashed #cbd5e1", display: "flex", flexDirection: "column", gap: "12px" }}>
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span style={{ fontWeight: "600", fontSize: "0.85rem", color: "#475569" }}>COLUMN {colIdx + 1}</span>
+                                    <select value={col.type || "empty"} onChange={e => updateGridColumnType(idx, colIdx, e.target.value)} style={{ padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}>
+                                      <option value="empty">-- Empty --</option>
+                                      <option value="text">Text / HTML</option>
+                                      <option value="image">Image</option>
+                                      <option value="data">Data Feed</option>
+                                    </select>
+                                  </div>
+
+                                  {col.type === "text" && (
+                                    <textarea placeholder="Write text or HTML here..." value={col.props?.content || ""} onChange={e => updateGridColumnProps(idx, colIdx, "content", e.target.value)} rows="4" style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px", resize: "vertical" }} />
+                                  )}
+                                  
+                                  {col.type === "image" && (
+                                    <input type="text" placeholder="Image URL" value={col.props?.imageUrl || ""} onChange={e => updateGridColumnProps(idx, colIdx, "imageUrl", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                  )}
+
+                                  {col.type === "data" && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                      <select value={col.props?.dataType || "jobs"} onChange={e => updateGridColumnProps(idx, colIdx, "dataType", e.target.value)} style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "4px" }}>
+                                        <option value="jobs">Jobs List</option>
+                                        <option value="institutions">Institutions List</option>
+                                      </select>
+                                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                        <span style={{ fontSize: "0.85rem", color: "#475569" }}>Limit:</span>
+                                        <input type="number" min="1" max="10" value={col.props?.limit || 2} onChange={e => updateGridColumnProps(idx, colIdx, "limit", parseInt(e.target.value))} style={{ width: "60px", padding: "4px 8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -364,6 +440,39 @@ export default function PageManager() {
                       {comp.type === "text" && (
                         <div style={{ fontSize: "1rem", color: "#334155", whiteSpace: "pre-wrap", lineHeight: "1.7" }}>
                           {comp.props.content || "Text block content will appear here..."}
+                        </div>
+                      )}
+                      
+                      {comp.type === "grid" && (
+                        <div style={{ display: "grid", gridTemplateColumns: `repeat(${comp.props.columnCount || 2}, 1fr)`, gap: "16px" }}>
+                          {(comp.props.columns || []).map((col, cIdx) => (
+                            <div key={cIdx} style={{ background: "#f8fafc", padding: "16px", borderRadius: "8px", border: "1px solid #cbd5e1", minHeight: "100px", display: "flex", flexDirection: "column" }}>
+                              {col.type === "empty" && <span style={{ margin: "auto", color: "#94a3b8", fontSize: "0.85rem", fontStyle: "italic" }}>Empty Column</span>}
+                              
+                              {col.type === "text" && (
+                                <div style={{ fontSize: "0.9rem", color: "#334155" }}>
+                                  {col.props.content ? col.props.content.substring(0, 50) + "..." : "Text / HTML content..."}
+                                </div>
+                              )}
+                              
+                              {col.type === "image" && (
+                                <div style={{ flex: 1, background: col.props.imageUrl ? `url(${col.props.imageUrl}) center/cover` : "#e2e8f0", borderRadius: "4px", minHeight: "80px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {!col.props.imageUrl && <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Image</span>}
+                                </div>
+                              )}
+                              
+                              {col.type === "data" && (
+                                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
+                                  <div style={{ background: "#e2e8f0", height: "16px", width: "40%", borderRadius: "4px" }}></div>
+                                  <div style={{ background: "#e2e8f0", height: "12px", width: "80%", borderRadius: "4px" }}></div>
+                                  <div style={{ background: "#e2e8f0", height: "12px", width: "60%", borderRadius: "4px" }}></div>
+                                  <div style={{ marginTop: "auto", alignSelf: "flex-end", fontSize: "0.75rem", color: "#64748b", fontWeight: "600", textTransform: "uppercase" }}>
+                                    {col.props.limit} {col.props.dataType}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>

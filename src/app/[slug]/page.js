@@ -5,6 +5,53 @@ import { db } from "../../lib/firebase";
 import WidgetRenderer from "../../components/widgets/WidgetRenderer";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { limit as firestoreLimit } from "firebase/firestore";
+
+function DynamicDataFeed({ dataType, limit }) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const q = query(collection(db, dataType), firestoreLimit(limit || 2));
+        const snapshot = await getDocs(q);
+        setData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (err) {
+        console.error("Error fetching data feed:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (dataType) fetchData();
+  }, [dataType, limit]);
+
+  if (loading) return <div style={{ padding: "20px", textAlign: "center", color: "#64748b" }}>Loading {dataType}...</div>;
+  if (data.length === 0) return <div style={{ padding: "20px", textAlign: "center", color: "#64748b" }}>No {dataType} found.</div>;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {data.map(item => (
+        <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "16px", background: "white", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
+          <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+            {item.logo || item.logoUrl || item.image ? (
+              <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: "1.2rem", color: "#94a3b8", fontWeight: "700" }}>{(item.title || item.name || "?").charAt(0)}</span>
+            )}
+          </div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700", color: "#0f172a" }}>{item.title || item.name}</h4>
+            <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#64748b" }}>{item.location || item.category || dataType}</p>
+          </div>
+          <Link href={`/${dataType}/${item.id}`} style={{ padding: "6px 12px", background: "#f1f5f9", color: "#3b82f6", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600" }}>
+            View
+          </Link>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DynamicPage({ params }) {
   const { slug } = params;
@@ -204,15 +251,20 @@ export default function DynamicPage({ params }) {
               }
               if (comp.type === "grid") {
                 return (
-                  <div key={idx} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px", marginBottom: "30px" }}>
-                    <div style={{ background: "#1e293b", padding: "30px", borderRadius: "12px", border: "1px solid #334155" }}>
-                      {comp.props.col1Title && <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "white", marginBottom: "12px" }}>{comp.props.col1Title}</h3>}
-                      {comp.props.col1Text && <p style={{ fontSize: "0.95rem", color: "#94a3b8", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>{comp.props.col1Text}</p>}
-                    </div>
-                    <div style={{ background: "#1e293b", padding: "30px", borderRadius: "12px", border: "1px solid #334155" }}>
-                      {comp.props.col2Title && <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "white", marginBottom: "12px" }}>{comp.props.col2Title}</h3>}
-                      {comp.props.col2Text && <p style={{ fontSize: "0.95rem", color: "#94a3b8", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>{comp.props.col2Text}</p>}
-                    </div>
+                  <div key={idx} style={{ display: "grid", gridTemplateColumns: `repeat(${comp.props.columnCount || 2}, 1fr)`, gap: "24px", marginBottom: "30px" }}>
+                    {(comp.props.columns || []).map((col, cIdx) => (
+                      <div key={cIdx} style={{ display: "flex", flexDirection: "column" }}>
+                        {col.type === "text" && (
+                          <div className="pb-text" dangerouslySetInnerHTML={{ __html: col.props.content }} />
+                        )}
+                        {col.type === "image" && col.props.imageUrl && (
+                          <img src={col.props.imageUrl} alt="" style={{ maxWidth: "100%", height: "auto", borderRadius: "8px" }} />
+                        )}
+                        {col.type === "data" && (
+                          <DynamicDataFeed dataType={col.props.dataType} limit={col.props.limit} />
+                        )}
+                      </div>
+                    ))}
                   </div>
                 );
               }
