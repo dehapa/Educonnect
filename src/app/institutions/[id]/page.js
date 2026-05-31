@@ -425,25 +425,56 @@ export default function InstitutionDetails() {
                 </div>
               </div>
 
-              {/* Connected Students Grid */}
+              {/* Alumni Networking Directory */}
               <div className="glass-card" style={{ padding: "32px" }}>
                 <h3 style={{ fontSize: "1.3rem", marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
                   <UserCheck size={20} style={{ color: "var(--success)" }} />
-                  <span>Verified Students ({students.length})</span>
+                  <span>Alumni Directory ({students.length})</span>
                 </h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-                  {students.map((stud, idx) => (
-                    <div key={idx} style={{ padding: "16px", background: "var(--bg-tertiary)", borderRadius: "10px", border: "1px solid var(--border-primary)", display: "flex", alignItems: "center", gap: "12px" }}>
-                      <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--success)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "0.85rem" }}>
-                        {stud.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: "0.9rem", fontWeight: "700" }}>{stud.name}</div>
-                        <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{stud.dept || "Student"}</div>
+                
+                {/* Group students by their endYear for this institution */}
+                {(() => {
+                  if (students.length === 0) return <div style={{ color: "var(--text-muted)" }}>No alumni records found.</div>;
+                  
+                  // Grouping logic
+                  const groupedAlumni = {};
+                  students.forEach(stud => {
+                    // Try to find the specific education entry for this institution to get pass-out year
+                    const eduEntry = stud.education?.find(e => e.id === inst.id);
+                    const passOutYear = eduEntry?.endYear || "Current/Unknown";
+                    
+                    if (!groupedAlumni[passOutYear]) groupedAlumni[passOutYear] = [];
+                    groupedAlumni[passOutYear].push(stud);
+                  });
+
+                  // Sort years descending
+                  const sortedYears = Object.keys(groupedAlumni).sort((a, b) => {
+                    if (a === "Current/Unknown") return 1;
+                    if (b === "Current/Unknown") return -1;
+                    return parseInt(b) - parseInt(a);
+                  });
+
+                  return sortedYears.map(year => (
+                    <div key={year} style={{ marginBottom: "24px" }}>
+                      <h4 style={{ fontSize: "1.05rem", fontWeight: "700", marginBottom: "12px", borderBottom: "1px solid var(--border-secondary)", paddingBottom: "8px", color: "var(--primary)" }}>
+                        Class of {year}
+                      </h4>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                        {groupedAlumni[year].map((stud, idx) => (
+                          <div key={idx} style={{ padding: "16px", background: "var(--bg-tertiary)", borderRadius: "10px", border: "1px solid var(--border-primary)", display: "flex", alignItems: "center", gap: "12px" }}>
+                            <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "var(--success)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "0.85rem" }}>
+                              {stud.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: "0.9rem", fontWeight: "700" }}>{stud.name}</div>
+                              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{stud.dept || "Student"}</div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  ));
+                })()}
               </div>
 
             </div>
