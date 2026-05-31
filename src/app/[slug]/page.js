@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { limit as firestoreLimit } from "firebase/firestore";
 
-function DynamicDataFeed({ dataType, limit, displayStyle }) {
+function DynamicDataFeed({ dataType, limit, displayStyle, title }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,53 +29,60 @@ function DynamicDataFeed({ dataType, limit, displayStyle }) {
   if (loading) return <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading {dataType}...</div>;
   if (data.length === 0) return <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>No {dataType} found.</div>;
 
-  if (displayStyle === "grid") {
-    return (
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
-        {data.map(item => (
-          <div key={item.id} style={{ display: "flex", flexDirection: "column", background: "#1e293b", padding: "24px 16px", borderRadius: "12px", border: "1px solid #334155", textAlign: "center" }}>
-            <div style={{ width: "70px", height: "70px", borderRadius: "50%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", margin: "0 auto 16px auto", border: "2px solid #3b82f6" }}>
-              {item.logo || item.logoUrl || item.image ? (
-                <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <span style={{ fontSize: "1.5rem", color: "#94a3b8", fontWeight: "700" }}>{(item.title || item.name || "?").charAt(0)}</span>
-              )}
-            </div>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: "1.05rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
-            <p style={{ margin: "0 0 12px 0", fontSize: "0.85rem", color: "#94a3b8", flex: 1 }}>{item.location || item.category || dataType}</p>
-            <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginBottom: "16px" }}>
-              <span style={{ color: "#fbbf24", fontSize: "0.9rem" }}>★★★★★</span>
-              <span style={{ color: "#64748b", fontSize: "0.75rem", alignSelf: "center" }}>({Math.floor(Math.random() * 50) + 10})</span>
-            </div>
-            <Link href={`/${dataType}/${item.id}`} style={{ padding: "8px 16px", background: "transparent", color: "#3b82f6", border: "1px solid #3b82f6", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600", width: "100%", boxSizing: "border-box" }}>
-              View Profile
-            </Link>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      {data.map(item => (
-        <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "16px", background: "#1e293b", padding: "16px", borderRadius: "12px", border: "1px solid #334155" }}>
-          <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-            {item.logo || item.logoUrl || item.image ? (
-              <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              <span style={{ fontSize: "1.2rem", color: "#94a3b8", fontWeight: "700" }}>{(item.title || item.name || "?").charAt(0)}</span>
-            )}
-          </div>
-          <div style={{ flex: 1 }}>
-            <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
-            <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#94a3b8" }}>{item.location || item.category || dataType}</p>
-          </div>
-          <Link href={`/${dataType}/${item.id}`} style={{ padding: "6px 16px", background: "#3b82f6", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600" }}>
-            View Details
-          </Link>
+    <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      {title && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #334155", paddingBottom: "12px", marginBottom: "20px" }}>
+          <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700", color: "white" }}>{title}</h3>
+          <Link href={`/${dataType}`} style={{ fontSize: "0.85rem", color: "#94a3b8", textDecoration: "none" }}>See All {title.split(" ")[1] || ""} &gt;</Link>
         </div>
-      ))}
+      )}
+
+      {displayStyle === "grid" ? (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "16px" }}>
+          {data.map(item => (
+            <div key={item.id} style={{ display: "flex", flexDirection: "column", background: "#1e293b", padding: "16px 12px", borderRadius: "12px", border: "1px solid #334155", textAlign: "center" }}>
+              <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", margin: "0 auto 12px auto", border: "2px solid #3b82f6" }}>
+                {item.logo || item.logoUrl || item.image ? (
+                  <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <span style={{ fontSize: "1.2rem", color: "#94a3b8", fontWeight: "700" }}>{(item.title || item.name || "?").charAt(0)}</span>
+                )}
+              </div>
+              <h4 style={{ margin: "0 0 6px 0", fontSize: "0.95rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
+              <p style={{ margin: "0 0 10px 0", fontSize: "0.75rem", color: "#94a3b8", flex: 1 }}>{item.location || item.category || dataType}</p>
+              <div style={{ display: "flex", justifyContent: "center", gap: "2px", marginBottom: "12px" }}>
+                <span style={{ color: "#fbbf24", fontSize: "0.8rem" }}>★★★★★</span>
+                <span style={{ color: "#64748b", fontSize: "0.7rem", alignSelf: "center" }}>({Math.floor(Math.random() * 50) + 10})</span>
+              </div>
+              <Link href={`/${dataType}/${item.id}`} style={{ padding: "6px 12px", background: "transparent", color: "#3b82f6", border: "1px solid #3b82f6", borderRadius: "6px", textDecoration: "none", fontSize: "0.75rem", fontWeight: "600", width: "100%", boxSizing: "border-box" }}>
+                View Profile
+              </Link>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {data.map(item => (
+            <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "16px", background: "#1e293b", padding: "16px", borderRadius: "12px", border: "1px solid #334155" }}>
+              <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                {item.logo || item.logoUrl || item.image ? (
+                  <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <span style={{ fontSize: "1.2rem", color: "#94a3b8", fontWeight: "700" }}>{(item.title || item.name || "?").charAt(0)}</span>
+                )}
+              </div>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
+                <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#94a3b8" }}>{item.location || item.category || dataType}</p>
+              </div>
+              <Link href={`/${dataType}/${item.id}`} style={{ padding: "6px 16px", background: "#3b82f6", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600" }}>
+                View Details
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -288,7 +295,7 @@ export default function DynamicPage({ params }) {
                           <img src={col.props.imageUrl} alt="" style={{ maxWidth: "100%", height: "auto", borderRadius: "8px" }} />
                         )}
                         {col.type === "data" && (
-                          <DynamicDataFeed dataType={col.props.dataType} limit={col.props.limit} displayStyle={col.props.displayStyle} />
+                          <DynamicDataFeed dataType={col.props.dataType} limit={col.props.limit} displayStyle={col.props.displayStyle} title={col.props.title} />
                         )}
                       </div>
                     ))}

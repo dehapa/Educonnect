@@ -383,7 +383,11 @@ export default function PageManager() {
                                       </select>
 
                                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                        <span style={{ fontSize: "0.85rem", color: "#475569" }}>Limit:</span>
+                                        <span style={{ fontSize: "0.85rem", color: "#475569", width: "40px" }}>Title:</span>
+                                        <input type="text" placeholder="e.g. Top Institutes" value={col.props?.title || ""} onChange={e => updateGridColumnProps(idx, colIdx, "title", e.target.value)} style={{ flex: 1, padding: "4px 8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      </div>
+                                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                        <span style={{ fontSize: "0.85rem", color: "#475569", width: "40px" }}>Limit:</span>
                                         <input type="number" min="1" max="20" value={col.props?.limit || 2} onChange={e => updateGridColumnProps(idx, colIdx, "limit", parseInt(e.target.value))} style={{ width: "60px", padding: "4px 8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
                                       </div>
                                     </div>
