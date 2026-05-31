@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import WidgetRenderer from "../../components/widgets/WidgetRenderer";
@@ -54,7 +54,7 @@ function DynamicDataFeed({ dataType, limit }) {
 }
 
 export default function DynamicPage({ params }) {
-  const { slug } = params;
+  const { slug } = use(params);
   
   const [pageData, setPageData] = useState(null);
   const [widgets, setWidgets] = useState([]);
