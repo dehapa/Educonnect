@@ -36,30 +36,34 @@ function DynamicDataFeed({ dataType, limit, displayStyle, title }) {
       {title && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #334155", paddingBottom: "12px", marginBottom: "20px" }}>
           <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700", color: "white" }}>{title}</h3>
-          <Link href={`/${dataType}`} style={{ fontSize: "0.85rem", color: "#94a3b8", textDecoration: "none" }}>See All {title.split(" ")[1] || ""} &gt;</Link>
+          <Link href={`/${dataType}`} style={{ padding: "8px 16px", background: "#3b82f6", color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600" }}>See All {title.split(" ")[1] || ""} &gt;</Link>
         </div>
       )}
 
       {displayStyle === "grid" ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "16px" }}>
           {data.map(item => (
-            <div key={item.id} style={{ display: "flex", flexDirection: "column", background: "#1e293b", padding: "16px 12px", borderRadius: "12px", border: "1px solid #334155", textAlign: "center" }}>
-              <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", margin: "0 auto 12px auto", border: "2px solid #3b82f6" }}>
+            <div key={item.id} style={{ display: "flex", flexDirection: "column", background: "#1e293b", borderRadius: "12px", border: "1px solid #334155", textAlign: "center", overflow: "hidden", transition: "transform 0.2s", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-4px)"} onMouseOut={e => e.currentTarget.style.transform = "translateY(0)"}>
+              <div style={{ width: "100%", height: "140px", background: "#0f172a", position: "relative" }}>
                 {item.logo || item.logoUrl || item.image ? (
                   <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <span style={{ fontSize: "1.2rem", color: "#94a3b8", fontWeight: "700" }}>{(item.title || item.name || "?").charAt(0)}</span>
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontSize: "3rem", color: "#94a3b8", fontWeight: "700", opacity: 0.5 }}>{(item.title || item.name || "?").charAt(0)}</span>
+                  </div>
                 )}
               </div>
-              <h4 style={{ margin: "0 0 6px 0", fontSize: "0.95rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
-              <p style={{ margin: "0 0 10px 0", fontSize: "0.75rem", color: "#94a3b8", flex: 1 }}>{item.location || item.category || dataType}</p>
-              <div style={{ display: "flex", justifyContent: "center", gap: "2px", marginBottom: "12px" }}>
-                <span style={{ color: "#fbbf24", fontSize: "0.8rem" }}>★★★★★</span>
-                <span style={{ color: "#64748b", fontSize: "0.7rem", alignSelf: "center" }}>({Math.floor(Math.random() * 50) + 10})</span>
+              <div style={{ padding: "16px 16px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <h4 style={{ margin: "0 0 6px 0", fontSize: "1rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
+                <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8", flex: 1 }}>{item.location || item.category || dataType}</p>
+                <div style={{ display: "flex", justifyContent: "center", gap: "2px", marginBottom: "16px" }}>
+                  <span style={{ color: "#fbbf24", fontSize: "0.85rem" }}>★★★★★</span>
+                  <span style={{ color: "#64748b", fontSize: "0.75rem", alignSelf: "center" }}>({Math.floor(Math.random() * 50) + 10})</span>
+                </div>
+                <Link href={`/${dataType}/${item.id}`} style={{ padding: "8px 12px", background: "transparent", color: "#3b82f6", border: "1px solid #3b82f6", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600", width: "100%", boxSizing: "border-box" }}>
+                  View Profile
+                </Link>
               </div>
-              <Link href={`/${dataType}/${item.id}`} style={{ padding: "6px 12px", background: "transparent", color: "#3b82f6", border: "1px solid #3b82f6", borderRadius: "6px", textDecoration: "none", fontSize: "0.75rem", fontWeight: "600", width: "100%", boxSizing: "border-box" }}>
-                View Profile
-              </Link>
             </div>
           ))}
         </div>
