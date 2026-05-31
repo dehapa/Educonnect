@@ -1,90 +1,62 @@
 import { NextResponse } from "next/server";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, deleteDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 
 export async function GET() {
   try {
-    // Check if it already exists
-    const q = query(collection(db, "pages"), where("slug", "==", "premium-home"));
+    // Delete existing home page if it exists to overwrite with our ready-made one
+    const q = query(collection(db, "pages"), where("slug", "==", "home"));
     const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      return NextResponse.json({ message: "Template already exists!" }, { status: 200 });
+    
+    for (const docSnapshot of snapshot.docs) {
+      await deleteDoc(docSnapshot.ref);
     }
 
-    const templatePage = {
-      title: "Premium Homepage Template",
-      slug: "premium-home",
-      description: "A gorgeous template replicating the dark premium home page layout.",
-      isTemplate: true,
+    const homePage = {
+      title: "Home",
+      slug: "home",
+      description: "The official home page for EduConnect - Find jobs, explore institutions, and connect.",
+      isTemplate: false,
       layout: "wide",
       status: "published",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       components: [
         {
-          id: "comp-1",
+          id: "comp-search",
           type: "grid",
           props: {
-            columnCount: 2,
+            columnCount: 1,
             columns: [
               {
-                type: "data",
-                props: { dataType: "institutions", displayStyle: "grid", limit: 3 }
-              },
-              {
-                type: "data",
-                props: { dataType: "jobs", displayStyle: "grid", limit: 4 }
+                type: "search_bar",
+                props: { placeholder: "Search for institutions, courses, or jobs..." }
               }
             ]
           }
         },
         {
-          id: "comp-2",
+          id: "comp-institutions",
           type: "grid",
           props: {
-            columnCount: 2,
+            columnCount: 1,
             columns: [
               {
                 type: "data",
-                props: { dataType: "institutions", displayStyle: "grid", limit: 4 }
-              },
-              {
-                type: "data",
-                props: { dataType: "jobs", displayStyle: "grid", limit: 4 }
+                props: { dataType: "institutions", displayStyle: "grid", limit: 4, title: "Top Institutions" }
               }
             ]
           }
         },
         {
-          id: "comp-3",
+          id: "comp-jobs",
           type: "grid",
           props: {
-            columnCount: 2,
+            columnCount: 1,
             columns: [
               {
                 type: "data",
-                props: { dataType: "institutions", displayStyle: "list", limit: 3 }
-              },
-              {
-                type: "data",
-                props: { dataType: "jobs", displayStyle: "list", limit: 3 }
-              }
-            ]
-          }
-        },
-        {
-          id: "comp-4",
-          type: "grid",
-          props: {
-            columnCount: 2,
-            columns: [
-              {
-                type: "data",
-                props: { dataType: "jobs", displayStyle: "list", limit: 3 }
-              },
-              {
-                type: "data",
-                props: { dataType: "institutions", displayStyle: "grid", limit: 4 }
+                props: { dataType: "jobs", displayStyle: "grid", limit: 4, title: "Latest Jobs" }
               }
             ]
           }
@@ -92,8 +64,8 @@ export async function GET() {
       ]
     };
 
-    const docRef = await addDoc(collection(db, "pages"), templatePage);
-    return NextResponse.json({ message: "Template injected successfully", id: docRef.id });
+    const docRef = await addDoc(collection(db, "pages"), homePage);
+    return NextResponse.json({ message: "Ready-made homepage injected successfully", id: docRef.id });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
