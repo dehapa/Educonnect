@@ -665,7 +665,6 @@ export default function StudentDashboard() {
                     <Settings size={16} style={{ marginRight: "8px" }} /> Edit Profile Settings
                   </button>
                 </div>
-              </div>
             </div>
           )}
 

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 import { 
   collection, query, where, orderBy, onSnapshot, 
   addDoc, serverTimestamp, doc, updateDoc, getDoc, setDoc 
@@ -12,8 +11,8 @@ import {
 import { db } from "../../lib/firebase";
 import { Send, UserCircle, MessageSquare, Clock, ArrowLeft } from "lucide-react";
 
-export default function InboxPage() {
-  const { user, profile } = useAuth();
+function InboxContent() {
+  const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialChatId = searchParams.get("chat");
@@ -56,11 +55,6 @@ export default function InboxPage() {
       });
       setChats(fetchedChats);
       setLoading(false);
-      
-      // If no active chat but we have chats, select the first one (optional)
-      // if (!activeChatId && fetchedChats.length > 0 && !initialChatId) {
-      //   setActiveChatId(fetchedChats[0].id);
-      // }
     });
 
     return () => unsubscribe();
@@ -131,11 +125,9 @@ export default function InboxPage() {
   if (loading) {
     return (
       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Header />
         <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div className="spinner" style={{ width: "40px", height: "40px", border: "4px solid var(--border-primary)", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
         </main>
-        <Footer />
         <style jsx global>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -143,7 +135,6 @@ export default function InboxPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--bg-secondary)" }}>
-      <Header />
       
       <main style={{ flex: 1, display: "flex", justifyContent: "center", padding: "24px", height: "calc(100vh - 70px)" }}>
         <div style={{ width: "100%", maxWidth: "1200px", display: "flex", gap: "24px", height: "100%" }}>
@@ -287,5 +278,13 @@ export default function InboxPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function InboxPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "40px", textAlign: "center" }}>Loading Inbox...</div>}>
+      <InboxContent />
+    </Suspense>
   );
 }

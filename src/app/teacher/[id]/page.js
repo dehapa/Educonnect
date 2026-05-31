@@ -43,14 +43,12 @@ export default function TeacherPublicProfile() {
   if (loading) {
     return (
       <>
-        <Header />
         <main style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "70vh" }}>
           <div style={{ textAlign: "center" }}>
             <RefreshCw className="spinner" size={48} style={{ color: "var(--primary)", marginBottom: "16px" }} />
             <h3>Loading Faculty Profile...</h3>
           </div>
         </main>
-        <Footer />
         <style jsx global>{`
           .spinner { animation: spin 1s linear infinite; }
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -62,7 +60,6 @@ export default function TeacherPublicProfile() {
   if (!teacher) {
     return (
       <>
-        <Header />
         <main style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "70vh", padding: "20px" }}>
           <div className="glass-card" style={{ maxWidth: "480px", width: "100%", padding: "40px", textAlign: "center" }}>
             <Users size={48} style={{ color: "var(--text-muted)", marginBottom: "16px" }} />
@@ -75,7 +72,6 @@ export default function TeacherPublicProfile() {
             </button>
           </div>
         </main>
-        <Footer />
       </>
     );
   }
@@ -140,8 +136,6 @@ export default function TeacherPublicProfile() {
 
   return (
     <>
-      <Header />
-      
       <main style={{ padding: "60px 0" }}>
         <div className="container" style={{ maxWidth: "1000px" }}>
           
@@ -306,8 +300,6 @@ export default function TeacherPublicProfile() {
 
         </div>
       </main>
-
-      <Footer />
 
       <style jsx global>{`
         .profile-grid {
