@@ -9,15 +9,18 @@ import {
   GraduationCap, Briefcase, MapPin, Globe, Mail, ArrowLeft, 
   ShieldCheck, Award, Star, RefreshCw, Sparkles, Code, Phone, MessageSquare, Lock, Link as LinkIcon
 } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
+import { useAuth } from "../../../context/AuthContext";
 import Link from "next/link";
 
 export default function StudentPublicProfile() {
   const { id } = useParams();
   const router = useRouter();
+  const { user, profile } = useAuth();
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [creatingChat, setCreatingChat] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -76,6 +79,64 @@ export default function StudentPublicProfile() {
       </>
     );
   }
+
+  const handleRequestAccess = async () => {
+    if (!user) {
+      alert("You must be logged in to send a message.");
+      router.push("/auth/login");
+      return;
+    }
+    if (user.uid === id) {
+      alert("You cannot request access from yourself.");
+      return;
+    }
+
+    setCreatingChat(true);
+    try {
+      // 1. Check if chat already exists
+      const chatsRef = collection(db, "chats");
+      const q = query(chatsRef, where("participants", "array-contains", user.uid));
+      const snapshot = await getDocs(q);
+      
+      let existingChatId = null;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.participants.includes(id)) {
+          existingChatId = doc.id;
+        }
+      });
+
+      let chatId = existingChatId;
+
+      // 2. If it doesn't exist, create it
+      if (!chatId) {
+        const newChat = await addDoc(chatsRef, {
+          participants: [user.uid, id],
+          participantsData: {
+            [user.uid]: { name: user.displayName || profile?.name || "User", role: profile?.role || "User" },
+            [id]: { name: student.name, role: student.role || "Student" }
+          },
+          lastMessage: "Hello, I would like to request access to your contact information and resume.",
+          updatedAt: serverTimestamp()
+        });
+        chatId = newChat.id;
+
+        // 3. Add the initial automated message
+        await addDoc(collection(db, "chats", chatId, "messages"), {
+          senderId: user.uid,
+          text: "Hello, I would like to request access to your contact information and resume.",
+          timestamp: serverTimestamp()
+        });
+      }
+
+      // 4. Redirect to inbox
+      router.push(`/inbox?chat=${chatId}`);
+    } catch (err) {
+      console.error("Error creating chat:", err);
+      alert("Failed to start conversation. Please try again.");
+      setCreatingChat(false);
+    }
+  };
 
   return (
     <>
@@ -272,12 +333,13 @@ export default function StudentPublicProfile() {
                 </div>
 
                 <button 
-                  onClick={() => alert("Chat functionality coming in Phase 2! A message will be sent to request access.")} 
+                  onClick={handleRequestAccess} 
+                  disabled={creatingChat}
                   className="btn-primary" 
-                  style={{ width: "100%", justifyContent: "center", gap: "8px", padding: "12px" }}
+                  style={{ width: "100%", justifyContent: "center", gap: "8px", padding: "12px", opacity: creatingChat ? 0.7 : 1 }}
                 >
-                  <MessageSquare size={18} />
-                  Message to Request Access
+                  {creatingChat ? <RefreshCw size={18} className="spinner" /> : <MessageSquare size={18} />}
+                  {creatingChat ? "Opening Chat..." : "Message to Request Access"}
                 </button>
               </div>
 

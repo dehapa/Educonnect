@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
-import { BookOpen, User, LogIn, Menu, X, ChevronDown, Loader } from "lucide-react";
+import { BookOpen, User, LogIn, Menu, X, ChevronDown, Loader, MessageSquare } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
@@ -117,10 +117,28 @@ export default function Header() {
           {user ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ flexDirection: "column", alignItems: "flex-end" }} className="user-name-display">
-                <span style={{ fontSize: "1rem", fontWeight: "600", color: "#f8fafc", textAlign: "right" }}>
+                <span style={{ fontSize: "1rem", fontWeight: "600", color: "#f8fafc", textAlign: "right", marginRight: "12px" }}>
                   {user.displayName || "User"}
                 </span>
               </div>
+              <Link href="/inbox" style={{ 
+                width: "40px", 
+                height: "40px", 
+                borderRadius: "50%", 
+                background: "rgba(59, 130, 246, 0.15)", 
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#3b82f6",
+                marginRight: "8px",
+                transition: "background 0.2s"
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = "rgba(59, 130, 246, 0.3)"}
+              onMouseOut={(e) => e.currentTarget.style.background = "rgba(59, 130, 246, 0.15)"}
+              title="Go to Inbox"
+              >
+                <MessageSquare size={20} />
+              </Link>
               <Link href="/dashboard" style={{ 
                 width: "50px", 
                 height: "50px", 
