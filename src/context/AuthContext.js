@@ -190,11 +190,18 @@ export function AuthProvider({ children }) {
 
   // Log out
   const logout = async () => {
-    setLoading(true);
-    await signOut(auth);
-    setUser(null);
-    setProfile(null);
-    setLoading(false);
+    try {
+      setLoading(true);
+      await signOut(auth);
+      // Wait for Firebase to clear IndexedDB/Local storage tokens
+      await new Promise(resolve => setTimeout(resolve, 200));
+      setUser(null);
+      setProfile(null);
+    } catch (e) {
+      console.error("Error during logout:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
