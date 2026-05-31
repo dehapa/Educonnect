@@ -175,7 +175,8 @@ export default function PageManager() {
     if (type === "text") col.props = { content: "" };
     else if (type === "image") col.props = { imageUrl: "" };
     else if (type === "html") col.props = { code: "" };
-    else if (type === "data") col.props = { dataType: "jobs", limit: 2 };
+    else if (type === "data") col.props = { dataType: "jobs", limit: 2, filterCategory: "" };
+    else if (type === "quick_categories") col.props = {};
     else col.props = {};
     setFormData({ ...formData, components: newComps });
   };
@@ -415,6 +416,10 @@ export default function PageManager() {
                                         <span style={{ fontSize: "0.85rem", color: "#475569", width: "40px" }}>Limit:</span>
                                         <input type="number" min="1" max="20" value={col.props?.limit || 2} onChange={e => updateGridColumnProps(idx, colIdx, "limit", parseInt(e.target.value))} style={{ width: "60px", padding: "4px 8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
                                       </div>
+                                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                        <span style={{ fontSize: "0.85rem", color: "#475569", width: "40px" }}>Filter:</span>
+                                        <input type="text" placeholder="e.g. engineering (optional)" value={col.props?.filterCategory || ""} onChange={e => updateGridColumnProps(idx, colIdx, "filterCategory", e.target.value)} style={{ flex: 1, padding: "4px 8px", border: "1px solid #cbd5e1", borderRadius: "4px" }} />
+                                      </div>
                                     </div>
                                   )}
                                 </div>
@@ -433,6 +438,7 @@ export default function PageManager() {
                 <button type="button" onClick={() => addComponent("text")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Text Block</button>
                 <button type="button" onClick={() => addComponent("image")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Image</button>
                 <button type="button" onClick={() => addComponent("grid")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Grid</button>
+                <button type="button" onClick={() => addComponent("quick_categories")} style={{ padding: "8px 16px", background: "#eff6ff", border: "2px dashed #3b82f6", borderRadius: "6px", cursor: "pointer", fontWeight: "700", color: "#1d4ed8" }}>+ Add Quick Categories</button>
               </div>
             </div>
             
@@ -468,6 +474,23 @@ export default function PageManager() {
                             <h2 style={{ fontSize: "1.8rem", fontWeight: "800", marginBottom: "12px", lineHeight: "1.2" }}>{comp.props.title || "Hero Title"}</h2>
                             <p style={{ fontSize: "1rem", color: "#cbd5e1", marginBottom: "20px" }}>{comp.props.subtitle || "Hero Subtitle goes here..."}</p>
                             {comp.props.buttonText && <button style={{ padding: "10px 20px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", fontWeight: "700" }}>{comp.props.buttonText}</button>}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {comp.type === "search_bar" && (
+                        <div style={{ padding: "16px", background: "#1e293b", borderRadius: "8px", border: "1px solid #334155", color: "#94a3b8" }}>
+                          🔍 {comp.props.placeholder || "Search Widget Placeholder"}
+                        </div>
+                      )}
+                      
+                      {comp.type === "quick_categories" && (
+                        <div style={{ padding: "20px", background: "#1e293b", borderRadius: "12px", border: "1px solid #334155" }}>
+                          <h4 style={{ margin: "0 0 16px 0", color: "white", fontSize: "1.1rem" }}>Explore Categories</h4>
+                          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                            {["Schools", "Engineering", "Nursing", "HR Jobs", "IT Jobs"].map(cat => (
+                              <div key={cat} style={{ padding: "8px 16px", background: "#0f172a", color: "#3b82f6", borderRadius: "20px", fontSize: "0.85rem", border: "1px solid #3b82f6" }}>{cat}</div>
+                            ))}
                           </div>
                         </div>
                       )}

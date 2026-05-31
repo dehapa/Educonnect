@@ -9,14 +9,17 @@ import { limit as firestoreLimit } from "firebase/firestore";
 import ShareButtons from "../components/ShareButtons";
 import SearchWidget from "../components/widgets/SearchWidget";
 
-function DynamicDataFeed({ dataType, limit, displayStyle, title }) {
+function DynamicDataFeed({ dataType, limit, displayStyle, title, filterCategory }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const q = query(collection(db, dataType), firestoreLimit(limit || 2));
+        let q = query(collection(db, dataType), firestoreLimit(limit || 2));
+        if (filterCategory) {
+          q = query(collection(db, dataType), where("category", "==", filterCategory.toLowerCase()), firestoreLimit(limit || 2));
+        }
         const snapshot = await getDocs(q);
         setData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } catch (err) {
@@ -26,7 +29,7 @@ function DynamicDataFeed({ dataType, limit, displayStyle, title }) {
       }
     };
     if (dataType) fetchData();
-  }, [dataType, limit]);
+  }, [dataType, limit, filterCategory]);
 
   if (loading) return <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading {dataType}...</div>;
   if (data.length === 0) return <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>No {dataType} found.</div>;
@@ -89,6 +92,27 @@ function DynamicDataFeed({ dataType, limit, displayStyle, title }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function QuickCategories() {
+  const categories = [
+    { name: "Schools", icon: "🏫", link: "/institutions?category=schools" },
+    { name: "Engineering", icon: "⚙️", link: "/institutions?category=engineering" },
+    { name: "Nursing", icon: "⚕️", link: "/institutions?category=nursing" },
+    { name: "HR Jobs", icon: "🤝", link: "/jobs?category=hr" },
+    { name: "IT Jobs", icon: "💻", link: "/jobs?category=it" }
+  ];
+
+  return (
+    <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center", padding: "20px 0" }}>
+      {categories.map(cat => (
+        <Link key={cat.name} href={cat.link} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", background: "#1e293b", color: "white", borderRadius: "30px", textDecoration: "none", border: "1px solid #334155", fontWeight: "600", transition: "transform 0.2s", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseOut={e => e.currentTarget.style.transform = "translateY(0)"}>
+          <span style={{ fontSize: "1.2rem" }}>{cat.icon}</span>
+          <span>{cat.name}</span>
+        </Link>
+      ))}
     </div>
   );
 }
@@ -312,8 +336,11 @@ export default function Home() {
                         {col.type === "search_bar" && (
                           <SearchWidget placeholder={col.props.placeholder} />
                         )}
+                        {col.type === "quick_categories" && (
+                          <QuickCategories />
+                        )}
                         {col.type === "data" && (
-                          <DynamicDataFeed dataType={col.props.dataType} limit={col.props.limit} displayStyle={col.props.displayStyle} title={col.props.title} />
+                          <DynamicDataFeed dataType={col.props.dataType} limit={col.props.limit} displayStyle={col.props.displayStyle} title={col.props.title} filterCategory={col.props.filterCategory} />
                         )}
                       </div>
                     ))}
