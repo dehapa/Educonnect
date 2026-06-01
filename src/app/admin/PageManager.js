@@ -86,10 +86,6 @@ export default function PageManager() {
   };
 
   const handleDelete = async (id, slug) => {
-    if (slug === "home") {
-      alert("You cannot delete the Home page.");
-      return;
-    }
     if (confirm("Delete this page? This will permanently remove it.")) {
       try {
         await deleteDoc(doc(db, "pages", id));
@@ -264,7 +260,7 @@ export default function PageManager() {
                 <div style={{ display: "block", fontSize: "1rem", fontWeight: "700", color: "#0f172a", marginBottom: "8px" }}>URL Slug</div>
                 <div style={{ position: "relative" }}>
                   <LinkIcon size={18} color="#94a3b8" style={{ position: "absolute", left: "12px", top: "11px" }} />
-                  <input required type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} placeholder="about-us" disabled={formData.slug === "home"} style={{ width: "100%", padding: "10px 12px 10px 38px", border: "2px solid #94a3b8", borderRadius: "6px", outline: "none", fontWeight: "600", color: "#0f172a", background: formData.slug === "home" ? "#f1f5f9" : "white" }} />
+                  <input required type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} placeholder="about-us" style={{ width: "100%", padding: "10px 12px 10px 38px", border: "2px solid #94a3b8", borderRadius: "6px", outline: "none", fontWeight: "600", color: "#0f172a", background: "white" }} />
                 </div>
               </div>
 
@@ -594,7 +590,7 @@ export default function PageManager() {
                       <button onClick={() => handleEdit(page)} style={{ padding: "8px", background: "white", border: "1px solid #cbd5e1", color: "#3b82f6", borderRadius: "6px", cursor: "pointer" }} title="Edit">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => handleDelete(page.id, page.slug)} disabled={page.slug === "home"} style={{ padding: "8px", background: "white", border: "1px solid #fca5a5", color: page.slug === "home" ? "#fca5a5" : "#ef4444", borderRadius: "6px", cursor: page.slug === "home" ? "not-allowed" : "pointer" }} title="Delete">
+                      <button onClick={() => handleDelete(page.id, page.slug)} style={{ padding: "8px", background: "white", border: "1px solid #fca5a5", color: "#ef4444", borderRadius: "6px", cursor: "pointer" }} title="Delete">
                         <Trash2 size={16} />
                       </button>
                     </div>
