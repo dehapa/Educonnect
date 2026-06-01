@@ -123,6 +123,15 @@ export default function TeacherPublicProfile() {
           text: "Hello, I would like to request access to your contact information and resume.",
           timestamp: serverTimestamp()
         });
+
+        // 4. Send Notification to the receiver
+        await addDoc(collection(db, "users", id, "notifications"), {
+          type: "new_chat",
+          message: `${user.displayName || profile?.name || "Someone"} requested access to your profile and sent a message.`,
+          link: `/inbox?chat=${chatId}`,
+          isRead: false,
+          createdAt: serverTimestamp()
+        });
       }
 
       // 4. Redirect to inbox

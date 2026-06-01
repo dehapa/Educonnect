@@ -5,7 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useAuth } from "../context/AuthContext";
-import { BookOpen, User, LogIn, Menu, X, ChevronDown, Loader, MessageSquare } from "lucide-react";
+import { BookOpen, User, LogIn, Menu, X, Loader, MessageSquare } from "lucide-react";
+import AvatarDropdown from "./AvatarDropdown";
+import NotificationBell from "./NotificationBell";
 
 export default function Header() {
   const pathname = usePathname();
@@ -115,12 +117,7 @@ export default function Header() {
         {/* RIGHT: Auth & Profile */}
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           {user ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ flexDirection: "column", alignItems: "flex-end" }} className="user-name-display">
-                <span style={{ fontSize: "1rem", fontWeight: "600", color: "#f8fafc", textAlign: "right", marginRight: "12px" }}>
-                  {user.displayName || "User"}
-                </span>
-              </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
               <Link href="/inbox" style={{ 
                 width: "40px", 
                 height: "40px", 
@@ -130,7 +127,6 @@ export default function Header() {
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#3b82f6",
-                marginRight: "8px",
                 transition: "background 0.2s"
               }}
               onMouseOver={(e) => e.currentTarget.style.background = "rgba(59, 130, 246, 0.3)"}
@@ -139,76 +135,12 @@ export default function Header() {
               >
                 <MessageSquare size={20} />
               </Link>
-              <Link href="/dashboard" style={{ 
-                width: "50px", 
-                height: "50px", 
-                borderRadius: "50%", 
-                padding: "2px", 
-                background: "linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #FFD700 100%)", // Rich Gold Border
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "transform 0.2s"
-              }}
-              onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-              onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
-              title="Go to Dashboard"
-              >
-                {user.photoURL ? (
-                  <img 
-                    src={user.photoURL} 
-                    alt="Profile" 
-                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", border: "2px solid #0B1120" }} 
-                  />
-                ) : (
-                  <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #0B1120" }}>
-                    <User size={24} color="#94a3b8" />
-                  </div>
-                )}
-              </Link>
-              <Link href="/dashboard" className="desktop-dashboard-btn" style={{ 
-                display: "none", 
-                alignItems: "center", 
-                gap: "8px", 
-                background: "rgba(59, 130, 246, 0.15)", 
-                color: "#3b82f6", 
-                padding: "8px 16px", 
-                borderRadius: "8px", 
-                textDecoration: "none", 
-                fontWeight: "600", 
-                fontSize: "0.9rem",
-                border: "1px solid rgba(59, 130, 246, 0.3)"
-              }}>
-                Dashboard
-              </Link>
-              <button 
-                onClick={async () => {
-                  setIsLoggingOut(true);
-                  await logout();
-                  router.push("/");
-                  router.refresh();
-                  setTimeout(() => { window.location.href = "/"; }, 100);
-                }}
-                disabled={isLoggingOut}
-                className="desktop-dashboard-btn" 
-                style={{ 
-                  display: "none", 
-                  alignItems: "center", 
-                  background: "transparent", 
-                  color: "#ef4444", 
-                  padding: "8px 16px", 
-                  borderRadius: "8px", 
-                  border: "1px solid rgba(239, 68, 68, 0.3)",
-                  cursor: isLoggingOut ? "not-allowed" : "pointer",
-                  fontWeight: "600",
-                  fontSize: "0.9rem",
-                  gap: "8px"
-                }}
-              >
-                {isLoggingOut ? <Loader className="spinner" size={16} /> : null}
-                {isLoggingOut ? "..." : "Log out"}
-              </button>
+              
+              <NotificationBell userId={user.uid} />
+
+              <div style={{ width: "1px", height: "30px", background: "rgba(255,255,255,0.1)", margin: "0 4px" }}></div>
+
+              <AvatarDropdown />
             </div>
           ) : (
             <div className="desktop-auth" style={{ display: "flex", gap: "12px" }}>

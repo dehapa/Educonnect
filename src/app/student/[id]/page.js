@@ -7,9 +7,9 @@ import Footer from "../../../components/Footer";
 import ShareButtons from "../../../components/ShareButtons";
 import { 
   GraduationCap, Briefcase, MapPin, Globe, Mail, ArrowLeft, 
-  ShieldCheck, Award, Star, RefreshCw, Sparkles, Code, Phone, MessageSquare, Lock, Link as LinkIcon
+  ShieldCheck, Award, Star, RefreshCw, Sparkles, Code, Phone, MessageSquare, Lock, Link as LinkIcon, Target, Edit2, Check
 } from "lucide-react";
-import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import { useAuth } from "../../../context/AuthContext";
 import Link from "next/link";
@@ -21,6 +21,11 @@ export default function StudentPublicProfile() {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creatingChat, setCreatingChat] = useState(false);
+  
+  // Frontend Edit States
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [editedBio, setEditedBio] = useState("");
+  const [savingBio, setSavingBio] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -123,6 +128,15 @@ export default function StudentPublicProfile() {
           text: "Hello, I would like to request access to your contact information and resume.",
           timestamp: serverTimestamp()
         });
+
+        // 4. Send Notification to the receiver
+        await addDoc(collection(db, "users", id, "notifications"), {
+          type: "new_chat",
+          message: `${user.displayName || profile?.name || "Someone"} requested access to your profile and sent a message.`,
+          link: `/inbox?chat=${chatId}`,
+          isRead: false,
+          createdAt: serverTimestamp()
+        });
       }
 
       // 4. Redirect to inbox
@@ -131,6 +145,21 @@ export default function StudentPublicProfile() {
       console.error("Error creating chat:", err);
       alert("Failed to start conversation. Please try again.");
       setCreatingChat(false);
+    }
+  };
+
+  const handleSaveBio = async () => {
+    if (!user || user.uid !== id) return;
+    setSavingBio(true);
+    try {
+      await updateDoc(doc(db, "users", id), { bio: editedBio });
+      setStudent(prev => ({ ...prev, bio: editedBio }));
+      setIsEditingBio(false);
+    } catch (err) {
+      console.error("Failed to update bio", err);
+      alert("Failed to update bio");
+    } finally {
+      setSavingBio(false);
     }
   };
 
@@ -284,6 +313,37 @@ export default function StudentPublicProfile() {
 
             {/* Right Column: Bio, skills & sharing */}
             <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+
+              {/* Career & Job Preferences */}
+              {(student.targetJobRole || student.totalExperience || student.expectedSalary) && (
+                <div className="glass-card" style={{ padding: "32px", border: "1px solid var(--accent)" }}>
+                  <h3 style={{ fontSize: "1.3rem", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Target size={18} style={{ color: "var(--accent)" }} />
+                    Career & Job Preferences
+                  </h3>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    {student.targetJobRole && (
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "0.95rem" }}>
+                        <span style={{ color: "var(--text-muted)", width: "110px", flexShrink: 0 }}>Target Role:</span>
+                        <span style={{ fontWeight: "600", color: "var(--text-primary)" }}>{student.targetJobRole}</span>
+                      </div>
+                    )}
+                    {student.totalExperience && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.95rem" }}>
+                        <span style={{ color: "var(--text-muted)", width: "110px", flexShrink: 0 }}>Experience:</span>
+                        <span style={{ fontWeight: "600", color: "var(--text-primary)" }}>{student.totalExperience}</span>
+                      </div>
+                    )}
+                    {student.expectedSalary && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.95rem" }}>
+                        <span style={{ color: "var(--text-muted)", width: "110px", flexShrink: 0 }}>Expected Salary:</span>
+                        <span style={{ fontWeight: "600", color: "var(--text-primary)" }}>{student.expectedSalary}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               
               {/* Contact Information & Privacy Request */}
               <div className="glass-card" style={{ padding: "32px", border: "1px solid var(--primary-light)" }}>
@@ -338,14 +398,43 @@ export default function StudentPublicProfile() {
               </div>
 
               {/* About & Bio */}
-              <div className="glass-card" style={{ padding: "32px" }}>
-                <h3 style={{ fontSize: "1.3rem", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Sparkles size={18} style={{ color: "var(--accent)" }} />
-                  About Candidates
-                </h3>
-                <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", fontSize: "0.95rem" }}>
-                  {student.bio || "No description provided. Connect directly with the student to request details or view active course milestones."}
-                </p>
+              <div className="glass-card" style={{ padding: "32px", position: "relative" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                  <h3 style={{ fontSize: "1.3rem", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+                    <Sparkles size={18} style={{ color: "var(--accent)" }} />
+                    About Candidates
+                  </h3>
+                  {user && user.uid === id && !isEditingBio && (
+                    <button 
+                      onClick={() => { setEditedBio(student.bio || ""); setIsEditingBio(true); }}
+                      style={{ background: "transparent", border: "1px solid var(--border-primary)", borderRadius: "8px", padding: "6px 12px", color: "var(--text-secondary)", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "0.8rem" }}
+                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-tertiary)"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                    >
+                      <Edit2 size={14} /> Edit
+                    </button>
+                  )}
+                </div>
+                
+                {isEditingBio ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <textarea 
+                      value={editedBio}
+                      onChange={e => setEditedBio(e.target.value)}
+                      style={{ width: "100%", padding: "12px", borderRadius: "8px", background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", color: "var(--text-primary)", resize: "vertical", minHeight: "100px", fontFamily: "inherit" }}
+                    />
+                    <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                      <button onClick={() => setIsEditingBio(false)} style={{ padding: "8px 16px", borderRadius: "8px", background: "transparent", border: "1px solid var(--border-primary)", color: "var(--text-secondary)", cursor: "pointer" }}>Cancel</button>
+                      <button onClick={handleSaveBio} disabled={savingBio} className="btn-primary" style={{ padding: "8px 16px", display: "flex", alignItems: "center", gap: "6px" }}>
+                        {savingBio ? <RefreshCw size={14} className="spinner" /> : <Check size={14} />} {savingBio ? "Saving..." : "Save"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", fontSize: "0.95rem", whiteSpace: "pre-wrap" }}>
+                    {student.bio || "No description provided."}
+                  </p>
+                )}
               </div>
 
               {/* Skills badges */}

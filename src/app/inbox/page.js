@@ -44,8 +44,7 @@ function InboxContent() {
     setLoading(true);
     const q = query(
       collection(db, "chats"), 
-      where("participants", "array-contains", user.uid),
-      orderBy("updatedAt", "desc")
+      where("participants", "array-contains", user.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -53,7 +52,16 @@ function InboxContent() {
       snapshot.forEach((doc) => {
         fetchedChats.push({ id: doc.id, ...doc.data() });
       });
+      // Sort in JS to avoid requiring a composite index in Firestore
+      fetchedChats.sort((a, b) => {
+        const timeA = a.updatedAt?.toMillis() || 0;
+        const timeB = b.updatedAt?.toMillis() || 0;
+        return timeB - timeA;
+      });
       setChats(fetchedChats);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching chats:", error);
       setLoading(false);
     });
 
@@ -103,6 +111,21 @@ function InboxContent() {
         lastMessage: messageText,
         updatedAt: serverTimestamp()
       });
+
+      // 3. Create Notification for the receiver
+      const activeChat = chats.find(c => c.id === activeChatId);
+      if (activeChat) {
+        const otherId = activeChat.participants.find(id => id !== user.uid);
+        if (otherId) {
+          await addDoc(collection(db, "users", otherId, "notifications"), {
+            type: "new_message",
+            message: `You have a new message from ${user.displayName || "Someone"}`,
+            link: `/inbox?chat=${activeChatId}`,
+            isRead: false,
+            createdAt: serverTimestamp()
+          });
+        }
+      }
 
     } catch (err) {
       console.error("Failed to send message:", err);

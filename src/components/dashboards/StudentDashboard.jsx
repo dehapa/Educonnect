@@ -22,6 +22,7 @@ export default function StudentDashboard() {
   
   // --- Step 1: Basic Info ---
   const [name, setName] = useState(profile?.name || "");
+  const [dob, setDob] = useState(profile?.dob || "");
   const [whatsapp, setWhatsapp] = useState(profile?.whatsapp || "");
   const [phone, setPhone] = useState(profile?.phone || "");
   const [presentAddress, setPresentAddress] = useState(profile?.presentAddress || "");
@@ -33,6 +34,11 @@ export default function StudentDashboard() {
   const [bio, setBio] = useState(profile?.bio || "");
   const [skills, setSkills] = useState(profile?.skills?.join(", ") || "");
   const [resumeLink, setResumeLink] = useState(profile?.resumeLink || "");
+  
+  // Job Seeker Fields
+  const [targetJobRole, setTargetJobRole] = useState(profile?.targetJobRole || "");
+  const [totalExperience, setTotalExperience] = useState(profile?.totalExperience || "");
+  const [expectedSalary, setExpectedSalary] = useState(profile?.expectedSalary || "");
 
   const priorityOptions = [
     "Find a job",
@@ -126,11 +132,15 @@ export default function StudentDashboard() {
       let updateData = {};
       
       if (step === 1) {
-        updateData = { name, whatsapp, phone, presentAddress, permanentAddress, privacySettings };
+        updateData = { name, dob, whatsapp, phone, presentAddress, permanentAddress, privacySettings };
       } else if (step === 2) {
         const hobbiesArray = hobbies.split(",").map(s => s.trim()).filter(s => s.length > 0);
         const skillsArray = skills.split(",").map(s => s.trim()).filter(s => s.length > 0);
-        updateData = { priorities, hobbies: hobbiesArray, skills: skillsArray, bio, resumeLink, privacySettings };
+        updateData = { 
+          priorities, hobbies: hobbiesArray, skills: skillsArray, 
+          bio, resumeLink, privacySettings,
+          targetJobRole, totalExperience, expectedSalary
+        };
       }
       
       await updateDoc(userRef, updateData);
@@ -311,9 +321,15 @@ export default function StudentDashboard() {
               <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "32px" }}>Let's start with your contact details so peers and employers can reach you.</p>
               
               <form onSubmit={(e) => handleSaveStep(1, e)} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <div>
-                  <label className="form-label">Full Name</label>
-                  <input type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} required />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                  <div>
+                    <label className="form-label">Full Name</label>
+                    <input type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="form-label">Date of Birth</label>
+                    <input type="date" className="form-input" value={dob} onChange={e => setDob(e.target.value)} />
+                  </div>
                 </div>
                 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
@@ -387,6 +403,24 @@ export default function StudentDashboard() {
                 <div>
                   <label className="form-label">Technical / Professional Skills (Comma separated)</label>
                   <input type="text" className="form-input" placeholder="e.g. React, JavaScript, Management" value={skills} onChange={e => setSkills(e.target.value)} />
+                </div>
+
+                <div style={{ background: "var(--bg-secondary)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-primary)" }}>
+                  <h3 style={{ fontSize: "1.1rem", marginBottom: "16px", color: "var(--text-primary)" }}>Job Seeker Preferences (Optional)</h3>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <label className="form-label">Target Job Role(s) / Applying For</label>
+                      <input type="text" className="form-input" placeholder="e.g. Software Engineer, Marketing Manager" value={targetJobRole} onChange={e => setTargetJobRole(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="form-label">Total Experience</label>
+                      <input type="text" className="form-input" placeholder="e.g. 3 Years, Fresher" value={totalExperience} onChange={e => setTotalExperience(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="form-label">Expected Salary</label>
+                      <input type="text" className="form-input" placeholder="e.g. $60,000 / ₹5,00,000" value={expectedSalary} onChange={e => setExpectedSalary(e.target.value)} />
+                    </div>
+                  </div>
                 </div>
 
                 <div>
