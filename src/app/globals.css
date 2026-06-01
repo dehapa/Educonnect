@@ -424,20 +424,17 @@ button, input, select, textarea {
   animation: pulse-heartbeat 2.5s infinite ease-in-out;
 }
 
-
- / *   S e a r c h W i d g e t   M o b i l e   F i x   * / 
- @ m e d i a   ( m a x - w i d t h :   7 6 8 p x )   { 
-     . s e a r c h - w i d g e t - f o r m   { 
-         f l e x - d i r e c t i o n :   c o l u m n   ! i m p o r t a n t ; 
-         b o r d e r - r a d i u s :   2 4 p x ; 
-     } 
-     . s e a r c h - w i d g e t - f o r m   s e l e c t ,   . s e a r c h - w i d g e t - f o r m   i n p u t   { 
-         b o r d e r - r i g h t :   n o n e   ! i m p o r t a n t ; 
-         b o r d e r - b o t t o m :   1 p x   s o l i d   v a r ( - - b o r d e r - p r i m a r y ) ; 
-     } 
-     . s e a r c h - w i d g e t - f o r m   . b t n - p r i m a r y   { 
-         w i d t h :   1 0 0 % ; 
-     } 
- } 
-  
- 
+/* SearchWidget Mobile Fix */
+@media (max-width: 768px) {
+  .search-widget-form {
+    flex-direction: column !important;
+    border-radius: 24px;
+  }
+  .search-widget-form select, .search-widget-form input {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-primary);
+  }
+  .search-widget-form .btn-primary {
+    width: 100%;
+  }
+}
