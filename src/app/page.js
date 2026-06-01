@@ -1,410 +1,567 @@
 "use client";
-import { useState, useEffect, use } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { collection, query, getDocs, limit as firestoreLimit, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import WidgetRenderer from "../components/widgets/WidgetRenderer";
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import { limit as firestoreLimit } from "firebase/firestore";
-import ShareButtons from "../components/ShareButtons";
-import SearchWidget from "../components/widgets/SearchWidget";
+import { useRouter } from "next/navigation";
 
-function DynamicDataFeed({ dataType, limit, displayStyle, title, filterCategory }) {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let q = query(collection(db, dataType), firestoreLimit(limit || 2));
-        if (filterCategory) {
-          q = query(collection(db, dataType), where("category", "==", filterCategory.toLowerCase()), firestoreLimit(limit || 2));
-        }
-        const snapshot = await getDocs(q);
-        setData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      } catch (err) {
-        console.error("Error fetching data feed:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (dataType) fetchData();
-  }, [dataType, limit, filterCategory]);
-
-  if (loading) return <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading {dataType}...</div>;
-  if (data.length === 0) return <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>No {dataType} found.</div>;
-
+// ─── Stats Bar ───────────────────────────────────────────────────────────────
+function StatsBar() {
+  const stats = [
+    { value: "2,500+", label: "Verified Institutions", icon: "🎓" },
+    { value: "45,000+", label: "Students & Teachers", icon: "👥" },
+    { value: "1,200+", label: "Active Job Listings", icon: "💼" },
+    { value: "98%", label: "Placement Rate", icon: "✅" },
+  ];
   return (
-    <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      {title && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #334155", paddingBottom: "12px", marginBottom: "20px" }}>
-          <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: "700", color: "white" }}>{title}</h3>
-          <Link href={`/${dataType}`} style={{ padding: "8px 16px", background: "#3b82f6", color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600" }}>See All {title.split(" ")[1] || ""} &gt;</Link>
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(4, 1fr)",
+      gap: "1px",
+      background: "rgba(255,255,255,0.06)",
+      borderRadius: "16px",
+      overflow: "hidden",
+      border: "1px solid rgba(255,255,255,0.07)",
+      marginTop: "48px",
+    }}>
+      {stats.map((s, i) => (
+        <div key={i} style={{
+          padding: "20px 16px",
+          textAlign: "center",
+          background: "rgba(11,17,32,0.6)",
+          backdropFilter: "blur(10px)",
+        }}>
+          <div style={{ fontSize: "1.5rem", marginBottom: "4px" }}>{s.icon}</div>
+          <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#ffffff", lineHeight: 1 }}>{s.value}</div>
+          <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginTop: "4px", fontWeight: "500" }}>{s.label}</div>
         </div>
-      )}
-
-      {displayStyle === "grid" ? (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "16px" }}>
-          {data.map(item => (
-            <div key={item.id} style={{ display: "flex", flexDirection: "column", background: "#1e293b", borderRadius: "12px", border: "1px solid #334155", textAlign: "center", overflow: "hidden", transition: "transform 0.2s", cursor: "pointer" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-4px)"} onMouseOut={e => e.currentTarget.style.transform = "translateY(0)"}>
-              <div style={{ width: "100%", height: "140px", background: "#0f172a", position: "relative" }}>
-                {item.logo || item.logoUrl || item.image ? (
-                  <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontSize: "3rem", color: "#94a3b8", fontWeight: "700", opacity: 0.5 }}>{(item.title || item.name || "?").charAt(0)}</span>
-                  </div>
-                )}
-              </div>
-              <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column", background: "var(--card-bg)" }}>
-                <h4 style={{ margin: "0 0 6px 0", fontSize: "1.1rem", fontWeight: "700", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "6px" }}>
-                  {item.title || item.name}
-                  {(item.isVerified || item.claimed) && (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                  )}
-                </h4>
-                <p style={{ margin: "0 0 16px 0", fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "4px" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  {item.location || item.category || dataType}
-                </p>
-                <div style={{ marginTop: "auto" }}>
-                  <Link href={`/${dataType}/${item.id}`} className="btn-secondary" style={{ width: "100%", padding: "10px", fontSize: "0.85rem", borderRadius: "100px" }}>
-                    View Profile
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {data.map(item => (
-            <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "16px", background: "#1e293b", padding: "16px", borderRadius: "12px", border: "1px solid #334155" }}>
-              <div style={{ width: "60px", height: "60px", borderRadius: "8px", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-                {item.logo || item.logoUrl || item.image ? (
-                  <img src={item.logo || item.logoUrl || item.image} alt={item.title || item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <span style={{ fontSize: "1.2rem", color: "#94a3b8", fontWeight: "700" }}>{(item.title || item.name || "?").charAt(0)}</span>
-                )}
-              </div>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
-                <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#94a3b8" }}>{item.location || item.category || dataType}</p>
-              </div>
-              <Link href={`/${dataType}/${item.id}`} style={{ padding: "6px 16px", background: "#3b82f6", color: "white", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600" }}>
-                View Details
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
+      ))}
     </div>
   );
 }
 
-function QuickCategories() {
-  const categories = [
-    { name: "Find School", subtitle: "Link your academic journey", icon: "🎓", link: "/institutions" },
-    { name: "Explore Jobs", subtitle: "Explore opportunities", icon: "💼", link: "/jobs" },
-    { name: "Connect with Mentors", subtitle: "Connect with network", icon: "🤝", link: "/teachers" },
-    { name: "Join Community", subtitle: "Join global network", icon: "🌍", link: "/community" }
+// ─── Hero Search ──────────────────────────────────────────────────────────────
+function HeroSearch() {
+  const router = useRouter();
+  const [keyword, setKeyword] = useState("");
+  const [category, setCategory] = useState("institutions");
+  const [location, setLocation] = useState("");
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (keyword) params.set("q", keyword);
+    if (location) params.set("loc", location);
+    router.push(`/${category}?${params.toString()}`);
+  };
+
+  return (
+    <form onSubmit={handleSearch} style={{
+      background: "rgba(255,255,255,0.07)",
+      backdropFilter: "blur(20px)",
+      border: "1px solid rgba(255,255,255,0.12)",
+      borderRadius: "20px",
+      padding: "8px",
+      display: "flex",
+      gap: "0",
+      alignItems: "center",
+      maxWidth: "860px",
+      margin: "32px auto 0",
+      boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+    }}>
+      {/* Category */}
+      <select
+        value={category}
+        onChange={e => setCategory(e.target.value)}
+        style={{
+          padding: "14px 16px",
+          background: "rgba(59,130,246,0.15)",
+          border: "none",
+          borderRight: "1px solid rgba(255,255,255,0.1)",
+          color: "#93c5fd",
+          outline: "none",
+          borderRadius: "14px 0 0 14px",
+          fontWeight: "700",
+          fontSize: "0.85rem",
+          cursor: "pointer",
+          flexShrink: 0,
+        }}
+      >
+        <option value="institutions">Institutions</option>
+        <option value="jobs">Jobs</option>
+        <option value="teachers">Teachers</option>
+        <option value="students">Students</option>
+      </select>
+
+      {/* Keyword */}
+      <input
+        type="text"
+        placeholder="Search colleges, jobs, teachers..."
+        value={keyword}
+        onChange={e => setKeyword(e.target.value)}
+        style={{
+          flex: 2,
+          padding: "14px 18px",
+          background: "transparent",
+          border: "none",
+          color: "#ffffff",
+          outline: "none",
+          fontSize: "0.95rem",
+          minWidth: 0,
+        }}
+      />
+
+      {/* Location */}
+      <input
+        type="text"
+        placeholder="📍 City / State"
+        value={location}
+        onChange={e => setLocation(e.target.value)}
+        style={{
+          flex: 1,
+          padding: "14px 16px",
+          background: "transparent",
+          borderLeft: "1px solid rgba(255,255,255,0.1)",
+          border: "none",
+          borderLeft: "1px solid rgba(255,255,255,0.1)",
+          color: "#ffffff",
+          outline: "none",
+          fontSize: "0.9rem",
+          minWidth: 0,
+        }}
+      />
+
+      {/* Submit */}
+      <button type="submit" style={{
+        padding: "14px 28px",
+        background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+        color: "white",
+        border: "none",
+        borderRadius: "14px",
+        fontWeight: "700",
+        fontSize: "0.95rem",
+        cursor: "pointer",
+        flexShrink: 0,
+        transition: "all 0.2s",
+        boxShadow: "0 4px 14px rgba(59,130,246,0.4)",
+      }}>
+        🔍 Search
+      </button>
+    </form>
+  );
+}
+
+// ─── Quick Action Cards ───────────────────────────────────────────────────────
+function QuickActions() {
+  const actions = [
+    {
+      icon: "🎓",
+      title: "Find Your School",
+      desc: "Explore 2,500+ verified institutions across India",
+      link: "/institutions",
+      color: "rgba(59,130,246,0.15)",
+      border: "rgba(59,130,246,0.3)",
+      accent: "#3b82f6",
+      badge: "Popular",
+    },
+    {
+      icon: "💼",
+      title: "Explore Jobs",
+      desc: "1,200+ active openings — teaching, corporate & more",
+      link: "/jobs",
+      color: "rgba(249,115,22,0.12)",
+      border: "rgba(249,115,22,0.3)",
+      accent: "#f97316",
+      badge: "New",
+    },
+    {
+      icon: "🤝",
+      title: "Find Mentors",
+      desc: "Connect with verified teachers & industry experts",
+      link: "/teachers",
+      color: "rgba(16,185,129,0.12)",
+      border: "rgba(16,185,129,0.3)",
+      accent: "#10b981",
+      badge: null,
+    },
+    {
+      icon: "🌍",
+      title: "Join Community",
+      desc: "Network with students, alumni & professionals",
+      link: "/students",
+      color: "rgba(139,92,246,0.12)",
+      border: "rgba(139,92,246,0.3)",
+      accent: "#8b5cf6",
+      badge: null,
+    },
   ];
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px", padding: "20px 0", maxWidth: "1000px", margin: "0 auto" }}>
-      {categories.map(cat => (
-        <Link key={cat.name} href={cat.link} className="glass-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", color: "var(--text-primary)", borderRadius: "var(--radius-xl)", textDecoration: "none", textAlign: "center" }}>
-          <div style={{ fontSize: "2.5rem", marginBottom: "16px" }}>{cat.icon}</div>
-          <h4 style={{ margin: "0 0 8px 0", fontSize: "1.1rem", fontWeight: "700" }}>{cat.name}</h4>
-          <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-secondary)" }}>{cat.subtitle}</p>
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: "16px",
+    }}>
+      {actions.map((a, i) => (
+        <Link key={i} href={a.link} style={{
+          display: "flex",
+          flexDirection: "column",
+          padding: "24px",
+          background: a.color,
+          border: `1px solid ${a.border}`,
+          borderRadius: "20px",
+          textDecoration: "none",
+          color: "inherit",
+          transition: "all 0.25s cubic-bezier(0.16,1,0.3,1)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+        onMouseOver={e => {
+          e.currentTarget.style.transform = "translateY(-5px)";
+          e.currentTarget.style.boxShadow = `0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px ${a.border}`;
+        }}
+        onMouseOut={e => {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "none";
+        }}
+        >
+          {a.badge && (
+            <span style={{
+              position: "absolute", top: "14px", right: "14px",
+              background: a.accent, color: "white",
+              fontSize: "0.65rem", fontWeight: "700", padding: "3px 8px",
+              borderRadius: "100px", letterSpacing: "0.5px",
+            }}>{a.badge}</span>
+          )}
+          <div style={{ fontSize: "2.2rem", marginBottom: "12px" }}>{a.icon}</div>
+          <h3 style={{ margin: "0 0 8px 0", fontSize: "1.05rem", fontWeight: "700", color: "#f8fafc" }}>{a.title}</h3>
+          <p style={{ margin: 0, fontSize: "0.82rem", color: "#94a3b8", lineHeight: 1.5 }}>{a.desc}</p>
+          <div style={{ marginTop: "16px", display: "flex", alignItems: "center", gap: "6px", color: a.accent, fontSize: "0.82rem", fontWeight: "600" }}>
+            Explore <span>→</span>
+          </div>
         </Link>
       ))}
     </div>
   );
 }
 
+// ─── Institution Card ─────────────────────────────────────────────────────────
+function InstitutionCard({ item }) {
+  return (
+    <Link href={`/institutions/${item.id}`} style={{
+      display: "flex", flexDirection: "column",
+      background: "rgba(15,23,42,0.7)", borderRadius: "16px",
+      border: "1px solid rgba(51,65,85,0.8)",
+      overflow: "hidden", textDecoration: "none", color: "inherit",
+      transition: "all 0.25s ease",
+    }}
+    onMouseOver={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.5)"; e.currentTarget.style.boxShadow = "0 16px 40px rgba(0,0,0,0.3)"; }}
+    onMouseOut={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(51,65,85,0.8)"; e.currentTarget.style.boxShadow = "none"; }}
+    >
+      {/* Image */}
+      <div style={{ height: "130px", background: "linear-gradient(135deg, #1e293b, #0f172a)", position: "relative", overflow: "hidden" }}>
+        {item.image || item.logo || item.logoUrl ? (
+          <img src={item.image || item.logo || item.logoUrl} alt={item.name || item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: "3rem", color: "#334155", fontWeight: "800" }}>{(item.name || item.title || "?").charAt(0)}</span>
+          </div>
+        )}
+        {(item.isVerified || item.claimed) && (
+          <div style={{ position: "absolute", top: "10px", right: "10px", background: "#10b981", borderRadius: "100px", padding: "3px 8px", fontSize: "0.65rem", fontWeight: "700", color: "white" }}>✓ Verified</div>
+        )}
+      </div>
+      {/* Info */}
+      <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column" }}>
+        <h4 style={{ margin: "0 0 4px", fontSize: "0.95rem", fontWeight: "700", color: "#f1f5f9" }}>{item.name || item.title || "Institution"}</h4>
+        <p style={{ margin: "0 0 12px", fontSize: "0.78rem", color: "#64748b", display: "flex", alignItems: "center", gap: "4px" }}>
+          <span>📍</span> {item.location || item.city || item.category || "India"}
+        </p>
+        <div style={{ marginTop: "auto", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {item.category && <span style={{ background: "rgba(59,130,246,0.15)", color: "#93c5fd", borderRadius: "100px", padding: "3px 10px", fontSize: "0.72rem", fontWeight: "600" }}>{item.category}</span>}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ─── Job Card ─────────────────────────────────────────────────────────────────
+function JobCard({ item }) {
+  return (
+    <Link href={`/jobs/${item.id}`} style={{
+      display: "flex", alignItems: "flex-start", gap: "14px",
+      padding: "16px", background: "rgba(15,23,42,0.7)",
+      borderRadius: "14px", border: "1px solid rgba(51,65,85,0.8)",
+      textDecoration: "none", color: "inherit",
+      transition: "all 0.2s ease",
+    }}
+    onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)"; e.currentTarget.style.background = "rgba(249,115,22,0.05)"; }}
+    onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(51,65,85,0.8)"; e.currentTarget.style.background = "rgba(15,23,42,0.7)"; }}
+    >
+      <div style={{ width: "48px", height: "48px", borderRadius: "10px", background: "rgba(249,115,22,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.3rem" }}>
+        {item.logo || item.logoUrl ? <img src={item.logo || item.logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "10px" }} /> : "💼"}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h4 style={{ margin: "0 0 3px", fontSize: "0.92rem", fontWeight: "700", color: "#f1f5f9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title || item.name || "Job Opening"}</h4>
+        <p style={{ margin: "0 0 8px", fontSize: "0.78rem", color: "#64748b" }}>{item.company || item.institution || "Company"}</p>
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+          {item.location && <span style={{ background: "rgba(51,65,85,0.6)", color: "#94a3b8", borderRadius: "100px", padding: "2px 8px", fontSize: "0.7rem" }}>📍 {item.location}</span>}
+          {item.type && <span style={{ background: "rgba(249,115,22,0.15)", color: "#fb923c", borderRadius: "100px", padding: "2px 8px", fontSize: "0.7rem" }}>{item.type}</span>}
+          {item.salary && <span style={{ background: "rgba(16,185,129,0.12)", color: "#34d399", borderRadius: "100px", padding: "2px 8px", fontSize: "0.7rem" }}>💰 {item.salary}</span>}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ─── Section Header ───────────────────────────────────────────────────────────
+function SectionHeader({ title, subtitle, linkText, linkHref, accent = "#3b82f6" }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "24px" }}>
+      <div>
+        <h2 style={{ margin: "0 0 6px", fontSize: "1.5rem", fontWeight: "800", color: "#f8fafc" }}>{title}</h2>
+        {subtitle && <p style={{ margin: 0, fontSize: "0.88rem", color: "#64748b" }}>{subtitle}</p>}
+      </div>
+      {linkHref && (
+        <Link href={linkHref} style={{
+          padding: "8px 18px",
+          background: `rgba(${accent === "#3b82f6" ? "59,130,246" : "249,115,22"},0.15)`,
+          color: accent,
+          borderRadius: "100px",
+          fontSize: "0.82rem",
+          fontWeight: "700",
+          textDecoration: "none",
+          border: `1px solid ${accent}40`,
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+        }}>
+          {linkText} →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Home() {
-  const slug = "v2-homepage";
-  
-  const [pageData, setPageData] = useState(null);
-  const [widgets, setWidgets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [institutions, setInstitutions] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [loadingInst, setLoadingInst] = useState(true);
+  const [loadingJobs, setLoadingJobs] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // 1. Check if the page exists in the 'pages' collection
-        const pQuery = query(collection(db, "pages"), where("slug", "==", slug));
-        const pSnapshot = await getDocs(pQuery);
-        
-        if (pSnapshot.empty) {
-          const defaultPageData = {
-            title: "Home",
-            layout: "wide",
-            components: [
-              { type: "hero", props: { title: "Discover Your Future", subtitle: "Connect with top institutions, explore career opportunities, and find the perfect mentors to guide your journey.", buttonText: "Explore Institutions", buttonLink: "/institutions", imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070" } },
-              { type: "grid", props: { columnCount: 1, columns: [{ type: "search_bar", props: { placeholder: "Search for colleges, jobs, or mentors..." } }] } },
-              { type: "grid", props: { columnCount: 1, columns: [{ type: "quick_categories", props: {} }] } },
-              { type: "grid", props: { columnCount: 1, columns: [{ type: "data", props: { dataType: "institutions", limit: 4, displayStyle: "grid", title: "Top Institutions" } }] } },
-              { type: "grid", props: { columnCount: 1, columns: [{ type: "data", props: { dataType: "jobs", limit: 4, displayStyle: "grid", title: "Featured Jobs" } }] } }
-            ]
-          };
-          setPageData(defaultPageData);
-          setWidgets([]);
-          setLoading(false);
-          return;
-        }
+    // Fetch top institutions
+    getDocs(query(collection(db, "institutions"), firestoreLimit(8)))
+      .then(snap => setInstitutions(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+      .catch(console.error)
+      .finally(() => setLoadingInst(false));
 
-        const pDoc = pSnapshot.docs[0].data();
-        
-        if (pDoc.status === "draft") {
-          notFound();
-          return;
-        }
-        
-        setPageData(pDoc);
-
-        // 2. Fetch widgets for this pageId
-        const wQuery = query(collection(db, "widgets"), where("pageId", "==", slug));
-        const wSnapshot = await getDocs(wQuery);
-        const wData = wSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        setWidgets(wData.sort((a, b) => a.order - b.order));
-      } catch (error) {
-        console.error("Error fetching dynamic page:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (slug) {
-      fetchData();
-    }
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="dark-premium-theme" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <p style={{ color: "#94a3b8", fontSize: "1.2rem" }}>Loading {slug}...</p>
-      </div>
-    );
-  }
-
-  if (!pageData) return null;
-
-  const leftSidebar = widgets.filter(w => w.area === "left_sidebar");
-  const rightSidebar = widgets.filter(w => w.area === "right_sidebar");
-  const topHeaderWidgets = widgets.filter(w => w.area === "top_header");
-
-  const layout = pageData.layout || "wide";
-  const components = pageData.components || [];
+    // Fetch featured jobs
+    getDocs(query(collection(db, "jobs"), firestoreLimit(6)))
+      .then(snap => setJobs(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+      .catch(console.error)
+      .finally(() => setLoadingJobs(false));
+  }, []);
 
   return (
-    <div className="dark-premium-theme">
-      {/* GLOBAL DARK THEME STYLES */}
-      <style dangerouslySetInnerHTML={{__html: `
-        .dark-premium-theme {
-          background-color: #0B1120;
-          color: #f8fafc;
-          min-height: 100vh;
-          font-family: 'Inter', system-ui, sans-serif;
-          padding-bottom: 60px;
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        .ec-home { background: #090d16; min-height: 100vh; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        .ec-hero { position: relative; padding: 100px 24px 60px; overflow: hidden; text-align: center; }
+        .ec-hero-bg { position: absolute; inset: 0; z-index: 0; }
+        .ec-hero-bg::before { content: ''; position: absolute; top: -30%; left: -10%; width: 70%; height: 70%; background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 65%); filter: blur(60px); }
+        .ec-hero-bg::after { content: ''; position: absolute; top: -10%; right: -10%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%); filter: blur(60px); }
+        .ec-hero-inner { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+        .ec-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; padding: 6px 16px; border-radius: 100px; font-size: 0.8rem; font-weight: 600; margin-bottom: 24px; }
+        .ec-hero-title { font-size: clamp(2.2rem, 5.5vw, 4rem); font-weight: 900; color: #ffffff; line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 20px; }
+        .ec-hero-title span { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #f97316 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .ec-hero-sub { font-size: clamp(1rem, 2vw, 1.2rem); color: #94a3b8; line-height: 1.7; margin: 0 auto 8px; max-width: 640px; }
+        .ec-section { max-width: 1280px; margin: 0 auto; padding: 60px 24px; }
+        .ec-section + .ec-section { padding-top: 0; }
+        .ec-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.05); margin: 0 24px; max-width: calc(100% - 48px); }
+        .ec-inst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .ec-jobs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .ec-promo { background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(139,92,246,0.10) 100%); border: 1px solid rgba(59,130,246,0.2); border-radius: 24px; padding: 48px; display: flex; align-items: center; gap: 40px; }
+        .ec-skeleton { background: linear-gradient(90deg, rgba(30,41,59,0.8) 25%, rgba(51,65,85,0.4) 50%, rgba(30,41,59,0.8) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 12px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @media (max-width: 768px) {
+          .ec-hero { padding: 80px 16px 40px; }
+          .ec-section { padding: 40px 16px; }
+          .ec-jobs-grid { grid-template-columns: 1fr; }
+          .ec-promo { flex-direction: column; padding: 28px; gap: 20px; }
+          .ec-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
-        .dark-premium-theme a { text-decoration: none; }
-        .cms-layout { display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
-        .cms-main { flex: 1; min-width: 0; }
-        .cms-sidebar { width: 300px; flex-shrink: 0; }
-        @media (max-width: 1024px) {
-          .cms-layout { flex-direction: column; }
-          .cms-sidebar { width: 100%; }
-        }
-        .pb-btn {
-          display: inline-block;
-          padding: 14px 32px;
-          background: #3b82f6;
-          color: white !important;
-          border-radius: 8px;
-          font-weight: 700;
-          font-size: 1.1rem;
-          transition: background 0.2s;
-          text-decoration: none;
-        }
-        .pb-btn:hover { background: #2563eb; }
-        .pb-text {
-          font-size: 1.1rem;
-          line-height: 1.8;
-          color: #94a3b8;
-          margin-bottom: 30px;
-          white-space: pre-wrap;
-        }
-      `}} />
+      `}</style>
 
+      <div className="ec-home">
 
-      <div className="cms-layout">
-        {(layout === "left-sidebar" || layout === "both-sidebars") && (
-          <aside className="cms-sidebar">
-            {leftSidebar.map(widget => <WidgetRenderer key={widget.id} widget={widget} />)}
-            {leftSidebar.length === 0 && <div style={{ color: "#475569", fontStyle: "italic", padding: "20px" }}>Empty Left Sidebar</div>}
-          </aside>
-        )}
+        {/* ── HERO ─────────────────────────────────────────────── */}
+        <section className="ec-hero">
+          <div className="ec-hero-bg" />
+          <div className="ec-hero-inner">
+            <div className="ec-badge">
+              <span>🇮🇳</span> India's #1 Education & Employment Network
+            </div>
+            <h1 className="ec-hero-title">
+              Connecting <span>Education</span><br />with <span>Employment</span>
+            </h1>
+            <p className="ec-hero-sub">
+              Discover verified schools, engineering colleges & nursing institutions across Odisha & India.
+              Find mentors, explore jobs, and build your career — all in one verified ecosystem.
+            </p>
 
-        <main className="cms-main">
-          {components.length === 0 ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
-              <h2>{pageData.title}</h2>
-              <p>This page has no components configured in the Page Builder.</p>
+            <HeroSearch />
+
+            {/* Stats */}
+            <div className="ec-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "rgba(255,255,255,0.06)", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)", marginTop: "48px" }}>
+              {[
+                { value: "2,500+", label: "Verified Institutions", icon: "🎓" },
+                { value: "45,000+", label: "Students & Teachers", icon: "👥" },
+                { value: "1,200+", label: "Active Jobs", icon: "💼" },
+                { value: "98%", label: "Placement Rate", icon: "✅" },
+              ].map((s, i) => (
+                <div key={i} style={{ padding: "20px 12px", textAlign: "center", background: "rgba(9,13,22,0.7)" }}>
+                  <div style={{ fontSize: "1.4rem" }}>{s.icon}</div>
+                  <div style={{ fontSize: "1.5rem", fontWeight: "800", color: "#ffffff", marginTop: "4px" }}>{s.value}</div>
+                  <div style={{ fontSize: "0.73rem", color: "#64748b", marginTop: "3px", fontWeight: "500" }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── QUICK ACTIONS ─────────────────────────────────────── */}
+        <section className="ec-section" style={{ paddingTop: "20px" }}>
+          <SectionHeader
+            title="What are you looking for?"
+            subtitle="Choose your path and we'll guide you forward"
+          />
+          <QuickActions />
+        </section>
+
+        <div className="ec-divider" style={{ margin: "0 auto", maxWidth: "1280px" }} />
+
+        {/* ── TOP INSTITUTIONS ──────────────────────────────────── */}
+        <section className="ec-section">
+          <SectionHeader
+            title="🎓 Top Institutions"
+            subtitle="Explore verified schools, colleges & coaching centers"
+            linkText="View All Institutions"
+            linkHref="/institutions"
+            accent="#3b82f6"
+          />
+          {loadingInst ? (
+            <div className="ec-inst-grid">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="ec-skeleton" style={{ height: "220px" }} />
+              ))}
+            </div>
+          ) : institutions.length > 0 ? (
+            <div className="ec-inst-grid">
+              {institutions.map(item => <InstitutionCard key={item.id} item={item} />)}
             </div>
           ) : (
-            components.map((comp, idx) => {
-              if (comp.type === "hero") {
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      position: "relative",
-                      padding: "100px 40px",
-                      borderRadius: "20px",
-                      overflow: "hidden",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      textAlign: "center",
-                      marginBottom: "40px",
-                      minHeight: "480px",
-                      backgroundImage: comp.props.imageUrl ? `url(${comp.props.imageUrl})` : "none",
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      backgroundColor: "#1e293b",
-                    }}
-                  >
-                    <div style={{
-                      position: "absolute",
-                      inset: 0,
-                      background: "linear-gradient(135deg, rgba(11,17,32,0.85) 0%, rgba(30,41,59,0.75) 100%)",
-                      zIndex: 0,
-                    }} />
-                    <div style={{ position: "relative", zIndex: 1, maxWidth: "800px", width: "100%" }}>
-                      {comp.props.title && (
-                        <h1 style={{
-                          fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                          fontWeight: "900",
-                          color: "#ffffff",
-                          marginBottom: "20px",
-                          lineHeight: "1.15",
-                          letterSpacing: "-0.02em",
-                          textShadow: "0 2px 20px rgba(0,0,0,0.5)",
-                        }}>
-                          {comp.props.title}
-                        </h1>
-                      )}
-                      {comp.props.subtitle && (
-                        <p style={{
-                          fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
-                          color: "#e2e8f0",
-                          marginBottom: "36px",
-                          lineHeight: "1.7",
-                          maxWidth: "640px",
-                          margin: "0 auto 36px auto",
-                          textShadow: "0 1px 10px rgba(0,0,0,0.4)",
-                        }}>
-                          {comp.props.subtitle}
-                        </p>
-                      )}
-                      {comp.props.buttonText && comp.props.buttonLink && (
-                        <Link href={comp.props.buttonLink} className="pb-btn">
-                          {comp.props.buttonText}
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                );
-              }
-              if (comp.type === "text") {
-                return <div key={idx} className="pb-text">{comp.props.content}</div>;
-              }
-              if (comp.type === "image") {
-                return (
-                  <div key={idx} style={{ marginBottom: "30px", textAlign: "center" }}>
-                    {comp.props.imageUrl ? (
-                      <img src={comp.props.imageUrl} alt="Page Image" style={{ maxWidth: "100%", height: "auto", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }} />
-                    ) : null}
-                  </div>
-                );
-              }
-              if (comp.type === "grid") {
-                return (
-                  <div key={idx} style={{ display: "grid", gridTemplateColumns: `repeat(${comp.props.columnCount || 2}, 1fr)`, gap: "24px", marginBottom: "30px" }}>
-                    {(comp.props.columns || []).map((col, cIdx) => (
-                      <div key={cIdx} style={{ display: "flex", flexDirection: "column" }}>
-                        {col.type === "text" && (
-                          <div className="pb-text" dangerouslySetInnerHTML={{ __html: col.props.content }} />
-                        )}
-                        {col.type === "image" && col.props.imageUrl && (
-                          <img src={col.props.imageUrl} alt="" style={{ maxWidth: "100%", height: "auto", borderRadius: "8px" }} />
-                        )}
-                        {col.type === "hero" && (
-                          <div style={{
-                            position: "relative",
-                            backgroundImage: `url(${col.props.bgImage || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070'})`,
-                            minHeight: col.props.height || "300px",
-                            padding: "40px 20px",
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            borderRadius: "16px",
-                            overflow: "hidden",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            textAlign: "center",
-                          }}>
-                            <div style={{ position: "absolute", inset: 0, background: "rgba(11,17,32,0.7)", zIndex: 0 }} />
-                            <div style={{ position: "relative", zIndex: 1 }}>
-                              <h1 style={{ fontSize: "2rem", fontWeight: "800", color: "white", marginBottom: "12px" }}>{col.props.title || "Hero Title"}</h1>
-                              <p style={{ fontSize: "1.1rem", color: "#cbd5e1", marginBottom: "24px" }}>{col.props.subtitle || "Hero Subtitle goes here"}</p>
-                              <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-                                {col.props.btn1Text && col.props.btn1Link && (
-                                  <Link href={col.props.btn1Link} className="pb-btn">{col.props.btn1Text}</Link>
-                                )}
-                                {col.props.btn2Text && col.props.btn2Link && (
-                                  <Link href={col.props.btn2Link} className="pb-btn" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }}>{col.props.btn2Text}</Link>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        {col.type === "search_bar" && (
-                          <SearchWidget placeholder={col.props.placeholder} />
-                        )}
-                        {col.type === "quick_categories" && (
-                          <QuickCategories />
-                        )}
-                        {col.type === "data" && (
-                          <DynamicDataFeed dataType={col.props.dataType} limit={col.props.limit} displayStyle={col.props.displayStyle} title={col.props.title} filterCategory={col.props.filterCategory} />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                );
-              }
-              return null;
-            })
-          )}
-          
-          {pageData && (
-            <div style={{ marginTop: "40px" }}>
-              <ShareButtons title={pageData.title || slug} description={`Check out ${pageData.title || slug} on EduConnect!`} />
+            <div style={{ textAlign: "center", padding: "60px 20px", color: "#475569" }}>
+              <div style={{ fontSize: "3rem" }}>🏫</div>
+              <p style={{ marginTop: "12px" }}>No institutions listed yet. <Link href="/admin" style={{ color: "#3b82f6" }}>Add via Admin Panel →</Link></p>
             </div>
           )}
-        </main>
+        </section>
 
-        {(layout === "right-sidebar" || layout === "both-sidebars") && (
-          <aside className="cms-sidebar">
-            {rightSidebar.map(widget => <WidgetRenderer key={widget.id} widget={widget} />)}
-            {rightSidebar.length === 0 && <div style={{ color: "#475569", fontStyle: "italic", padding: "20px" }}>Empty Right Sidebar</div>}
-          </aside>
-        )}
+        <div className="ec-divider" style={{ margin: "0 auto", maxWidth: "1280px" }} />
+
+        {/* ── FEATURED JOBS ─────────────────────────────────────── */}
+        <section className="ec-section">
+          <SectionHeader
+            title="💼 Featured Jobs"
+            subtitle="Teaching, corporate & government job openings"
+            linkText="Browse All Jobs"
+            linkHref="/jobs"
+            accent="#f97316"
+          />
+          {loadingJobs ? (
+            <div className="ec-jobs-grid">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="ec-skeleton" style={{ height: "90px" }} />
+              ))}
+            </div>
+          ) : jobs.length > 0 ? (
+            <div className="ec-jobs-grid">
+              {jobs.map(item => <JobCard key={item.id} item={item} />)}
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "60px 20px", color: "#475569" }}>
+              <div style={{ fontSize: "3rem" }}>💼</div>
+              <p style={{ marginTop: "12px" }}>No jobs listed yet. <Link href="/admin" style={{ color: "#f97316" }}>Post a job →</Link></p>
+            </div>
+          )}
+        </section>
+
+        <div className="ec-divider" style={{ margin: "0 auto", maxWidth: "1280px" }} />
+
+        {/* ── PROMO BANNER ──────────────────────────────────────── */}
+        <section className="ec-section">
+          <div className="ec-promo">
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "0.8rem", fontWeight: "700", color: "#3b82f6", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "12px" }}>For Institutions</div>
+              <h2 style={{ fontSize: "1.8rem", fontWeight: "800", color: "#f8fafc", margin: "0 0 12px", lineHeight: 1.2 }}>
+                Is your institution listed?
+              </h2>
+              <p style={{ color: "#94a3b8", margin: "0 0 24px", lineHeight: 1.6 }}>
+                Claim your free listing on EduConnect and connect with thousands of students,
+                teachers, and employers looking for verified institutions like yours.
+              </p>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                <Link href="/institutions" style={{ padding: "12px 24px", background: "#3b82f6", color: "white", borderRadius: "10px", fontWeight: "700", textDecoration: "none", fontSize: "0.9rem" }}>
+                  Find My Institution
+                </Link>
+                <Link href="/dashboard" style={{ padding: "12px 24px", background: "rgba(255,255,255,0.08)", color: "#f8fafc", borderRadius: "10px", fontWeight: "700", textDecoration: "none", fontSize: "0.9rem", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  Register Now
+                </Link>
+              </div>
+            </div>
+            <div style={{ flexShrink: 0, textAlign: "center" }}>
+              <div style={{ fontSize: "6rem", lineHeight: 1 }}>🏫</div>
+              <div style={{ marginTop: "12px", fontSize: "0.85rem", color: "#64748b" }}>2,500+ already listed</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── CATEGORIES ────────────────────────────────────────── */}
+        <section className="ec-section" style={{ paddingTop: 0 }}>
+          <SectionHeader
+            title="🔍 Browse by Category"
+            subtitle="Filter institutions by type to find the right fit"
+          />
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            {[
+              { label: "Engineering Colleges", icon: "⚙️", q: "engineering" },
+              { label: "Nursing Colleges", icon: "🏥", q: "nursing" },
+              { label: "Schools (K–12)", icon: "📚", q: "school" },
+              { label: "Coaching Centers", icon: "🎯", q: "coaching" },
+              { label: "Universities", icon: "🏛️", q: "university" },
+              { label: "Polytechnic", icon: "🔧", q: "polytechnic" },
+              { label: "Medical Colleges", icon: "⚕️", q: "medical" },
+              { label: "Law Colleges", icon: "⚖️", q: "law" },
+            ].map((c, i) => (
+              <Link key={i} href={`/institutions?q=${c.q}`} style={{
+                display: "inline-flex", alignItems: "center", gap: "8px",
+                padding: "10px 18px", background: "rgba(30,41,59,0.8)",
+                border: "1px solid rgba(51,65,85,0.8)", borderRadius: "100px",
+                color: "#cbd5e1", fontSize: "0.85rem", fontWeight: "600",
+                textDecoration: "none", transition: "all 0.2s",
+              }}
+              onMouseOver={e => { e.currentTarget.style.background = "rgba(59,130,246,0.15)"; e.currentTarget.style.borderColor = "rgba(59,130,246,0.4)"; e.currentTarget.style.color = "#93c5fd"; }}
+              onMouseOut={e => { e.currentTarget.style.background = "rgba(30,41,59,0.8)"; e.currentTarget.style.borderColor = "rgba(51,65,85,0.8)"; e.currentTarget.style.color = "#cbd5e1"; }}
+              >
+                <span>{c.icon}</span> {c.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
       </div>
-    </div>
+    </>
   );
 }
