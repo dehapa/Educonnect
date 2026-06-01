@@ -21,7 +21,7 @@ export default function SearchWidget({ placeholder }) {
 
   return (
     <div style={{ background: "var(--card-bg)", backdropFilter: "blur(12px)", padding: "8px 12px", borderRadius: "100px", border: "1px solid var(--card-border)", width: "100%", boxShadow: "var(--shadow-xl)", maxWidth: "800px", margin: "0 auto" }}>
-      <form onSubmit={handleSearch} style={{ display: "flex", gap: "8px", flexWrap: "nowrap", alignItems: "center" }}>
+      <form className="search-widget-form" onSubmit={handleSearch} style={{ display: "flex", gap: "8px", flexWrap: "nowrap", alignItems: "center" }}>
         
         {/* Category Dropdown */}
         <select 
@@ -67,21 +67,6 @@ export default function SearchWidget({ placeholder }) {
 
       </form>
 
-      <style jsx>{`
-        @media (max-width: 768px) {
-          form {
-            flex-direction: column !important;
-            border-radius: 24px;
-          }
-          select, input {
-            border-right: none !important;
-            border-bottom: 1px solid var(--border-primary);
-          }
-          .btn-primary {
-            width: 100%;
-          }
-        }
-      `}</style>
     </div>
   );
 }
