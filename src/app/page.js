@@ -218,61 +218,18 @@ export default function Home() {
           .cms-layout { flex-direction: column; }
           .cms-sidebar { width: 100%; }
         }
-
-        /* Page Builder Components */
-        .pb-hero {
-          position: relative;
-          padding: 80px 20px;
-          border-radius: 16px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          margin-bottom: 30px;
-          min-height: 400px;
-          background-size: cover;
-          background-position: center;
-          background-color: #1e293b;
-        }
-        .pb-hero::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: rgba(11, 17, 32, 0.7);
-          z-index: 1;
-        }
-        .pb-hero-content {
-          position: relative;
-          z-index: 2;
-          max-width: 800px;
-        }
-        .pb-hero-title {
-          font-size: 3rem;
-          font-weight: 800;
-          color: white;
-          margin-bottom: 16px;
-          line-height: 1.2;
-        }
-        .pb-hero-subtitle {
-          font-size: 1.25rem;
-          color: #cbd5e1;
-          margin-bottom: 32px;
-          line-height: 1.6;
-        }
         .pb-btn {
           display: inline-block;
-          padding: 12px 28px;
+          padding: 14px 32px;
           background: #3b82f6;
-          color: white;
+          color: white !important;
           border-radius: 8px;
-          font-weight: 600;
+          font-weight: 700;
           font-size: 1.1rem;
           transition: background 0.2s;
+          text-decoration: none;
         }
         .pb-btn:hover { background: #2563eb; }
-
         .pb-text {
           font-size: 1.1rem;
           line-height: 1.8;
@@ -281,6 +238,7 @@ export default function Home() {
           white-space: pre-wrap;
         }
       `}} />
+
 
       <div className="cms-layout">
         {(layout === "left-sidebar" || layout === "both-sidebars") && (
@@ -300,10 +258,59 @@ export default function Home() {
             components.map((comp, idx) => {
               if (comp.type === "hero") {
                 return (
-                  <div key={idx} className="pb-hero" style={{ backgroundImage: comp.props.imageUrl ? `url(${comp.props.imageUrl})` : 'none' }}>
-                    <div className="pb-hero-content">
-                      {comp.props.title && <h1 className="pb-hero-title">{comp.props.title}</h1>}
-                      {comp.props.subtitle && <p className="pb-hero-subtitle">{comp.props.subtitle}</p>}
+                  <div
+                    key={idx}
+                    style={{
+                      position: "relative",
+                      padding: "100px 40px",
+                      borderRadius: "20px",
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      marginBottom: "40px",
+                      minHeight: "480px",
+                      backgroundImage: comp.props.imageUrl ? `url(${comp.props.imageUrl})` : "none",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundColor: "#1e293b",
+                    }}
+                  >
+                    <div style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "linear-gradient(135deg, rgba(11,17,32,0.85) 0%, rgba(30,41,59,0.75) 100%)",
+                      zIndex: 0,
+                    }} />
+                    <div style={{ position: "relative", zIndex: 1, maxWidth: "800px", width: "100%" }}>
+                      {comp.props.title && (
+                        <h1 style={{
+                          fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                          fontWeight: "900",
+                          color: "#ffffff",
+                          marginBottom: "20px",
+                          lineHeight: "1.15",
+                          letterSpacing: "-0.02em",
+                          textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+                        }}>
+                          {comp.props.title}
+                        </h1>
+                      )}
+                      {comp.props.subtitle && (
+                        <p style={{
+                          fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
+                          color: "#e2e8f0",
+                          marginBottom: "36px",
+                          lineHeight: "1.7",
+                          maxWidth: "640px",
+                          margin: "0 auto 36px auto",
+                          textShadow: "0 1px 10px rgba(0,0,0,0.4)",
+                        }}>
+                          {comp.props.subtitle}
+                        </p>
+                      )}
                       {comp.props.buttonText && comp.props.buttonLink && (
                         <Link href={comp.props.buttonLink} className="pb-btn">
                           {comp.props.buttonText}
@@ -337,10 +344,24 @@ export default function Home() {
                           <img src={col.props.imageUrl} alt="" style={{ maxWidth: "100%", height: "auto", borderRadius: "8px" }} />
                         )}
                         {col.type === "hero" && (
-                          <div className="pb-hero" style={{ backgroundImage: `url(${col.props.bgImage || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070'})`, minHeight: col.props.height || "300px", padding: "40px 20px" }}>
-                            <div className="pb-hero-content">
-                              <h1 className="pb-hero-title">{col.props.title || "Hero Title"}</h1>
-                              <p className="pb-hero-subtitle">{col.props.subtitle || "Hero Subtitle goes here"}</p>
+                          <div style={{
+                            position: "relative",
+                            backgroundImage: `url(${col.props.bgImage || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070'})`,
+                            minHeight: col.props.height || "300px",
+                            padding: "40px 20px",
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            borderRadius: "16px",
+                            overflow: "hidden",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            textAlign: "center",
+                          }}>
+                            <div style={{ position: "absolute", inset: 0, background: "rgba(11,17,32,0.7)", zIndex: 0 }} />
+                            <div style={{ position: "relative", zIndex: 1 }}>
+                              <h1 style={{ fontSize: "2rem", fontWeight: "800", color: "white", marginBottom: "12px" }}>{col.props.title || "Hero Title"}</h1>
+                              <p style={{ fontSize: "1.1rem", color: "#cbd5e1", marginBottom: "24px" }}>{col.props.subtitle || "Hero Subtitle goes here"}</p>
                               <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
                                 {col.props.btn1Text && col.props.btn1Link && (
                                   <Link href={col.props.btn1Link} className="pb-btn">{col.props.btn1Text}</Link>
@@ -370,7 +391,6 @@ export default function Home() {
             })
           )}
           
-          {/* Universal Share Component for all pages */}
           {pageData && (
             <div style={{ marginTop: "40px" }}>
               <ShareButtons title={pageData.title || slug} description={`Check out ${pageData.title || slug} on EduConnect!`} />
