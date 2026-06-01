@@ -124,7 +124,7 @@ function QuickCategories() {
 }
 
 export default function Home() {
-  const slug = "home";
+  const slug = "homepage";
   
   const [pageData, setPageData] = useState(null);
   const [widgets, setWidgets] = useState([]);
