@@ -20,14 +20,14 @@ export default function SearchWidget({ placeholder }) {
   };
 
   return (
-    <div style={{ background: "var(--bg-tertiary, #1e293b)", padding: "20px", borderRadius: "12px", border: "1px solid var(--border-primary, #334155)", width: "100%" }}>
-      <form onSubmit={handleSearch} style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+    <div style={{ background: "var(--card-bg)", backdropFilter: "blur(12px)", padding: "8px 12px", borderRadius: "100px", border: "1px solid var(--card-border)", width: "100%", boxShadow: "var(--shadow-xl)", maxWidth: "800px", margin: "0 auto" }}>
+      <form onSubmit={handleSearch} style={{ display: "flex", gap: "8px", flexWrap: "nowrap", alignItems: "center" }}>
         
         {/* Category Dropdown */}
         <select 
           value={category} 
           onChange={(e) => setCategory(e.target.value)}
-          style={{ padding: "12px 16px", borderRadius: "8px", border: "1px solid #475569", background: "#0f172a", color: "white", outline: "none", flex: "1 1 120px" }}
+          style={{ padding: "12px 16px", borderRadius: "24px", border: "none", borderRight: "1px solid var(--border-primary)", background: "transparent", color: "var(--text-primary)", outline: "none", flex: "1 1 auto", cursor: "pointer", fontWeight: "600" }}
         >
           <option value="jobs">Jobs</option>
           <option value="institutions">Institutions</option>
@@ -37,35 +37,51 @@ export default function SearchWidget({ placeholder }) {
         </select>
         
         {/* Keyword Input */}
-        <div style={{ position: "relative", flex: "2 1 200px" }}>
-          <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
+        <div style={{ position: "relative", flex: "2 1 auto", display: "flex", alignItems: "center" }}>
+          <Search size={18} style={{ position: "absolute", left: "12px", color: "var(--text-muted)" }} />
           <input 
             type="text" 
-            placeholder={placeholder || "Search..."}
+            placeholder={placeholder || "What are you looking for?"}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            style={{ width: "100%", padding: "12px 12px 12px 38px", borderRadius: "8px", border: "1px solid #475569", background: "#0f172a", color: "white", outline: "none", boxSizing: "border-box" }}
+            style={{ width: "100%", padding: "12px 12px 12px 38px", border: "none", borderRight: "1px solid var(--border-primary)", background: "transparent", color: "var(--text-primary)", outline: "none", fontWeight: "500" }}
           />
         </div>
 
         {/* Location Input */}
-        <div style={{ position: "relative", flex: "2 1 150px" }}>
-          <MapPin size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#64748b" }} />
+        <div style={{ position: "relative", flex: "1 1 auto", display: "flex", alignItems: "center" }}>
+          <MapPin size={18} style={{ position: "absolute", left: "12px", color: "var(--text-muted)" }} />
           <input 
             type="text" 
-            placeholder="Location"
+            placeholder="Where?"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            style={{ width: "100%", padding: "12px 12px 12px 38px", borderRadius: "8px", border: "1px solid #475569", background: "#0f172a", color: "white", outline: "none", boxSizing: "border-box" }}
+            style={{ width: "100%", padding: "12px 12px 12px 38px", border: "none", background: "transparent", color: "var(--text-primary)", outline: "none", fontWeight: "500" }}
           />
         </div>
 
         {/* Submit Button */}
-        <button type="submit" className="btn-primary" style={{ padding: "12px 24px", borderRadius: "8px", flex: "1 1 120px", background: "#2563eb", color: "white", border: "none", cursor: "pointer", fontWeight: "600" }}>
+        <button type="submit" className="btn-primary" style={{ padding: "12px 32px", borderRadius: "100px", flexShrink: 0, boxShadow: "0 4px 14px 0 var(--primary-glow)" }}>
           Search
         </button>
 
       </form>
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          form {
+            flex-direction: column !important;
+            border-radius: 24px;
+          }
+          select, input {
+            border-right: none !important;
+            border-bottom: 1px solid var(--border-primary);
+          }
+          .btn-primary {
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }

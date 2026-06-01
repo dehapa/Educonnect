@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { X, GraduationCap, Briefcase, Users, Landmark, AlertCircle, Loader } from "lucide-react";
+import { logAppEvent } from "../lib/firebase";
 
 export default function AuthModal({ isOpen, onClose }) {
   const { loginWithGoogle, saveUserProfile, user, logout } = useAuth();
@@ -50,6 +51,9 @@ export default function AuthModal({ isOpen, onClose }) {
         pendingUser.email,
         selectedRole
       );
+      
+      logAppEvent("user_registered", { role: selectedRole });
+
       setLoading(false);
       onClose();
     } catch (e) {

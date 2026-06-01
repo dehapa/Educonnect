@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, doc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, doc, setDoc, getDocs, query, where } from "firebase/firestore";
 
 // Helper to load environment variables from .env.local
 const loadEnv = () => {
@@ -65,6 +65,27 @@ const selectEmoji = (category) => {
   return "🎒";
 };
 
+// String Normalization for Deduplication
+const normalizeString = (str) => {
+  if (!str) return "";
+  return str.toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/(school|college|university|institute|academy|centre|center|high|secondary|public)/g, "");
+};
+
+// Haversine distance (in km)
+const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+  return R * c; 
+};
+
 async function scrapeAndSeed(location, categoryQuery) {
   console.log(`[START] Querying Google Places API for ${categoryQuery} in ${location}...`);
   
@@ -77,7 +98,7 @@ async function scrapeAndSeed(location, categoryQuery) {
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": GOOGLE_MAPS_KEY,
-        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.rating,places.types"
+        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.rating,places.types,places.location"
       },
       body: JSON.stringify({ textQuery })
     });
@@ -92,16 +113,64 @@ async function scrapeAndSeed(location, categoryQuery) {
     
     console.log(`[API] Found ${places.length} matching places.`);
     
+    // Pre-fetch existing institutions in this city to optimize deduplication checks
+    const q = query(collection(db, "institutions"), where("location", "==", location.toLowerCase()));
+    const querySnapshot = await getDocs(q);
+    const existingInsts = [];
+    querySnapshot.forEach(doc => {
+      existingInsts.push({ id: doc.id, ...doc.data() });
+    });
+
     let count = 0;
+    let dupCount = 0;
+
     for (const place of places) {
       const type = mapType(place.types);
       const name = place.displayName?.text || "Unnamed Institution";
+      const normalizedName = normalizeString(name);
+      const lat = place.location?.latitude || null;
+      const lng = place.location?.longitude || null;
       
+      // Deduplication Logic
+      let isDuplicate = false;
+      
+      for (const existing of existingInsts) {
+        // 1. Exact ID match
+        if (existing.id === place.id) {
+          isDuplicate = true;
+          break;
+        }
+        
+        // 2. Normalized Name match (strict)
+        if (existing.normalizedName && existing.normalizedName === normalizedName && normalizedName.length > 3) {
+          isDuplicate = true;
+          break;
+        }
+        
+        // 3. Geo-Radius match (< 100 meters = 0.1 km) & Same Type
+        if (lat && lng && existing.lat && existing.lng) {
+          const dist = getDistanceFromLatLonInKm(lat, lng, existing.lat, existing.lng);
+          if (dist < 0.1 && existing.type === type) {
+            isDuplicate = true;
+            break;
+          }
+        }
+      }
+
+      if (isDuplicate) {
+        console.log(`[SKIP] Duplicate detected for: ${name}`);
+        dupCount++;
+        continue;
+      }
+
       const institutionData = {
         id: place.id,
         name: name,
+        normalizedName: normalizedName,
         type: type,
         location: location.toLowerCase(),
+        lat: lat,
+        lng: lng,
         rating: place.rating || 4.2,
         isVerified: false,
         isClaimed: false,
@@ -115,11 +184,15 @@ async function scrapeAndSeed(location, categoryQuery) {
       // Write to Firestore database
       const docRef = doc(db, "institutions", place.id);
       await setDoc(docRef, institutionData);
+      
+      // Add to local cache to prevent duplicates within the same batch run
+      existingInsts.push(institutionData);
+      
       console.log(`[DB] Seeding: ${name} (${type})`);
       count++;
     }
     
-    console.log(`[SUCCESS] Seeding completed for ${location}. ${count} items updated.`);
+    console.log(`[SUCCESS] Seeding completed for ${location}. ${count} items updated, ${dupCount} duplicates skipped.`);
   } catch (error) {
     console.error(`[ERROR] Ingestion failed:`, error.message);
   }

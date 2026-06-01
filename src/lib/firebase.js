@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAnalytics, isSupported, logEvent } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -20,4 +21,17 @@ const auth = getAuth(app);
 const db = getFirestore(app, "educonnect");
 const storage = getStorage(app);
 
-export { app, auth, db, storage };
+// Initialize Analytics only on the client side
+let analytics = null;
+if (typeof window !== "undefined") {
+  isSupported().then((yes) => yes ? analytics = getAnalytics(app) : null);
+}
+
+// Global helper to fire analytics events safely
+export const logAppEvent = (eventName, eventParams = {}) => {
+  if (typeof window !== "undefined" && analytics) {
+    logEvent(analytics, eventName, eventParams);
+  }
+};
+
+export { app, auth, db, storage, analytics };

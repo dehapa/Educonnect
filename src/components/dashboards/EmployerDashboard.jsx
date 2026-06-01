@@ -9,7 +9,7 @@ import {
   Trash2, Award, CheckCircle2, UserCheck, Send, Loader, UserX, UserMinus, Search, ExternalLink
 } from "lucide-react";
 import { doc, updateDoc, collection, getDocs, addDoc, query, where, deleteDoc } from "firebase/firestore";
-import { db } from "../../lib/firebase";
+import { db, logAppEvent } from "../../lib/firebase";
 
 export default function EmployerDashboard() {
   const { user, profile } = useAuth();
@@ -113,6 +113,12 @@ export default function EmployerDashboard() {
       };
 
       await addDoc(collection(db, "jobs"), newJob);
+      
+      logAppEvent("job_posted", {
+        jobType,
+        location: jobLoc
+      });
+
       alert("Job vacancy posted successfully! It is now visible on the placements directory.");
       
       // Reset form

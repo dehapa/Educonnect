@@ -3,6 +3,7 @@
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import { Share2, Check } from "lucide-react";
+import { logAppEvent } from "../lib/firebase";
 
 export default function ShareButtons({ title, description }) {
   const { user } = useAuth();
@@ -22,21 +23,25 @@ export default function ShareButtons({ title, description }) {
   const shareText = title ? `Check out "${title}" on EduConnect!` : `Explore EduConnect - The educational and employment ecosystem platform of Odisha.`;
 
   const handleShareWhatsApp = () => {
+    logAppEvent("share_link_clicked", { platform: "whatsapp", path: window.location.pathname });
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + "\n\n" + shareUrl)}`;
     window.open(url, "_blank");
   };
 
   const handleShareFacebook = () => {
+    logAppEvent("share_link_clicked", { platform: "facebook", path: window.location.pathname });
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
     window.open(url, "_blank");
   };
 
   const handleShareLinkedIn = () => {
+    logAppEvent("share_link_clicked", { platform: "linkedin", path: window.location.pathname });
     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
     window.open(url, "_blank");
   };
 
   const handleCopyLink = () => {
+    logAppEvent("share_link_clicked", { platform: "copy_link", path: window.location.pathname });
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Landmark, AlertCircle, CheckCircle, Loader } from "lucide-react";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db, logAppEvent } from "../lib/firebase";
 
 export default function SuggestionModal({ isOpen, onClose }) {
   const [name, setName] = useState("");
@@ -72,6 +72,13 @@ export default function SuggestionModal({ isOpen, onClose }) {
       };
 
       await addDoc(collection(db, "suggestions"), suggestionData);
+      
+      logAppEvent("institution_suggested", {
+        type,
+        country,
+        state
+      });
+
       setSuccess(true);
       setLoading(false);
       

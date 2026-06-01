@@ -56,16 +56,22 @@ function DynamicDataFeed({ dataType, limit, displayStyle, title, filterCategory 
                   </div>
                 )}
               </div>
-              <div style={{ padding: "16px 16px", flex: 1, display: "flex", flexDirection: "column" }}>
-                <h4 style={{ margin: "0 0 6px 0", fontSize: "1rem", fontWeight: "700", color: "white" }}>{item.title || item.name}</h4>
-                <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8", flex: 1 }}>{item.location || item.category || dataType}</p>
-                <div style={{ display: "flex", justifyContent: "center", gap: "2px", marginBottom: "16px" }}>
-                  <span style={{ color: "#fbbf24", fontSize: "0.85rem" }}>★★★★★</span>
-                  <span style={{ color: "#64748b", fontSize: "0.75rem", alignSelf: "center" }}>({Math.floor(Math.random() * 50) + 10})</span>
+              <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column", background: "var(--card-bg)" }}>
+                <h4 style={{ margin: "0 0 6px 0", fontSize: "1.1rem", fontWeight: "700", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "6px" }}>
+                  {item.title || item.name}
+                  {(item.isVerified || item.claimed) && (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  )}
+                </h4>
+                <p style={{ margin: "0 0 16px 0", fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  {item.location || item.category || dataType}
+                </p>
+                <div style={{ marginTop: "auto" }}>
+                  <Link href={`/${dataType}/${item.id}`} className="btn-secondary" style={{ width: "100%", padding: "10px", fontSize: "0.85rem", borderRadius: "100px" }}>
+                    View Profile
+                  </Link>
                 </div>
-                <Link href={`/${dataType}/${item.id}`} style={{ padding: "8px 12px", background: "transparent", color: "#3b82f6", border: "1px solid #3b82f6", borderRadius: "6px", textDecoration: "none", fontSize: "0.85rem", fontWeight: "600", width: "100%", boxSizing: "border-box" }}>
-                  View Profile
-                </Link>
               </div>
             </div>
           ))}
@@ -98,19 +104,19 @@ function DynamicDataFeed({ dataType, limit, displayStyle, title, filterCategory 
 
 function QuickCategories() {
   const categories = [
-    { name: "Schools", icon: "🏫", link: "/institutions?category=schools" },
-    { name: "Engineering", icon: "⚙️", link: "/institutions?category=engineering" },
-    { name: "Nursing", icon: "⚕️", link: "/institutions?category=nursing" },
-    { name: "HR Jobs", icon: "🤝", link: "/jobs?category=hr" },
-    { name: "IT Jobs", icon: "💻", link: "/jobs?category=it" }
+    { name: "Find School", subtitle: "Link your academic journey", icon: "🎓", link: "/institutions" },
+    { name: "Explore Jobs", subtitle: "Explore opportunities", icon: "💼", link: "/jobs" },
+    { name: "Connect with Mentors", subtitle: "Connect with network", icon: "🤝", link: "/teachers" },
+    { name: "Join Community", subtitle: "Join global network", icon: "🌍", link: "/community" }
   ];
 
   return (
-    <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center", padding: "20px 0" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px", padding: "20px 0", maxWidth: "1000px", margin: "0 auto" }}>
       {categories.map(cat => (
-        <Link key={cat.name} href={cat.link} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", background: "#1e293b", color: "white", borderRadius: "30px", textDecoration: "none", border: "1px solid #334155", fontWeight: "600", transition: "transform 0.2s", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseOut={e => e.currentTarget.style.transform = "translateY(0)"}>
-          <span style={{ fontSize: "1.2rem" }}>{cat.icon}</span>
-          <span>{cat.name}</span>
+        <Link key={cat.name} href={cat.link} className="glass-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 16px", color: "var(--text-primary)", borderRadius: "var(--radius-xl)", textDecoration: "none", textAlign: "center" }}>
+          <div style={{ fontSize: "2.5rem", marginBottom: "16px" }}>{cat.icon}</div>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: "1.1rem", fontWeight: "700" }}>{cat.name}</h4>
+          <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-secondary)" }}>{cat.subtitle}</p>
         </Link>
       ))}
     </div>

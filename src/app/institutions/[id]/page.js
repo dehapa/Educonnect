@@ -14,6 +14,7 @@ import {
 import { doc, getDoc, collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import { useAuth } from "../../../context/AuthContext";
+import { logAppEvent } from "../../../lib/firebase";
 
 export default function InstitutionDetails() {
   const { id } = useParams();
@@ -121,6 +122,11 @@ export default function InstitutionDetails() {
         timestamp: new Date().toISOString()
       });
       
+      logAppEvent("institution_claim_requested", { 
+        instId: inst.id, 
+        tier: claimTier 
+      });
+
       setClaimSuccess(true);
       setTimeout(() => {
         setClaiming(false);
