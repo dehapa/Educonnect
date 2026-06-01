@@ -138,7 +138,20 @@ export default function Home() {
         const pSnapshot = await getDocs(pQuery);
         
         if (pSnapshot.empty) {
-          notFound();
+          const defaultPageData = {
+            title: "Home",
+            layout: "wide",
+            components: [
+              { type: "hero", props: { title: "Discover Your Future", subtitle: "Connect with top institutions, explore career opportunities, and find the perfect mentors to guide your journey.", buttonText: "Explore Institutions", buttonLink: "/institutions", imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070" } },
+              { type: "grid", props: { columnCount: 1, columns: [{ type: "search_bar", props: { placeholder: "Search for colleges, jobs, or mentors..." } }] } },
+              { type: "grid", props: { columnCount: 1, columns: [{ type: "quick_categories", props: {} }] } },
+              { type: "grid", props: { columnCount: 1, columns: [{ type: "data", props: { dataType: "institutions", limit: 4, displayStyle: "grid", title: "Top Institutions" } }] } },
+              { type: "grid", props: { columnCount: 1, columns: [{ type: "data", props: { dataType: "jobs", limit: 4, displayStyle: "grid", title: "Featured Jobs" } }] } }
+            ]
+          };
+          setPageData(defaultPageData);
+          setWidgets([]);
+          setLoading(false);
           return;
         }
 
